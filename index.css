@@ -29,6 +29,11 @@
     border: none;
     pointer-events: none;
  }
+
+ .mainTitle
+ {   
+   font-family: 'Nabla', cursive;
+ }
  
  .marginVisualizer + .marginVisualizer {
     top: unset;
@@ -40,14 +45,17 @@
     align-self: flex-start;
     position: sticky;
     top: 0;
-    width: auto;    
+    width: 250px;/* auto;    */
     display: flex;
     flex-direction: column;
+    background-color: var(--black);
+    height: 100%;
  }
  
  li {
+   width: 250px;
    box-sizing: border-box;
-    display: flex;
+    display:contents;
     font-family: 'Kanit', sans-serif;
     /*border: 1px solid var(--black);*/
  }
@@ -59,13 +67,19 @@
  
  a {
    color: black;
-    /*padding: 16px 50px;*/
-    /*color: inherit;*/
+   padding: 16px 50px;
+   color: inherit;
+ }
+
+ a:hover
+ {
+   background: var(--black);
+   color: var(--white);
  }
  
  .highlight {
-    background: var(--black);
-    color: var(--white);
+    background: var(--white);
+    color: var(--black);
  }
  
  /* Right column --------------------- */
