@@ -1,0 +1,79 @@
+:root {
+    --black: hsl(0, 0%, 11%);
+    --white: hsl(55, 25%, 90%);
+ }
+ 
+ * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+ 
+    border: 1px solid var(--black);
+ }
+ 
+ html {
+    scroll-behavior: smooth;
+    color: var(--black);
+ }
+ 
+ body {
+    display: flex;
+ }
+ 
+ .marginVisualizer {
+    width: 100%;
+    height: calc(50% - 1px);
+ 
+    position: fixed;
+    top: 0;
+    left: 0;
+ 
+    background: hsla(0, 0%, 0%, 0.1);
+    border: none;
+    pointer-events: none;
+ }
+ 
+ .marginVisualizer + .marginVisualizer {
+    top: unset;
+    bottom: 0;
+ }
+ 
+ /* Left column --------------------- */
+ ul {
+    align-self: flex-start;
+    position: sticky;
+    top: 0;
+ 
+    display: flex;
+    flex-direction: column;
+ }
+ 
+ li {
+    display: flex;
+ }
+ 
+ a {
+    padding: 16px 48px;
+    color: inherit;
+ }
+ 
+ .highlight {
+    background: var(--black);
+    color: var(--white);
+ }
+ 
+ /* Right column --------------------- */
+ main {
+    flex-grow: 1;
+ 
+    display: flex;
+    flex-direction: column;
+ }
+ 
+ section {
+    height: 80vh;
+ 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+ }
