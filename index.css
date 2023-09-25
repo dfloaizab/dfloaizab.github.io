@@ -55,8 +55,9 @@
  li {
    width: 250px;
    box-sizing: border-box;
-    display:contents;
-    font-family: 'Kanit', sans-serif;
+   display:contents;
+   font-family: 'Kanit', sans-serif;
+   text-decoration: none;
     /*border: 1px solid var(--black);*/
  }
 
@@ -65,16 +66,17 @@
     font-size: medium;
  }
  
- a {
-   color: black;
+ a {   
    padding: 16px 50px;
    color: inherit;
+   text-decoration: none;
  }
 
  a:hover
  {
    background: var(--black);
    color: var(--white);
+   text-decoration: none;
  }
  
  .highlight {
