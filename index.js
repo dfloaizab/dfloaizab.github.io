@@ -1,5 +1,7 @@
 const links = document.querySelectorAll("a");
 const sections = document.querySelectorAll("section");
+
+
 const options = {
    // root is only required because this sandbox is in an iframe.
    root: document,

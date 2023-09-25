@@ -1,14 +1,11 @@
-:root {
+* {
     --black: hsl(0, 0%, 11%);
     --white: hsl(55, 25%, 90%);
- }
- 
- * {
-    box-sizing: border-box;
+    
     margin: 0;
     padding: 0;
  
-    border: 1px solid var(--black);
+   
  }
  
  html {
@@ -43,18 +40,27 @@
     align-self: flex-start;
     position: sticky;
     top: 0;
- 
+    width: auto;    
     display: flex;
     flex-direction: column;
  }
  
  li {
+   box-sizing: border-box;
     display: flex;
+    font-family: 'Kanit', sans-serif;
+    /*border: 1px solid var(--black);*/
+ }
+
+ section{
+    font-family: 'Kanit', sans-serif;
+    font-size: medium;
  }
  
  a {
-    padding: 16px 48px;
-    color: inherit;
+   color: black;
+    /*padding: 16px 50px;*/
+    /*color: inherit;*/
  }
  
  .highlight {
