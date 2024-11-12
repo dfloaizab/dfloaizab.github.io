@@ -97,13 +97,13 @@
     font-size: large;
 }
  
- .about_section {
-            border: 2px solid #4CAF50; /* Borde de 2px de color verde */
-            background-color: #f0f8ff; /* Color de fondo */
-            padding: 20px; /* Espacio interno (padding) */
-            border-radius: 8px; /* Bordes redondeados */
-            margin: 20px; /* Margen alrededor de la sección */
- }
+.about-section {
+    border: 2px solid #4CAF50 !important;
+    background-color: #f0f8ff !important;
+    padding: 20px !important;
+    border-radius: 8px !important;
+    margin: 20px !important;
+}
 
  section {
     height: 80vh;
