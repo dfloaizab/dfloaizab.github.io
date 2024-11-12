@@ -97,6 +97,14 @@
     font-size: large;
 }
  
+ section.about_section {
+    height: 80vh;
+ 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+ }
+
  section {
     height: 80vh;
  
@@ -104,3 +112,4 @@
     justify-content: center;
     align-items: center;
  }
+
