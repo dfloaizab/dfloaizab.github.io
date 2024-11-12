@@ -98,11 +98,11 @@
 }
  
  section.about_section {
-    height: 80vh;
- 
-    display: flex;
-    justify-content: center;
-    align-items: center;
+            border: 2px solid #4CAF50; /* Borde de 2px de color verde */
+            background-color: #f0f8ff; /* Color de fondo */
+            padding: 20px; /* Espacio interno (padding) */
+            border-radius: 8px; /* Bordes redondeados */
+            margin: 20px; /* Margen alrededor de la sección */
  }
 
  section {
