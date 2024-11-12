@@ -103,6 +103,9 @@
     padding: 20px !important;
     border-radius: 8px !important;
     margin: 20px !important;
+    overflow-y: auto;    
+    width: 100%;               /* Ajusta el ancho de la sección */
+    max-height: 300px;  
 }
 
  section {
