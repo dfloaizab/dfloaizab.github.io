@@ -104,8 +104,8 @@
     border-radius: 8px !important;
     margin: 20px !important;
     overflow-y: auto;    
-    width: 90%;               /* Ajusta el ancho de la sección */
-    max-height: 300px;  
+    width: 95%;               /* Ajusta el ancho de la sección */
+    max-height: 500px;  
     display: block;
 }
 
