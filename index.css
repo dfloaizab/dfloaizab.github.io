@@ -97,7 +97,7 @@
     font-size: large;
 }
  
- section.about_section {
+ .about_section {
             border: 2px solid #4CAF50; /* Borde de 2px de color verde */
             background-color: #f0f8ff; /* Color de fondo */
             padding: 20px; /* Espacio interno (padding) */
