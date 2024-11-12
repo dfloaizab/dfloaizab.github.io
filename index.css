@@ -106,11 +106,11 @@
     overflow-y: auto;    
     width: 90%;               /* Ajusta el ancho de la sección */
     max-height: 300px;  
+    display: block;
 }
 
  section {
-    height: 80vh;
- 
+    height: 80vh; 
     display: flex;
     justify-content: center;
     align-items: center;
