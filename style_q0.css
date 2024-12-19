@@ -1,0 +1,205 @@
+/* styles.css */
+body {
+    font-family: 'Georgia', serif;
+    background-color: #f8f4e3;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Estilos adicionales para el acordeón */
+.accordion {
+    margin: 20px 0;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.accordion-item {
+    border-bottom: 1px solid #ddd;
+}
+
+.accordion-item:last-child {
+    border-bottom: none;
+}
+
+.accordion-header {
+    cursor: pointer;
+    padding: 10px 15px;
+    font-weight: bold;
+    background-color: #e9e9e9;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.accordion-header:hover {
+    background-color: #d9d9d9;
+}
+
+.accordion-content {
+    display: none;
+    padding: 10px 15px;
+    background-color: white;
+    border-top: 1px solid #ddd;
+}
+
+.accordion-content p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.book-container {
+    width: 600px;
+    max-width: 100%;
+    background-color: #fff8dc;
+    border: 2px solid #01001c;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Encabezado */
+.book-header {
+    text-align: center;
+    border-bottom: 2px solid rgb(2, 34, 85);
+    margin-bottom: 10px;
+}
+
+.book-header h1 {
+    font-size: 24px;
+    color: rgb(2, 34, 85);
+}
+
+/* Navegación */
+.book-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+button {
+    background-color: transparent;
+    color: #8b4513;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    color: #4b2e1f;
+    transform: scale(1.1);
+    transition: 0.2s ease-in-out;
+}
+
+/* Contenido de la página */
+#page-content {
+    /*height: 400px;*/
+    padding: 10px;    
+    line-height: 1.6;
+    color: #333;
+    text-align: justify;
+    background-color: #fafafa;
+    border: 1px solid #ddd;
+    position: relative;
+}
+
+.page-image img {
+    display: block;
+    margin: 10px auto;
+    max-width: 100px;
+    border: 1px solid #8b4513;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Pie de página */
+.book-footer {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #4b2e1f;
+    border-top: 2px solid #8b4513;
+    padding-top: 5px;
+}
+
+.exo-2-normal {
+    font-family: "Exo 2", serif;
+    font-optical-sizing: auto;
+    font-weight: 333;
+    font-style: normal;
+  }
+
+
+.exo-2-bold {
+  font-family: "Exo 2", serif;
+  font-optical-sizing: auto;
+  font-weight:100;
+  font-style: bold;
+}
+
+
+.open-sans-bold {
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 350;
+  font-style: bold;
+  font-variation-settings:
+    "wdth" 100;
+}
+
+.open-sans-normal {
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 350;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    font-size: small;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -60px;
+  }
+  
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+  }
+
+
+.saira-normal {
+  font-family: "Saira", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}
+
+.saira-bold {
+    font-family: "Saira", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: bold;
+    font-variation-settings:
+      "wdth" 100;
+  }

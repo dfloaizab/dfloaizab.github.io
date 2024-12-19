@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libro Vintage</title>
+    <link rel="stylesheet" href="style_q0.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Saira:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="book-container">
+        <!-- Encabezado -->
+        <header class="book-header exo-2-bold">
+            <h1>Quantum Algorithmics and Computing Intro</h1>
+        </header>
+
+        <!-- Navegación -->
+        <div class="book-navigation">
+            <div class=" tooltip"><button class="nav-first" onclick="goToFirstPage()"><span class="tooltiptext">table of content</span>⏮️</button></div>
+            <div class=" tooltip"><button class="nav-prev" onclick="goToPreviousPage()"><span class="tooltiptext">previous page</span>◀️</button></div>
+            <input type="number" id="page-number" min="1" max="4" value="1" onchange="goToPage()"></input>
+            <button class="nav-next" onclick="goToNextPage()">▶️</button>
+            <button class="nav-last" onclick="goToLastPage()">⏭️</button>
+        </div>
+
+        <!-- Contenido de la página -->
+        <div id="page-content" class="exo-2-normal">
+            <div class="page-content-text" >
+               
+            </div>
+            <div class="page-image"></div>
+        </div>
+        <!-- Pie de página -->
+        <!-- <footer class="book-footer open-sans-bold">
+            <p id="footer-text">Página 1</p>
+        </footer> -->
+        <footer class="open-sans-bold">
+            <p>Diego Fernando Loaiza Buitrago, 2025. <br><span class="saira-bold"><b>Informa</b></span> Student Research Group - Comba I+D<br> Curated from <a href="https://github.com/microsoft/QuantumKatas">Microsoft Quantum Katas</a></p>
+        </footer>
+    </div>
+    <script src="script_q.js"></script>
+</body>
+
+</html>
