@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semillero INFORMA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .parallax-container {
+            height: 100vh;
+            overflow-y: auto;
+            perspective: 1px;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .semillero-name {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .main-content {
+            padding-top: 120px;
+            min-height: 100vh;
+        }
+
+        .hero-section {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: white;
+            transform: translateZ(0);
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            transform: translateZ(-0.5px) scale(1.5);
+        }
+
+        .member-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .member-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .member-photo {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .member-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .member-program {
+            opacity: 0.8;
+            margin-bottom: 1rem;
+        }
+
+        .member-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .skill-tag {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 20px;
+            max-width: 800px;
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .modal-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            font-weight: bold;
+            margin-right: 2rem;
+        }
+
+        .modal-info {
+            flex: 1;
+        }
+
+        .modal-name {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .modal-program {
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .info-section {
+            margin-bottom: 2rem;
+        }
+
+        .info-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-value {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .tech-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .tech-skill {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 1rem;
+            }
+
+            .semillero-name {
+                font-size: 1.5rem;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .members-grid {
+                grid-template-columns: 1fr;
+                transform: none;
+            }
+
+            .modal-content {
+                margin: 1rem;
+                padding: 1rem;
+            }
+
+            .modal-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .modal-photo {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="parallax-container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">SI</div>
+                <h1 class="semillero-name">Semillero INFORMA</h1>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="hero-section">
+                <h1 class="hero-title">Innovación & Tecnología</h1>
+                <p class="hero-subtitle">Conoce a nuestro equipo de investigadores</p>
+            </section>
+
+            <section class="members-grid" id="membersGrid">
+                <!-- Los miembros se cargarán dinámicamente -->
+            </section>
+        </main>
+    </div>
+
+    <div id="memberModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <div class="modal-header">
+                <div class="modal-photo" id="modalPhoto"></div>
+                <div class="modal-info">
+                    <h2 class="modal-name" id="modalName"></h2>
+                    <p class="modal-program" id="modalProgram"></p>
+                </div>
+            </div>
+            <div id="modalDetails"></div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de ejemplo - Reemplaza con tus datos reales
+        const membersData = [
+            {
+                id: 1,
+                nombre: "Ana María García",
+                email: "ana.garcia@universidad.edu",
+                telefono: "+57 300 123 4567",
+                linkedin: "https://linkedin.com/in/ana-garcia",
+                programa: "Ingeniería de Sistemas",
+                semestre: 8,
+                promedio: 4.5,
+                otrosSemilleros: "Semillero de IA, Grupo de Robótica",
+                areasInteres: "Inteligencia Artificial, Machine Learning, Desarrollo Web",
+                lenguajesProgramacion: ["Python", "JavaScript", "Java", "R"],
+                herramientas: ["TensorFlow", "React", "Node.js", "Docker"],
+                nivelCompetencia: "Avanzado",
+                proyectos: [
+                    {
+                        nombre: "Sistema de Recomendación",
+                        descripcion: "Desarrollo de algoritmo ML para recomendaciones personalizadas",
+                        rol: "Líder técnico",
+                        año: 2024
+                    }
+                ],
+                portafolio: "https://github.com/ana-garcia",
+                trabajoEquipo: "Me gusta liderar equipos y facilitar la comunicación entre miembros",
+                rolGrupo: "Líder técnico",
+                fortaleza: "Capacidad analítica y resolución de problemas complejos",
+                motivacion: "Aplicar tecnología para resolver problemas reales de la sociedad",
+                serviciosInteres: ["Desarrollo de software", "Investigación aplicada", "Capacitaciones"],
+                disponibilidad: "20 horas semanales",
+                representacion: true,
+                aporteCorto: "Liderar proyectos de IA y mentorear a nuevos miembros",
+                expectativasAprendizaje: "Profundizar en deep learning y investigación científica",
+                fraseInspiracion: "La tecnología debe servir para mejorar vidas"
+            },
+            {
+                id: 2,
+                nombre: "Carlos Eduardo Ruiz",
+                email: "carlos.ruiz@universidad.edu",
+                telefono: "+57 310 987 6543",
+                linkedin: "https://linkedin.com/in/carlos-ruiz",
+                programa: "Ingeniería Electrónica",
+                semestre: 6,
+                promedio: 4.2,
+                otrosSemilleros: "Semillero de IoT",
+                areasInteres: "Internet de las Cosas, Sistemas Embebidos, Automatización",
+                lenguajesProgramacion: ["C++", "Python", "Arduino", "MATLAB"],
+                herramientas: ["ESP32", "Raspberry Pi", "KiCad", "Proteus"],
+                nivelCompetencia: "Intermedio",
+                proyectos: [
+                    {
+                        nombre: "Sistema de Monitoreo Ambiental",
+                        descripcion: "Red de sensores IoT para monitoreo de calidad del aire",
+                        rol: "Desarrollador hardware",
+                        año: 2024
+                    }
+                ],
+                portafolio: "https://github.com/carlos-ruiz",
+                trabajoEquipo: "Prefiero trabajar en la implementación técnica y pruebas",
+                rolGrupo: "Ejecutor técnico",
+                fortaleza: "Atención al detalle y perseverancia en la resolución de problemas",
+                motivacion: "Crear soluciones tecnológicas que impacten positivamente el medio ambiente",
+                serviciosInteres: ["Desarrollo de prototipos", "Investigación aplicada", "Consultorías técnicas"],
+                disponibilidad: "15 horas semanales",
+                representacion: true,
+                aporteCorto: "Desarrollar prototipos funcionales y documentar procesos técnicos",
+                expectativasAprendizaje: "Ampliar conocimientos en machine learning para IoT",
+                fraseInspiracion: "Innovar para un futuro sostenible"
+            },
+            {
+                id: 3,
+                nombre: "María Fernanda López",
+                email: "maria.lopez@universidad.edu",
+                telefono: "+57 320 456 7890",
+                linkedin: "https://linkedin.com/in/maria-lopez",
+                programa: "Diseño Gráfico",
+                semestre: 7,
+                promedio: 4.7,
+                otrosSemilleros: "Semillero de UX/UI",
+                areasInteres: "Diseño de Experiencia de Usuario, Branding, Comunicación Visual",
+                lenguajesProgramacion: ["HTML", "CSS", "JavaScript"],
+                herramientas: ["Figma", "Adobe Creative Suite", "Sketch", "Principle"],
+                nivelCompetencia: "Avanzado",
+                proyectos: [
+                    {
+                        nombre: "Rediseño de Plataforma Educativa",
+                        descripcion: "Mejora de UX/UI para plataforma de aprendizaje online",
+                        rol: "UX/UI Designer",
+                        año: 2024
+                    }
+                ],
+                portafolio: "https://behance.net/maria-lopez",
+                trabajoEquipo: "Me enfoco en facilitar la creatividad y la comunicación visual del equipo",
+                rolGrupo: "Creativa y comunicadora",
+                fortaleza: "Capacidad de visualizar soluciones y comunicar ideas complejas de forma simple",
+                motivacion: "Hacer que la tecnología sea más accesible y humana através del diseño",
+                serviciosInteres: ["Comunicación y diseño gráfico", "Capacitaciones", "Consultorías"],
+                disponibilidad: "18 horas semanales",
+                representacion: true,
+                aporteCorto: "Mejorar la comunicación visual del semillero y crear material educativo",
+                expectativasAprendizaje: "Aprender sobre design thinking aplicado a la investigación",
+                fraseInspiracion: "El buen diseño es tan poco diseño como sea posible"
+            }
+        ];
+
+        function createMemberCard(member) {
+            const initials = member.nombre.split(' ').map(n => n[0]).join('').substring(0, 2);
+            const mainSkills = member.lenguajesProgramacion.slice(0, 3);
+            
+            return `
+                <div class="member-card" onclick="openModal(${member.id})">
+                    <div class="member-photo">${initials}</div>
+                    <div class="member-name">${member.nombre}</div>
+                    <div class="member-program">${member.programa} - Semestre ${member.semestre}</div>
+                    <div class="member-skills">
+                        ${mainSkills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadMembers() {
+            const grid = document.getElementById('membersGrid');
+            grid.innerHTML = membersData.map(member => createMemberCard(member)).join('');
+        }
+
+        function openModal(memberId) {
+            const member = membersData.find(m => m.id === memberId);
+            if (!member) return;
+
+            const modal = document.getElementById('memberModal');
+            const initials = member.nombre.split(' ').map(n => n[0]).join('').substring(0, 2);
+            
+            document.getElementById('modalPhoto').textContent = initials;
+            document.getElementById('modalName').textContent = member.nombre;
+            document.getElementById('modalProgram').textContent = `${member.programa} - Semestre ${member.semestre}`;
+            
+            const modalDetails = document.getElementById('modalDetails');
+            modalDetails.innerHTML = `
+                <div class="info-section">
+                    <h3 class="info-title">Información de Contacto</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Email Institucional</div>
+                            <div class="info-value">${member.email}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Teléfono</div>
+                            <div class="info-value">${member.telefono}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">LinkedIn</div>
+                            <div class="info-value"><a href="${member.linkedin}" target="_blank">Ver perfil</a></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Portafolio</div>
+                            <div class="info-value"><a href="${member.portafolio}" target="_blank">Ver proyectos</a></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3 class="info-title">Información Académica</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Promedio Acumulado</div>
+                            <div class="info-value">${member.promedio}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Otros Semilleros</div>
+                            <div class="info-value">${member.otrosSemilleros}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Áreas de Interés</div>
+                            <div class="info-value">${member.areasInteres}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3 class="info-title">Habilidades Técnicas</h3>
+                    <div class="info-item">
+                        <div class="info-label">Lenguajes de Programación</div>
+                        <div class="tech-skills">
+                            ${member.lenguajesProgramacion.map(lang => `<span class="tech-skill">${lang}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Herramientas y Tecnologías</div>
+                        <div class="tech-skills">
+                            ${member.herramientas.map(tool => `<span class="tech-skill">${tool}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Nivel de Competencia</div>
+                        <div class="info-value">${member.nivelCompetencia}</div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3 class="info-title">Proyectos Destacados</h3>
+                    ${member.proyectos.map(proyecto => `
+                        <div class="info-item">
+                            <div class="info-label">${proyecto.nombre} (${proyecto.año})</div>
+                            <div class="info-value">
+                                <strong>Rol:</strong> ${proyecto.rol}<br>
+                                <strong>Descripción:</strong> ${proyecto.descripcion}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="info-section">
+                    <h3 class="info-title">Perfil Personal</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Trabajo en Equipo</div>
+                            <div class="info-value">${member.trabajoEquipo}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Rol en Grupos</div>
+                            <div class="info-value">${member.rolGrupo}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Mayor Fortaleza</div>
+                            <div class="info-value">${member.fortaleza}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Motivación</div>
+                            <div class="info-value">${member.motivacion}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3 class="info-title">Disponibilidad y Servicios</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Disponibilidad Semanal</div>
+                            <div class="info-value">${member.disponibilidad}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Servicios de Interés</div>
+                            <div class="info-value">${member.serviciosInteres.join(', ')}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Representación en Eventos</div>
+                            <div class="info-value">${member.representacion ? 'Sí' : 'No'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3 class="info-title">Visión y Objetivos</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Aporte a Corto Plazo</div>
+                            <div class="info-value">${member.aporteCorto}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Expectativas de Aprendizaje</div>
+                            <div class="info-value">${member.expectativasAprendizaje}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Frase que lo Define</div>
+                            <div class="info-value"><em>"${member.fraseInspiracion}"</em></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('memberModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Cerrar modal al hacer clic fuera del contenido
+        document.getElementById('memberModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Cerrar modal con Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Efecto parallax suave
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const parallax = document.querySelector('.members-grid');
+            const speed = scrolled * 0.2;
+            parallax.style.transform = `translateY(${speed}px)`;
+        });
+
+        // Cargar miembros al iniciar
+        document.addEventListener('DOMContentLoaded', loadMembers);
+    </script>
+</body>
+</html>
