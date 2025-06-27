@@ -1,1 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Semillero INFORMA</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #800000 0%, #400000 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(45deg, #800000, #a00000);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      color: white;
+      font-weight: bold;
+      font-size: 1.5rem;
+    }
+
+    .semillero-name {
+      font-size: 2rem;
+      font-weight: bold;
+      background: linear-gradient(45deg, #800000, #a00000);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-menu {
+      margin-left: auto;
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .nav-menu a {
+      text-decoration: none;
+      color: #800000;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      transition: background 0.3s;
+    }
+
+    .nav-menu a:hover {
+      background: rgba(128, 0, 0, 0.1);
+    }
+
+    .main-content {
+      padding-top: 120px;
+      min-height: 100vh;
+    }
+
+    .hero-section {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: white;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1.5rem;
+      opacity: 0.9;
+      margin-bottom: 2rem;
+    }
+
+    .carousel-container {
+      overflow-x: auto;
+      display: flex;
+      gap: 2rem;
+      padding: 2rem;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+
+    .carousel-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .member-card {
+      flex: 0 0 calc(33.333% - 2rem);
+      scroll-snap-align: start;
+      min-width: 280px;
+      max-width: 360px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .member-card:hover {
+      transform: translateY(-10px) scale(1.05);
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .member-photo {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      margin: 0 auto 1rem;
+      background: linear-gradient(45deg, #800000, #b30000);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .member-name {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .member-program {
+      opacity: 0.8;
+      margin-bottom: 1rem;
+    }
+
+    .member-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .skill-tag {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    @media (max-width: 1024px) {
+      .member-card {
+        flex: 0 0 calc(50% - 2rem);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .member-card {
+        flex: 0 0 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">SI</div>
+      <h1 class="semillero-name">Semillero INFORMA</h1>
+      <nav class="nav-menu">
+        <a href="#acerca">Acerca de</a>
+        <a href="#proyectos">Proyectos</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+    </div>
+  </header>
+  <main class="main-content">
+    <section class="hero-section">
+      <h1 class="hero-title">Innovación & Tecnología</h1>
+      <p class="hero-subtitle">Conoce a nuestro equipo de investigadores</p>
+    </section>
+    <section class="carousel-container" id="membersGrid">
+      <!-- Cards dinámicas -->
+    </section>
+  </main>
+
+  <script>
+    const membersData = [
+      {
+        id: 1,
+        nombre: "Zaira Ramírez Mejía",
+        programa: "Ingeniería de Sistemas",
+        semestre: 5,
+        lenguajesProgramacion: ["Java", "MySQL", "C#"]
+      },
+      {
+        id: 2,
+        nombre: "Carlos Eduardo Ruiz",
+        programa: "Ingeniería Electrónica",
+        semestre: 6,
+        lenguajesProgramacion: ["C++", "Python", "Arduino"]
+      },
+      {
+        id: 3,
+        nombre: "María Fernanda López",
+        programa: "Diseño Gráfico",
+        semestre: 7,
+        lenguajesProgramacion: ["HTML", "CSS", "JavaScript"]
+      }
+    ];
+
+    function createMemberCard(member) {
+      const initials = member.nombre.split(' ').map(n => n[0]).join('').substring(0, 2);
+      return `
+        <div class="member-card">
+          <div class="member-photo">${initials}</div>
+          <div class="member-name">${member.nombre}</div>
+          <div class="member-program">${member.programa} - Semestre ${member.semestre}</div>
+          <div class="member-skills">
+            ${member.lenguajesProgramacion.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+          </div>
+        </div>`;
+    }
+
+    function loadMembers() {
+      const grid = document.getElementById('membersGrid');
+      grid.innerHTML = membersData.map(m => createMemberCard(m)).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', loadMembers);
+  </script>
+</body>
+</html>
