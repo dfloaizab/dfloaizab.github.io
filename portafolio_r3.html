@@ -74,44 +74,23 @@
       margin-bottom: 2rem;
     }
     .carousel-wrapper {
-      position: relative;
-      overflow: hidden;
-      padding: 2rem;
-    }
-    .carousel-controls {
-      position: absolute;
-      top: 50%;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      transform: translateY(-50%);
-      z-index: 10;
-    }
-    .carousel-button {
-      background-color: rgba(255, 255, 255, 0.6);
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-   /* ... todo tu CSS anterior ... */
+  overflow: hidden;
+  position: relative;
+  max-width: 100%;
+  margin: auto;
+}
 
-
-
-
-
-
-    .carousel {
+.carousel {
   display: flex;
   gap: 2rem;
   scroll-snap-type: x mandatory;
-  overflow-x: auto;
+  overflow-x: hidden; /* ocultar scroll horizontal */
   scroll-behavior: smooth;
   padding-bottom: 1rem;
-  justify-content: center; /* centra el carrusel */
+  justify-content: center;
+  transition: transform 0.3s ease-in-out;
 }
+
 .member-card {
   flex: 0 0 calc(100% / 3 - 2rem);
   max-width: 360px;
@@ -123,6 +102,68 @@
   padding: 2rem;
   cursor: pointer;
   margin: auto;
+}
+
+@media (max-width: 1024px) {
+  .member-card {
+    flex: 0 0 45%;
+  }
+}
+
+@media (max-width: 768px) {
+  .member-card {
+    flex: 0 0 100%;
+  }
+}
+
+.carousel-controls {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  transform: translateY(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.carousel-button {
+  background-color: rgba(255, 255, 255, 0.6);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  pointer-events: all;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.member-card {
+  flex: 0 0 calc(100% / 3 - 2rem);
+  max-width: 360px;
+  scroll-snap-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  color: white;
+  text-align: center;
+  padding: 2rem;
+  cursor: pointer;
+  margin: auto;
+}
+
+@media (max-width: 1024px) {
+  .member-card {
+    flex: 0 0 45%;
+  }
+}
+
+@media (max-width: 768px) {
+  .member-card {
+    flex: 0 0 100%;
+  }
 }
     .member-photo {
       width: 150px;
@@ -146,16 +187,7 @@
       font-size: 0.8rem;
       border: 1px solid rgba(255, 255, 255, 0.3);
     }
-   @media (max-width: 1024px) {
-  .member-card {
-    flex: 0 0 45%;
-  }
-}
-
-@media (max-width: 768px) {
-  .member-card {
-    flex: 0 0 90%;
-  }
+   
   </style>
 </head>
 <body>
