@@ -96,25 +96,34 @@
       font-size: 1.5rem;
       cursor: pointer;
     }
+   /* ... todo tu CSS anterior ... */
+
+
+
+
+
+
     .carousel {
-      display: flex;
-      gap: 2rem;
-      scroll-snap-type: x mandatory;
-      overflow-x: auto;
-      scroll-behavior: smooth;
-      padding-bottom: 1rem;
-    }
-    .carousel::-webkit-scrollbar { display: none; }
-    .member-card {
-      flex: 0 0 30%;
-      scroll-snap-align: center;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      color: white;
-      text-align: center;
-      padding: 2rem;
-      cursor: pointer;
-    }
+  display: flex;
+  gap: 2rem;
+  scroll-snap-type: x mandatory;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding-bottom: 1rem;
+  justify-content: center; /* centra el carrusel */
+}
+.member-card {
+  flex: 0 0 calc(100% / 3 - 2rem);
+  max-width: 360px;
+  scroll-snap-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  color: white;
+  text-align: center;
+  padding: 2rem;
+  cursor: pointer;
+  margin: auto;
+}
     .member-photo {
       width: 150px;
       height: 150px;
@@ -137,8 +146,16 @@
       font-size: 0.8rem;
       border: 1px solid rgba(255, 255, 255, 0.3);
     }
-    @media (max-width: 1024px) { .member-card { flex: 0 0 45%; } }
-    @media (max-width: 768px) { .member-card { flex: 0 0 90%; } }
+   @media (max-width: 1024px) {
+  .member-card {
+    flex: 0 0 45%;
+  }
+}
+
+@media (max-width: 768px) {
+  .member-card {
+    flex: 0 0 90%;
+  }
   </style>
 </head>
 <body>
