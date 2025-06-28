@@ -3,477 +3,155 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Semillero INFORMA</title>
+  <title>Portafolio con Carrusel Bootstrap</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #800000 0%, #400000 100%);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    .parallax-container { height: 100vh; overflow-y: auto; perspective: 1px; }
-    .header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      z-index: 1000;
-      padding: 1rem 2rem;
-      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-    }
-    .header-content {
-      display: flex; align-items: center;
-      max-width: 1200px; margin: 0 auto;
-    }
-    .logo {
-      width: 60px; height: 60px;
-      background: linear-gradient(45deg, #800000, #a00000);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin-right: 1rem;
-      color: white; font-weight: bold; font-size: 1.5rem;
-    }
-    .semillero-name {
-      font-size: 2rem; font-weight: bold;
-      background: linear-gradient(45deg, #800000, #a00000);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .nav-menu {
-      margin-left: auto;
-      display: flex; gap: 1.5rem;
-    }
-    .nav-menu a {
-      text-decoration: none;
-      color: #800000;
-      font-weight: bold;
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
-      transition: background 0.3s;
-    }
-    .nav-menu a:hover {
-      background: rgba(128, 0, 0, 0.1);
-    }
-    .main-content { padding-top: 120px; min-height: 100vh; }
-    .hero-section {
-      text-align: center;
-      padding: 4rem 2rem;
       color: white;
-      transform: translateZ(0);
+      font-family: 'Segoe UI', sans-serif;
     }
-    .hero-title {
-      font-size: 3.5rem;
-      margin-bottom: 1rem;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    .member-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 1rem;
+      text-align: center;
+      color: white;
+      cursor: pointer;
     }
-    .hero-subtitle {
-      font-size: 1.5rem;
-      opacity: 0.9;
-      margin-bottom: 2rem;
-    }
-    .carousel-wrapper {
-  overflow: hidden;
-  position: relative;
-  max-width: 100%;
-  margin: auto;
-}
-
-.carousel {
-  display: flex;
-  gap: 2rem;
-  scroll-snap-type: x mandatory;
-  overflow-x: hidden; /* ocultar scroll horizontal */
-  scroll-behavior: smooth;
-  padding-bottom: 1rem;
-  justify-content: center;
-  transition: transform 0.3s ease-in-out;
-}
-
-.member-card {
-  flex: 0 0 calc(100% / 3 - 2rem);
-  max-width: 360px;
-  scroll-snap-align: center;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  color: white;
-  text-align: center;
-  padding: 2rem;
-  cursor: pointer;
-  margin: auto;
-}
-
-@media (max-width: 1024px) {
-  .member-card {
-    flex: 0 0 45%;
-  }
-}
-
-@media (max-width: 768px) {
-  .member-card {
-    flex: 0 0 100%;
-  }
-}
-
-.carousel-controls {
-  position: absolute;
-  top: 50%;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  transform: translateY(-50%);
-  z-index: 10;
-  pointer-events: none;
-}
-
-.carousel-button {
-  background-color: rgba(255, 255, 255, 0.6);
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 1.5rem;
-  cursor: pointer;
-  pointer-events: all;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.member-card {
-  flex: 0 0 calc(100% / 3 - 2rem);
-  max-width: 360px;
-  scroll-snap-align: center;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  color: white;
-  text-align: center;
-  padding: 2rem;
-  cursor: pointer;
-  margin: auto;
-}
-
-@media (max-width: 1024px) {
-  .member-card {
-    flex: 0 0 45%;
-  }
-}
-
-@media (max-width: 768px) {
-  .member-card {
-    flex: 0 0 100%;
-  }
-}
     .member-photo {
-      width: 150px;
-      height: 150px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
       background: linear-gradient(45deg, #800000, #b30000);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 3rem;
-      font-weight: bold;
+      font-size: 2rem;
       margin: 0 auto 1rem;
+      color: white;
+      font-weight: bold;
     }
-    .member-name { font-size: 1.5rem; font-weight: bold; }
-    .member-program { opacity: 0.8; margin-bottom: 1rem; }
-    .member-skills { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
     .skill-tag {
       background: rgba(255, 255, 255, 0.2);
       padding: 0.3rem 0.8rem;
       border-radius: 15px;
       font-size: 0.8rem;
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      margin: 0.2rem;
+      display: inline-block;
     }
-   
   </style>
 </head>
 <body>
-  <div class="parallax-container">
-    <header class="header">
-      <div class="header-content">
-        <div class="logo">SI</div>
-        <h1 class="semillero-name">Semillero INFORMA</h1>
-        <nav class="nav-menu">
-          <a href="#acerca">Acerca de</a>
-          <a href="#proyectos">Proyectos</a>
-          <a href="#contacto">Contacto</a>
-        </nav>
+  <div class="container text-center my-3">
+    <h2 class="font-weight-light">Semillero INFORMA</h2>
+    <div class="row mx-auto my-auto">
+      <div id="membersCarousel" class="carousel slide w-100" data-ride="carousel">
+        <div class="carousel-inner w-100" role="listbox" id="membersGrid"></div>
+        <a class="carousel-control-prev w-auto" href="#membersCarousel" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon bg-dark border border-dark rounded-circle" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next w-auto" href="#membersCarousel" role="button" data-slide="next">
+          <span class="carousel-control-next-icon bg-dark border border-dark rounded-circle" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
       </div>
-    </header>
-
-    <main class="main-content">
-      <section class="hero-section">
-        <h1 class="hero-title">Innovación & Tecnología</h1>
-        <p class="hero-subtitle">Conoce a nuestro equipo de investigadores</p>
-      </section>
-
-      <div class="carousel-wrapper">
-        <div class="carousel-controls">
-          <button class="carousel-button" onclick="scrollCarousel(-1)">&#8249;</button>
-          <button class="carousel-button" onclick="scrollCarousel(1)">&#8250;</button>
-        </div>
-        <div class="carousel" id="membersGrid">
-          <!-- Los miembros se cargarán dinámicamente -->
-        </div>
-      </div>
-    </main>
+    </div>
   </div>
 
+  <!-- Modal -->
   <div id="memberModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); color:white; overflow:auto; padding:2rem; z-index:2000;">
-  <div id="modalContent" style="background:#300; padding:2rem; border-radius:15px; max-width:800px; margin:auto;">
-    <button onclick="closeModal()" style="float:right; background:#800000; color:white; border:none; padding:0.5rem 1rem; border-radius:5px; cursor:pointer;">Cerrar</button>
-    <div id="modalBody"></div>
+    <div style="background:#300; padding:2rem; border-radius:15px; max-width:800px; margin:auto;">
+      <button onclick="closeModal()" style="float:right; background:#800000; color:white; border:none; padding:0.5rem 1rem; border-radius:5px; cursor:pointer;">Cerrar</button>
+      <div id="modalBody"></div>
+    </div>
   </div>
-</div>
 
   <script>
     const membersData = [
-  {
-    "id": 1,
-    "nombre": "Zaira Ramírez Mejía",
-    "email": "zaira.ramirez00@usc.edu.co",
-    "telefono": "+57 3212593394",
-    "linkedin": "www.linkedin.com/in/zaira-ramírez-mejía-86a8702ba",
-    "programa": "Ingeniería de Sistemas",
-    "semestre": 5,
-    "promedio": "N/A",
-    "otrosSemilleros": "Semillero Comba",
-    "areasInteres": "Desarrollo multiplataforma",
-    "lenguajesProgramacion": ["Java", "MySQL", "C#", "Flutter"],
-    "herramientas": ["Unity", "React", "Node.js", "Docker"],
-    "nivelCompetencia": "Avanzado",
-    "proyectos": [
       {
-        "nombre": "Aula en VR para química básica",
-        "descripcion": "Desarrollo de escenarios, mecánicas e IA en Unity",
-        "rol": "Diseño y Desarrollo",
-        "año": "2024 - presente"
+        id: 1,
+        nombre: "Zaira Ramírez Mejía",
+        email: "zaira@demo.com",
+        telefono: "3210000000",
+        programa: "Ingeniería de Sistemas",
+        semestre: 5,
+        lenguajesProgramacion: ["Java", "MySQL", "C#"]
       },
       {
-        "nombre": "Sistema de Recomendaciones ML",
-        "descripcion": "Desarrollo de algoritmo ML para recomendaciones personalizadas",
-        "rol": "Líder técnico",
-        "año": "2024"
-      }
-    ],
-    "portafolio": "https://github.com/ana-garcia",
-    "trabajoEquipo": "Me gusta liderar equipos y facilitar la comunicación entre miembros",
-    "rolGrupo": "Líder técnico",
-    "fortaleza": "Capacidad analítica y resolución de problemas complejos",
-    "motivacion": "Aplicar tecnología para resolver problemas reales de la sociedad",
-    "serviciosInteres": ["Desarrollo de software", "Investigación aplicada", "Capacitaciones"],
-    "disponibilidad": "20 horas semanales",
-    "representacion": true,
-    "aporteCorto": "Liderar proyectos de IA y mentorear a nuevos miembros",
-    "expectativasAprendizaje": "Profundizar en deep learning y investigación científica",
-    "fraseInspiracion": "La tecnología debe servir para mejorar vidas"
-  },
-  {
-    "id": 2,
-    "nombre": "Nayeli Trujillo Rengifo",
-    "email": "carlos.ruiz@universidad.edu",
-    "telefono": "+57 310 987 6543",
-    "linkedin": "https://linkedin.com/in/carlos-ruiz",
-    "programa": "Ingeniería Electrónica",
-    "semestre": 6,
-    "promedio": 4.2,
-    "otrosSemilleros": "Semillero de IoT",
-    "areasInteres": "Internet de las Cosas, Sistemas Embebidos, Automatización",
-    "lenguajesProgramacion": ["C++", "Python", "Arduino", "MATLAB"],
-    "herramientas": ["ESP32", "Raspberry Pi", "KiCad", "Proteus"],
-    "nivelCompetencia": "Intermedio",
-    "proyectos": [
-      {
-        "nombre": "Sistema de Monitoreo Ambiental",
-        "descripcion": "Red de sensores IoT para monitoreo de calidad del aire",
-        "rol": "Desarrollador hardware",
-        "año": 2024
-      }
-    ],
-    "portafolio": "https://github.com/carlos-ruiz",
-    "trabajoEquipo": "Prefiero trabajar en la implementación técnica y pruebas",
-    "rolGrupo": "Ejecutor técnico",
-    "fortaleza": "Atención al detalle y perseverancia en la resolución de problemas",
-    "motivacion": "Crear soluciones tecnológicas que impacten positivamente el medio ambiente",
-    "serviciosInteres": ["Desarrollo de prototipos", "Investigación aplicada", "Consultorías técnicas"],
-    "disponibilidad": "15 horas semanales",
-    "representacion": true,
-    "aporteCorto": "Desarrollar prototipos funcionales y documentar procesos técnicos",
-    "expectativasAprendizaje": "Ampliar conocimientos en machine learning para IoT",
-    "fraseInspiracion": "Innovar para un futuro sostenible"
-  },
-  {
-    "id": 3,
-    "nombre": "Sebastián Toro Rodríguez",
-    "email": "maria.lopez@universidad.edu",
-    "telefono": "+57 320 456 7890",
-    "linkedin": "https://linkedin.com/in/maria-lopez",
-    "programa": "Diseño Gráfico",
-    "semestre": 7,
-    "promedio": 4.7,
-    "otrosSemilleros": "Semillero de UX/UI",
-    "areasInteres": "Diseño de Experiencia de Usuario, Branding, Comunicación Visual",
-    "lenguajesProgramacion": ["HTML", "CSS", "JavaScript"],
-    "herramientas": ["Figma", "Adobe Creative Suite", "Sketch", "Principle"],
-    "nivelCompetencia": "Avanzado",
-    "proyectos": [
-      {
-        "nombre": "Rediseño de Plataforma Educativa",
-        "descripcion": "Mejora de UX/UI para plataforma de aprendizaje online",
-        "rol": "UX/UI Designer",
-        "año": 2024
-      }
-    ],
-    "portafolio": "https://behance.net/maria-lopez",
-    "trabajoEquipo": "Me enfoco en facilitar la creatividad y la comunicación visual del equipo",
-    "rolGrupo": "Creativa y comunicadora",
-    "fortaleza": "Capacidad de visualizar soluciones y comunicar ideas complejas de forma simple",
-    "motivacion": "Hacer que la tecnología sea más accesible y humana através del diseño",
-    "serviciosInteres": ["Comunicación y diseño gráfico", "Capacitaciones", "Consultorías"],
-    "disponibilidad": "18 horas semanales",
-    "representacion": true,
-    "aporteCorto": "Mejorar la comunicación visual del semillero y crear material educativo",
-    "expectativasAprendizaje": "Aprender sobre design thinking aplicado a la investigación",
-    "fraseInspiracion": "El buen diseño es tan poco diseño como sea posible"
-  },
-       {
-    "id": 4,
-    "nombre": "Santiago Restrepo Ortega",
-    "email": "zaira.ramirez00@usc.edu.co",
-    "telefono": "+57 3212593394",
-    "linkedin": "www.linkedin.com/in/zaira-ramírez-mejía-86a8702ba",
-    "programa": "Ingeniería de Sistemas",
-    "semestre": 5,
-    "promedio": "N/A",
-    "otrosSemilleros": "Semillero Comba",
-    "areasInteres": "Desarrollo multiplataforma",
-    "lenguajesProgramacion": ["Java", "MySQL", "C#", "Flutter"],
-    "herramientas": ["Unity", "React", "Node.js", "Docker"],
-    "nivelCompetencia": "Avanzado",
-    "proyectos": [
-      {
-        "nombre": "Aula en VR para química básica",
-        "descripcion": "Desarrollo de escenarios, mecánicas e IA en Unity",
-        "rol": "Diseño y Desarrollo",
-        "año": "2024 - presente"
+        id: 2,
+        nombre: "Carlos Eduardo Ruiz",
+        email: "carlos@demo.com",
+        telefono: "3100000000",
+        programa: "Ingeniería Electrónica",
+        semestre: 6,
+        lenguajesProgramacion: ["C++", "Python", "Arduino"]
       },
       {
-        "nombre": "Sistema de Recomendaciones ML",
-        "descripcion": "Desarrollo de algoritmo ML para recomendaciones personalizadas",
-        "rol": "Líder técnico",
-        "año": "2024"
+        id: 3,
+        nombre: "María Fernanda López",
+        email: "maria@demo.com",
+        telefono: "3200000000",
+        programa: "Diseño Gráfico",
+        semestre: 7,
+        lenguajesProgramacion: ["HTML", "CSS", "JavaScript"]
       }
-    ],
-    "portafolio": "https://github.com/ana-garcia",
-    "trabajoEquipo": "Me gusta liderar equipos y facilitar la comunicación entre miembros",
-    "rolGrupo": "Líder técnico",
-    "fortaleza": "Capacidad analítica y resolución de problemas complejos",
-    "motivacion": "Aplicar tecnología para resolver problemas reales de la sociedad",
-    "serviciosInteres": ["Desarrollo de software", "Investigación aplicada", "Capacitaciones"],
-    "disponibilidad": "20 horas semanales",
-    "representacion": true,
-    "aporteCorto": "Liderar proyectos de IA y mentorear a nuevos miembros",
-    "expectativasAprendizaje": "Profundizar en deep learning y investigación científica",
-    "fraseInspiracion": "La tecnología debe servir para mejorar vidas"
-  },
-       {
-    "id": 5,
-    "nombre": "Andrés Rodríguez Rubio",
-    "email": "zaira.ramirez00@usc.edu.co",
-    "telefono": "+57 3212593394",
-    "linkedin": "www.linkedin.com/in/zaira-ramírez-mejía-86a8702ba",
-    "programa": "Ingeniería de Sistemas",
-    "semestre": 5,
-    "promedio": "N/A",
-    "otrosSemilleros": "Semillero Comba",
-    "areasInteres": "Desarrollo multiplataforma",
-    "lenguajesProgramacion": ["Java", "MySQL", "C#", "Flutter"],
-    "herramientas": ["Unity", "React", "Node.js", "Docker"],
-    "nivelCompetencia": "Avanzado",
-    "proyectos": [
-      {
-        "nombre": "Aula en VR para química básica",
-        "descripcion": "Desarrollo de escenarios, mecánicas e IA en Unity",
-        "rol": "Diseño y Desarrollo",
-        "año": "2024 - presente"
-      },
-      {
-        "nombre": "Sistema de Recomendaciones ML",
-        "descripcion": "Desarrollo de algoritmo ML para recomendaciones personalizadas",
-        "rol": "Líder técnico",
-        "año": "2024"
-      }
-    ],
-    "portafolio": "https://github.com/ana-garcia",
-    "trabajoEquipo": "Me gusta liderar equipos y facilitar la comunicación entre miembros",
-    "rolGrupo": "Líder técnico",
-    "fortaleza": "Capacidad analítica y resolución de problemas complejos",
-    "motivacion": "Aplicar tecnología para resolver problemas reales de la sociedad",
-    "serviciosInteres": ["Desarrollo de software", "Investigación aplicada", "Capacitaciones"],
-    "disponibilidad": "20 horas semanales",
-    "representacion": true,
-    "aporteCorto": "Liderar proyectos de IA y mentorear a nuevos miembros",
-    "expectativasAprendizaje": "Profundizar en deep learning y investigación científica",
-    "fraseInspiracion": "La tecnología debe servir para mejorar vidas"
-  }
-];
+    ];
 
-    function createMemberCard(member) {
-      const initials = member.nombre.split(' ').map(n => n[0]).join('').substring(0, 2);
-      const mainSkills = member.lenguajesProgramacion.slice(0, 3);
-      return `
-        <div class="member-card" onclick="openModal(${member.id})">
-          <div class="member-photo">${initials}</div>
-          <div class="member-name">${member.nombre}</div>
-          <div class="member-program">${member.programa} - Semestre ${member.semestre}</div>
-          <div class="member-skills">
-            ${mainSkills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
-          </div>
-        </div>`;
+    function openModal(id) {
+      const member = membersData.find(m => m.id === id);
+      if (!member) return;
+      document.getElementById('modalBody').innerHTML = `
+        <h2>${member.nombre}</h2>
+        <p><strong>Email:</strong> ${member.email}</p>
+        <p><strong>Teléfono:</strong> ${member.telefono}</p>
+        <p><strong>Programa:</strong> ${member.programa} - Semestre ${member.semestre}</p>
+        <p><strong>Lenguajes:</strong> ${member.lenguajesProgramacion.join(', ')}</p>
+      `;
+      document.getElementById('memberModal').style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('memberModal').style.display = 'none';
     }
 
     function loadMembers() {
-      const grid = document.getElementById('membersGrid');
-      grid.innerHTML = membersData.map(createMemberCard).join('');
-    }
+      const container = document.getElementById('membersGrid');
+      container.innerHTML = membersData.map((member, index) => {
+        const initials = member.nombre.split(' ').map(n => n[0]).join('').substring(0, 2);
+        const skills = member.lenguajesProgramacion.slice(0, 3).map(skill => `<span class='skill-tag'>${skill}</span>`).join('');
+        return `
+          <div class="carousel-item ${index === 0 ? 'active' : ''}">
+            <div class="col-md-4">
+              <div class="member-card" onclick="openModal(${member.id})">
+                <div class="member-photo">${initials}</div>
+                <div class="member-name">${member.nombre}</div>
+                <div class="member-program">${member.programa} - Semestre ${member.semestre}</div>
+                <div class="member-skills">${skills}</div>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
 
-    function scrollCarousel(direction) {
-      const carousel = document.getElementById('membersGrid');
-      const scrollAmount = carousel.clientWidth * 0.6;
-      carousel.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+      // Duplica tarjetas para crear efecto de múltiples por slide
+      setTimeout(() => {
+        const items = document.querySelectorAll('#membersGrid .carousel-item');
+        items.forEach(el => {
+          let next = el.nextElementSibling;
+          for (let i = 0; i < 2; i++) {
+            if (!next) next = items[0];
+            const clone = next.querySelector('.col-md-4').cloneNode(true);
+            el.appendChild(clone);
+            next = next.nextElementSibling;
+          }
+        });
+      }, 100);
     }
 
     document.addEventListener('DOMContentLoaded', loadMembers);
-
-function openModal(id) {
-  const member = membersData.find(m => m.id === id);
-  if (!member) return;
-  const modal = document.getElementById('memberModal');
-  const modalBody = document.getElementById('modalBody');
-  modalBody.innerHTML = `
-    <h2>${member.nombre}</h2>
-    <p><strong>Email:</strong> ${member.email}</p>
-    <p><strong>Teléfono:</strong> ${member.telefono}</p>
-    <p><strong>Programa:</strong> ${member.programa} - Semestre ${member.semestre}</p>
-    <p><strong>Promedio:</strong> ${member.promedio}</p>
-    <p><strong>Áreas de interés:</strong> ${member.areasInteres}</p>
-    <p><strong>Lenguajes:</strong> ${member.lenguajesProgramacion.join(', ')}</p>
-    <p><strong>Herramientas:</strong> ${member.herramientas.join(', ')}</p>
-    <p><strong>Proyectos:</strong></p>
-    <ul>${member.proyectos.map(p => `<li><strong>${p.nombre}</strong>: ${p.descripcion} (${p.año})</li>`).join('')}</ul>
-    <p><strong>Motivación:</strong> ${member.motivacion}</p>
-    <p><strong>Frase:</strong> “${member.fraseInspiracion}”</p>
-    <p><a href="${member.portafolio}" target="_blank" style="color:lightblue">Portafolio</a></p>
-  `;
-  modal.style.display = 'block';
-}
-
-function closeModal() {
-  document.getElementById('memberModal').style.display = 'none';
-}
   </script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
