@@ -18,6 +18,7 @@
       text-align: center;
       color: white;
       cursor: pointer;
+      margin: 0.5rem;
     }
     .member-photo {
       width: 100px;
@@ -40,6 +41,18 @@
       margin: 0.2rem;
       display: inline-block;
     }
+    nav a {
+      padding: 0.5rem 1rem;
+      background: #800000;
+      border-radius: 10px;
+      color: white !important;
+      margin: 0 0.5rem;
+      transition: background 0.3s;
+    }
+    nav a:hover {
+      background: #a00000;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
@@ -50,17 +63,18 @@
         <h1 class="ml-3 mb-0" style="font-size:1.8rem; color:#800000;">Semillero INFORMA</h1>
       </div>
       <nav>
-        <a href="#proyectos" class="mx-3 text-dark font-weight-bold">Proyectos</a>
-        <a href="#acerca" class="mx-3 text-dark font-weight-bold">Acerca de</a>
-        <a href="#contacto" class="mx-3 text-dark font-weight-bold">Contacto</a>
+        <a href="#proyectos">Proyectos</a>
+        <a href="#acerca">Acerca de</a>
+        <a href="#contacto">Contacto</a>
       </nav>
     </div>
   </header>
+
   <div class="container text-center my-3">
     <h2 class="font-weight-light">Semillero INFORMA</h2>
     <div class="row mx-auto my-auto">
       <div id="membersCarousel" class="carousel slide w-100" data-ride="carousel">
-        <div class="carousel-inner w-100 d-flex" role="listbox" id="membersGrid"></div>
+        <div class="carousel-inner" id="membersGrid"></div>
         <a class="carousel-control-prev w-auto" href="#membersCarousel" role="button" data-slide="prev">
           <span class="carousel-control-prev-icon bg-dark border border-dark rounded-circle" aria-hidden="true"></span>
           <span class="sr-only">Previous</span>
@@ -73,7 +87,6 @@
     </div>
   </div>
 
-  <!-- Modal -->
   <div id="memberModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); color:white; overflow:auto; padding:2rem; z-index:2000;">
     <div style="background:#300; padding:2rem; border-radius:15px; max-width:800px; margin:auto;">
       <button onclick="closeModal()" style="float:right; background:#800000; color:white; border:none; padding:0.5rem 1rem; border-radius:5px; cursor:pointer;">Cerrar</button>
@@ -130,64 +143,37 @@
     }
 
     function loadMembers() {
-  const container = document.getElementById('membersGrid');
-  container.innerHTML = '';
-  const itemsPerSlide = 3;
-  const totalSlides = Math.ceil(membersData.length / itemsPerSlide);
+      const container = document.getElementById('membersGrid');
+      container.innerHTML = '';
+      const itemsPerSlide = 3;
+      const totalSlides = Math.ceil(membersData.length / itemsPerSlide);
 
-  for (let i = 0; i < totalSlides; i++) {
-    const start = i * itemsPerSlide;
-    const end = start + itemsPerSlide;
-    const group = membersData.slice(start, end);
+      for (let i = 0; i < totalSlides; i++) {
+        const start = i * itemsPerSlide;
+        const end = start + itemsPerSlide;
+        const group = membersData.slice(start, end);
 
-    const rowItems = group.map(member => {
-      const initials = member.nombre.split(' ').map(n => n[0]).join('').substring(0, 2);
-      const skills = member.lenguajesProgramacion.slice(0, 3).map(skill => `<span class='skill-tag'>${skill}</span>`).join('');
-      return `
-        <div class="col-md-4 d-flex">
-          <div class="member-card w-100" onclick="openModal(${member.id})">
-            <div class="member-photo">${initials}</div>
-            <div class="member-name">${member.nombre}</div>
-            <div class="member-program">${member.programa} - Semestre ${member.semestre}</div>
-            <div class="member-skills">${skills}</div>
-          </div>
-        </div>`;
-    }).join('');
-
-    container.innerHTML += `
-      <div class="carousel-item ${i === 0 ? 'active' : ''}">
-        <div class="row justify-content-center">
-          ${rowItems}
-        </div>
-      </div>`;
-  }
-}</span>`).join('');
-        return `
-          <div class="carousel-item $1 d-flex align-items-stretch">
-  <div class="col-md-4 d-flex">
-              <div class="member-card" onclick="openModal(${member.id})">
+        const rowItems = group.map(member => {
+          const initials = member.nombre.split(' ').map(n => n[0]).join('').substring(0, 2);
+          const skills = member.lenguajesProgramacion.slice(0, 3).map(skill => `<span class='skill-tag'>${skill}</span>`).join('');
+          return `
+            <div class="col-md-4 d-flex">
+              <div class="member-card w-100" onclick="openModal(${member.id})">
                 <div class="member-photo">${initials}</div>
                 <div class="member-name">${member.nombre}</div>
                 <div class="member-program">${member.programa} - Semestre ${member.semestre}</div>
                 <div class="member-skills">${skills}</div>
               </div>
+            </div>`;
+        }).join('');
+
+        container.innerHTML += `
+          <div class="carousel-item ${i === 0 ? 'active' : ''}">
+            <div class="row justify-content-center">
+              ${rowItems}
             </div>
           </div>`;
-      }).join('');
-
-      // Duplica tarjetas para crear efecto de múltiples por slide
-      setTimeout(() => {
-        const items = document.querySelectorAll('#membersGrid .carousel-item');
-        items.forEach(el => {
-          let next = el.nextElementSibling;
-          for (let i = 0; i < 2; i++) {
-            if (!next) next = items[0];
-            const clone = next.querySelector('.col-md-4').cloneNode(true);
-            el.appendChild(clone);
-            next = next.nextElementSibling;
-          }
-        });
-      }, 100);
+      }
     }
 
     document.addEventListener('DOMContentLoaded', loadMembers);
