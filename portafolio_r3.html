@@ -43,11 +43,24 @@
   </style>
 </head>
 <body>
+  <header class="bg-light py-3 mb-4 shadow">
+    <div class="container d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center">
+        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;font-weight:bold;font-size:1.2rem;">SI</div>
+        <h1 class="ml-3 mb-0" style="font-size:1.8rem; color:#800000;">Semillero INFORMA</h1>
+      </div>
+      <nav>
+        <a href="#proyectos" class="mx-3 text-dark font-weight-bold">Proyectos</a>
+        <a href="#acerca" class="mx-3 text-dark font-weight-bold">Acerca de</a>
+        <a href="#contacto" class="mx-3 text-dark font-weight-bold">Contacto</a>
+      </nav>
+    </div>
+  </header>
   <div class="container text-center my-3">
     <h2 class="font-weight-light">Semillero INFORMA</h2>
     <div class="row mx-auto my-auto">
       <div id="membersCarousel" class="carousel slide w-100" data-ride="carousel">
-        <div class="carousel-inner w-100" role="listbox" id="membersGrid"></div>
+        <div class="carousel-inner w-100 d-flex" role="listbox" id="membersGrid"></div>
         <a class="carousel-control-prev w-auto" href="#membersCarousel" role="button" data-slide="prev">
           <span class="carousel-control-prev-icon bg-dark border border-dark rounded-circle" aria-hidden="true"></span>
           <span class="sr-only">Previous</span>
@@ -122,8 +135,8 @@
         const initials = member.nombre.split(' ').map(n => n[0]).join('').substring(0, 2);
         const skills = member.lenguajesProgramacion.slice(0, 3).map(skill => `<span class='skill-tag'>${skill}</span>`).join('');
         return `
-          <div class="carousel-item ${index === 0 ? 'active' : ''}">
-            <div class="col-md-4">
+          <div class="carousel-item $1 d-flex align-items-stretch">
+  <div class="col-md-4 d-flex">
               <div class="member-card" onclick="openModal(${member.id})">
                 <div class="member-photo">${initials}</div>
                 <div class="member-name">${member.nombre}</div>
