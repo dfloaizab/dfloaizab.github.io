@@ -130,10 +130,38 @@
     }
 
     function loadMembers() {
-      const container = document.getElementById('membersGrid');
-      container.innerHTML = membersData.map((member, index) => {
-        const initials = member.nombre.split(' ').map(n => n[0]).join('').substring(0, 2);
-        const skills = member.lenguajesProgramacion.slice(0, 3).map(skill => `<span class='skill-tag'>${skill}</span>`).join('');
+  const container = document.getElementById('membersGrid');
+  container.innerHTML = '';
+  const itemsPerSlide = 3;
+  const totalSlides = Math.ceil(membersData.length / itemsPerSlide);
+
+  for (let i = 0; i < totalSlides; i++) {
+    const start = i * itemsPerSlide;
+    const end = start + itemsPerSlide;
+    const group = membersData.slice(start, end);
+
+    const rowItems = group.map(member => {
+      const initials = member.nombre.split(' ').map(n => n[0]).join('').substring(0, 2);
+      const skills = member.lenguajesProgramacion.slice(0, 3).map(skill => `<span class='skill-tag'>${skill}</span>`).join('');
+      return `
+        <div class="col-md-4 d-flex">
+          <div class="member-card w-100" onclick="openModal(${member.id})">
+            <div class="member-photo">${initials}</div>
+            <div class="member-name">${member.nombre}</div>
+            <div class="member-program">${member.programa} - Semestre ${member.semestre}</div>
+            <div class="member-skills">${skills}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    container.innerHTML += `
+      <div class="carousel-item ${i === 0 ? 'active' : ''}">
+        <div class="row justify-content-center">
+          ${rowItems}
+        </div>
+      </div>`;
+  }
+}</span>`).join('');
         return `
           <div class="carousel-item $1 d-flex align-items-stretch">
   <div class="col-md-4 d-flex">
