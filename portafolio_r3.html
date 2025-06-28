@@ -94,8 +94,28 @@
     </div>
   </div>
 
-  <script>
-    const membersData = [
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+$('#membersCarousel').carousel({ interval: 10000 });
+
+$('.carousel .carousel-item').each(function(){
+  var minPerSlide = 3;
+  var next = $(this).next();
+  if (!next.length) {
+    next = $(this).siblings(':first');
+  }
+  next.children(':first-child').clone().appendTo($(this));
+
+  for (var i = 0; i < minPerSlide - 1; i++) {
+    next = next.next();
+    if (!next.length) {
+      next = $(this).siblings(':first');
+    }
+    next.children(':first-child').clone().appendTo($(this));
+  }
+});
+
+const membersData = [
       {
         id: 1,
         nombre: "Zaira Ramírez Mejía",
