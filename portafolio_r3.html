@@ -210,12 +210,18 @@
 	  
 	  /* corregir recorte de las tarjetas de forma horizontal*/
 	  /* Asegura que los slides no se recorten en altura */
-#membersCarousel,
+#membersCarousel{
+	  overflow-y: visible;
+  max-height: none; /* Por si algo lo está limitando */
+}
 #membersCarousel .carousel-inner,
 #membersCarousel .carousel-item {
-  height: auto;
-  overflow-y: visible;
+  height: auto !important;
+  overflow-y: visible !important;
   overflow-x: hidden;
+}
+	  html, body {
+  overflow-y: hidden;  /* Elimina scroll vertical global si no lo necesitas */
 }
 
 /* Permite que las columnas se alineen correctamente */
