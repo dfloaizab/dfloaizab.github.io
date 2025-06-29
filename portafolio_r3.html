@@ -258,6 +258,46 @@
             /*100%;*/
         }
 
+        /* estilos nuevos para barra de búsqueda y selección de idioma*/
+        .header-custom {
+          background: linear-gradient(to bottom, #ffffff 0%, #f9f9f9 100%);
+          flex-wrap: wrap;
+          gap: 1rem;
+        }
+        
+        .logo-img {
+          width: 60px;
+          height: 60px;
+          object-fit: cover;
+          border-radius: 50%;
+        }
+        
+        .brand-title {
+          font-size: 1.8rem;
+          color: #800000;
+        }
+        
+        .btn-maroon {
+          background-color: #800000;
+          color: white;
+          border-radius: 0.5rem;
+          padding: 0.4rem 1rem;
+          border: none;
+        }
+        
+        .btn-maroon:hover {
+          background-color: #660000;
+        }
+        .nav-links {
+          flex-grow: 1;
+          justify-content: center;
+        }
+
+        .search-lang {
+          min-width: 250px;
+          justify-content: flex-end;
+        }
+
 
         /* Estilos responsive */
         @media (max-width: 768px) {
@@ -276,8 +316,8 @@
     </style>
 </head>
 
-<body>
-    <header class="bg-light py-3 mb-4 shadow">
+<body>    
+    <old_header class="bg-light py-3 mb-4 shadow">
         <div class="container d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
                 <!--<div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;font-weight:bold;font-size:1.2rem;">SI</div>-->
@@ -299,6 +339,31 @@
               <button class="btn btn-link text-dark px-2" onclick="cambiarIdioma('es')" title="Español">🇪🇸</button>
               <button class="btn btn-link text-dark px-2" onclick="cambiarIdioma('en')" title="English">🇬🇧</button>
             </div>
+        </div>
+    </old_header>
+    <header class="header-custom d-flex justify-content-between align-items-center px-4 py-3 flex-wrap">
+        <!-- LOGO + NOMBRE -->
+        <div class="d-flex align-items-center">
+            <img src="imgs/logo_informa.jpg" alt="Logo" class="logo-img">
+            <h1 class="mb-0 ml-3 saira-bold brand-title">Semillero Informa</h1>
+        </div>
+        
+        <!-- MENÚ DE NAVEGACIÓN -->
+        <nav class="d-flex align-items-center flex-wrap nav-links">
+            <button class="btn btn-maroon mx-1">Quiénes somos</button>
+            <button class="btn btn-maroon mx-1">Proyectos</button>
+            <button class="btn btn-maroon mx-1">Eventos</button>
+            <button class="btn btn-maroon mx-1">Contáctanos</button>
+        </nav>
+        
+        <!-- BÚSQUEDA + IDIOMA -->
+        <div class="d-flex align-items-center search-lang">
+            <form class="d-flex align-items-center mr-2" onsubmit="buscar(event)">
+              <input type="text" id="busqueda" class="form-control form-control-sm mr-1" placeholder="Buscar...">
+              <button type="submit" class="btn btn-outline-secondary btn-sm">🔍</button>
+            </form>
+            <button class="btn btn-link text-dark px-1" onclick="cambiarIdioma('es')">ES</button>
+            <button class="btn btn-link text-dark px-1" onclick="cambiarIdioma('en')">GB</button>
         </div>
     </header>
 
