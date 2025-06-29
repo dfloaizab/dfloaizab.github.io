@@ -182,6 +182,14 @@
       font-size: 0.8rem;
       color: white;
     }
+
+	  /* para evitar recorte de las tarjetas dentro del carrusel: */
+    .carousel,
+.carousel-inner,
+.carousel-item {
+  height: auto;
+  min-height: fit-content;
+}
     
     /* Estilos responsive */
     @media (max-width: 768px) {
