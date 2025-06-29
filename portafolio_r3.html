@@ -229,6 +229,18 @@
   justify-content: center;
   align-items: stretch;
 }
+
+	  .carousel-inner .row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: nowrap; /* Para que no salten a otra línea */
+  gap: 1rem; /* Espacio entre tarjetas si lo deseas */
+}
+
+.carousel-inner .col-md-4 {
+  flex: 0 0 33.3333%;
+  max-width: 33.3333%;
+}
 	  /* corregir recorte de las tarjetas de forma horizontal*/
     
     /* Estilos responsive */
