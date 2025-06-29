@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grupo Comba I+D - Semillero Informa - Portal de Servicios</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Saira:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <style>
+        /*  estilo de fondo 1:*/
+        /*
+        body {
+            background: linear-gradient(135deg, #800000 0%, #400000 100%);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        */
+
+        /* estilo de fondo 2:*/
+        body {
+          background-image:
+            linear-gradient(135deg, rgba(128, 0, 0, 0.8), rgba(64, 0, 0, 0.8)),
+            /*linear-gradient(135deg, #800000 0%, #400000 100%),*/
+            url('imgs/semillero_1_r.jpg'); /* cambia el nombre si es distinto */
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          color: white;
+          font-family: 'Segoe UI', sans-serif;
+        }
+
+        header {
+          background: linear-gradient(to bottom, #ffffff 0%, #f4f4f4 100%);
+        }
+
+        .member-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            color: white;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: transform 0.3s ease, background 0.3s ease;
+            height: auto;
+            /*100%;*/
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: visible;
+        }
+
+        .member-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .member-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #800000, #b30000);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .skill-tag {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin: 0.2rem;
+            display: inline-block;
+        }
+
+        nav a {
+            padding: 0.5rem 1rem;
+            background: #800000;
+            border-radius: 10px;
+            color: white !important;
+            margin: 0 0.5rem;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+
+        nav a:hover {
+            background: #a00000;
+            text-decoration: none;
+        }
+
+        /* Estilos del modal */
+        .modal-custom {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            overflow: auto;
+            padding: 2rem;
+            z-index: 2000;
+        }
+
+        .modal-content-custom {
+            background: #300;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 800px;
+            margin: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #800000;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .modal-close:hover {
+            background: #a00000;
+        }
+
+        .modal-header-custom {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-right: 3rem;
+        }
+
+        .modal-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #800000, #b30000);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 1rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .info-section {
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+
+        .info-title {
+            color: #ff6b6b;
+            border-bottom: 2px solid #800000;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
+            margin-bottom: 1rem;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #ffcccc;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-value {
+            color: white;
+            line-height: 1.4;
+        }
+
+        .info-value a {
+            color: #ff9999;
+            text-decoration: underline;
+        }
+
+        .info-value a:hover {
+            color: #ffcccc;
+        }
+
+        .tech-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tech-skill {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: white;
+        }
+
+        /* para evitar recorte de las tarjetas dentro del carrusel: */
+
+        .saira-bold {
+            font-family: "Saira", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 600;
+            font-style: bold;
+            font-variation-settings:
+                "wdth" 100;
+        }
+
+        .saira-normal {
+            font-family: "Saira", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 600;
+            font-style: normal;
+            font-variation-settings:
+                "wdth" 100;
+        }
+
+
+
+        /* Permite que las columnas se alineen correctamente */
+        #membersCarousel .carousel-item .row {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: center;
+        }
+
+        /* Tarjeta se adapta al alto */
+        .member-card {
+            background-color: rgba(255, 255, 255, 0.08);
+            padding: 1.0rem 1rem 2.0rem;
+            /* 1.5rem 1rem 2.5rem;*/
+            border-radius: 1rem;
+            text-align: center;
+            width: 100%;
+            height: auto;
+            /*100%;*/
+        }
+
+
+        /* Estilos responsive */
+        @media (max-width: 768px) {
+            .modal-custom {
+                padding: 1rem;
+            }
+
+            .modal-content-custom {
+                padding: 1rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="bg-light py-3 mb-4 shadow">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <!--<div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;font-weight:bold;font-size:1.2rem;">SI</div>-->
+                <img src="imgs/logo_informa_3.png" alt="Logo Semillero Informa" style="height: 100px;">
+                <!--<h1 class="ml-3 mb-0 saira-bold" style="font-size:3.0rem; color:#800000;">Semillero Informa</h1>-->
+            </div>
+            <nav>
+                <a href="#proyectos">Quiénes somos</a>
+                <a href="#proyectos">Proyectos</a>
+                <a href="#acerca">Eventos</a>
+                <a href="#contacto">Contáctanos</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container text-center my-3">
+        <h2 class="font-weight-light saira-normal">Conoce a nuestro equipo:</h2>
+        <div class="row mx-auto my-auto">
+            <div id="membersCarousel" class="carousel slide w-100" data-ride="carousel">
+                <div class="carousel-inner" id="membersGrid"></div>
+                <a class="carousel-control-prev w-auto" href="#membersCarousel" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon bg-dark border border-dark rounded-circle"
+                        aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next w-auto" href="#membersCarousel" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon bg-dark border border-dark rounded-circle"
+                        aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal personalizado -->
+    <div id="memberModal" class="modal-custom">
+        <div class="modal-content-custom">
+            <button class="modal-close" onclick="closeModal()">Cerrar</button>
+            <div class="modal-header-custom">
+                <div class="modal-photo" id="modalPhoto"></div>
+                <h2 id="modalName"></h2>
+                <p id="modalProgram"></p>
+            </div>
+            <div id="modalDetails"></div>
+        </div>
+    </div>
+    <footer class="footer d-flex justify-content-between align-items-center px-4 py-3 text-white">
+        <!-- Logo izquierdo -->
+        <img src="imgs/logo_comba_w.png" alt="Logo izquierdo" class="footer-logo" style="height:120px;">
+
+        <!-- Texto central -->
+        <div class="text-center flex-grow-1">
+            <span>&copy; 2025 Grupo de Investigación Comba I+D - Semillero Informa. Todos los derechos reservados.</span>
+        </div>
+
+        <!-- Logo derecho -->
+        <img src="imgs/logo_human.png" alt="Logo derecho" class="footer-logo" style="height:120px;">
+    </footer>
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const membersData = [
+            {
+                "id": 1,
+                "nombre": "Zaira Ramírez Mejía",
+                "email": "zaira.ramirez00@usc.edu.co",
+                "telefono": "‪+57 312 259 3394‬",
+                "linkedin": "www.linkedin.com/in/zaira-ramírez-mejía-86a8702ba",
+                "programa": "Ingeniería de Sistemas",
+                "semestre": 5,
+                "promedio": "N/A",
+                "otrosSemilleros": "Semillero Comba",
+                "areasInteres": "Desarrollo multiplataforma",
+                "lenguajesProgramacion": ["Java", "MySQL"],
+                "herramientas": ["Unity", "React", "Flutter"],
+                "nivelCompetencia": "Intermedio",
+                "proyectos": [
+                    {
+                        "nombre": "Aula en VR para química básica",
+                        "descripcion": "Desarrollo de escenarios, mecánicas e IA en Unity",
+                        "rol": "Diseño y Desarrollo",
+                        "año": "2024 - presente"
+                    },
+                    {
+                        "nombre": "360°",
+                        "descripcion": "Diseño y desarrollo de un ambiente para un entorno 360°",
+                        "rol": "Diseño y Desarrollo",
+                        "año": "2024 "
+                    },
+                ],
+                "portafolio": "No aplica",
+                "trabajoEquipo": "Me gusta trabajar en equipo",
+                "rolGrupo": " Ejecutora ",
+                "fortaleza": " Capacidad de aprendizaje de nuevas tecnologías ",
+                "motivacion": "Aplicar tecnología para resolver problemas reales de la sociedad",
+                "serviciosInteres": ["Desarrollo de software", "Investigación aplicada", "Capacitaciones"],
+                "disponibilidad": "15 horas semanales",
+                "representacion": true,
+                "aporteCorto": " Realizar y apoyar en nuevos proyectos ",
+                "expectativasAprendizaje": "Aprender cibersegurida",
+                "fraseInspiracion": " 'Es una locura odiar todas las rosas solo porque una te pinchó. Renunciar a todos tus sueños sólo porque uno no se cumplió' ~El Principito "
+            },
+            {
+                "id": 2,
+                "nombre": "Mariana Galeano Galeano",
+                "email": "mariana.galeano00@usc.edu.co",
+                "telefono": "+57 317 617 7258",
+                "linkedin": "www.linkedin.com/in/mariana-galeano-81522727a",
+                "programa": "Ingeniería de Sistemas",
+                "semestre": 9,
+                "promedio": "N/A",
+                "otrosSemilleros": ["Semillero Comba", "Semillero Informa"],
+                "areasInteres": "Desarrollo multiplataforma",
+                "lenguajesProgramacion": ["Java", "MySQL", "C#", "Python", "PHP", "CSS", "JavaScript"],
+                "herramientas": ["Unity", "React", "React Native", "Vue.js", "Flutter", "Node.js", "Docker", "Postman", "Laravel", "Figma"],
+                "nivelCompetencia": "Intermedio",
+                "proyectos": [
+                    {
+                        "nombre": "MilPatitasFelices",
+                        "descripcion": "Desarrollo de una plataforma web para facilitar la adopción de mascotas, con registro de animales, filtros de búsqueda, actualización de perfiles e integración de imágenes. Tecnologías: Vue.js, API REST, Figma.",
+                        "rol": "Desarrolladora frontend",
+                        "año": "2025"
+                    },
+                    {
+                        "nombre": "Páginas web para recicladores",
+                        "descripcion": "Diseño y desarrollo de sitios web informativos para asociaciones de recicladores, orientados a mejorar la visibilidad de su labor y facilitar la comunicación con la comunidad.",
+                        "rol": "Diseñadora y desarrolladora full-stack",
+                        "año": "2024"
+                    },
+                    {
+                        "nombre": "Baby Mom App",
+                        "descripcion": "Aplicación móvil para madres lactantes con seguimiento de lactancia, alarmas, contenidos educativos y asesoría. Diseño de interfaz en Figma.",
+                        "rol": "Diseñadora de mockups",
+                        "año": "2025"
+                    },
+                    {
+                        "nombre": "App de Recomendaciones Turísticas (MasterWay)",
+                        "descripcion": "Aplicación móvil con recomendaciones de hoteles, restaurantes y sitios turísticos. Incluye autenticación, favoritos, filtros y conexión con Firebase.",
+                        "rol": "Diseñadora y desarrolladora full-stack",
+                        "año": "2024"
+                    },
+                    {
+                        "nombre": "Madres lactantes Podcast",
+                        "descripcion": "Aplicación para madres lactantes con secciones educativas, y acceso a podcasts informativos.",
+                        "rol": "Diseñadora y desarrolladora full-stack",
+                        "año": "2025"
+                    },
+                    {
+                        "nombre": "Sistema de exhibiciones artísticas de la USC",
+                        "descripcion": "Una aplicación con realidad aumentada, que permitirá a los usuarios encontrar las obras distribuidas por el campus, escanear marcadores desde sus dispositivos móviles y acceder a contenido multimedia superpuesto (textos, audio, video). Un entorno de realidad virtual modelado en 3D, que funcionará como un museo digital accesible, multilingüe y equipado con audioguías y elementos de accesibilidad, permitiendo una exploración libre.",
+                        "año": "2025"
+                    }
+                ],
+                "portafolio": "https://github.com/MarianaGaleano?tab=overview&from=2025-06-01&to=2025-06-21",
+                "trabajoEquipo": "Me gusta liderar equipos y facilitar la comunicación entre miembros",
+                "rolGrupo": "Líder técnico",
+                "fortaleza": "Capacidad analítica, resolución de problemas complejos y capacidad de aprendizaje autónomo",
+                "motivacion": "Aplicar tecnología para resolver problemas reales de la sociedad",
+                "serviciosInteres": ["Desarrollo de software", "Investigación aplicada", "Capacitaciones", "Comunicación y diseño gráfico", "Voluntariado"],
+                "disponibilidad": "20 horas semanales",
+                "representacion": true,
+                "aporteCorto": "Diseñar y desarrollar diferentes tipos de proyectos",
+                "expectativasAprendizaje": "Profundizar en deep learning y ciencia de datos",
+                "fraseInspiracion": "El éxito no se logra solo con cualidades especiales. Es, sobre todo, un trabajo de constancia, de método y de organización"
+            },
+            {
+                "id": 3,
+                "nombre": "María Fernanda López",
+                "email": "maria.lopez@universidad.edu",
+                "telefono": "+57 320 456 7890",
+                "linkedin": "https://linkedin.com/in/maria-lopez",
+                "programa": "Diseño Gráfico",
+                "semestre": 7,
+                "promedio": 4.7,
+                "otrosSemilleros": "Semillero de UX/UI",
+                "areasInteres": "Diseño de Experiencia de Usuario, Branding, Comunicación Visual",
+                "lenguajesProgramacion": ["HTML", "CSS", "JavaScript"],
+                "herramientas": ["Figma", "Adobe Creative Suite", "Sketch", "Principle"],
+                "nivelCompetencia": "Avanzado",
+                "proyectos": [
+                    {
+                        "nombre": "Rediseño de Plataforma Educativa",
+                        "descripcion": "Mejora de UX/UI para plataforma de aprendizaje online",
+                        "rol": "UX/UI Designer",
+                        "año": "2024"
+                    }
+                ],
+                "portafolio": "https://behance.net/maria-lopez",
+                "trabajoEquipo": "Me enfoco en facilitar la creatividad y la comunicación visual del equipo",
+                "rolGrupo": "Creativa y comunicadora",
+                "fortaleza": "Capacidad de visualizar soluciones y comunicar ideas complejas de forma simple",
+                "motivacion": "Hacer que la tecnología sea más accesible y humana através del diseño",
+                "serviciosInteres": ["Comunicación y diseño gráfico", "Capacitaciones", "Consultorías"],
+                "disponibilidad": "18 horas semanales",
+                "representacion": true,
+                "aporteCorto": "Mejorar la comunicación visual del semillero y crear material educativo",
+                "expectativasAprendizaje": "Aprender sobre design thinking aplicado a la investigación",
+                "fraseInspiracion": "El buen diseño es tan poco diseño como sea posible"
+            },
+            {
+                "id": 4,
+                "nombre": "María Fernanda López",
+                "email": "maria.lopez@universidad.edu",
+                "telefono": "+57 320 456 7890",
+                "linkedin": "https://linkedin.com/in/maria-lopez",
+                "programa": "Diseño Gráfico",
+                "semestre": 7,
+                "promedio": 4.7,
+                "otrosSemilleros": "Semillero de UX/UI",
+                "areasInteres": "Diseño de Experiencia de Usuario, Branding, Comunicación Visual",
+                "lenguajesProgramacion": ["HTML", "CSS", "JavaScript"],
+                "herramientas": ["Figma", "Adobe Creative Suite", "Sketch", "Principle"],
+                "nivelCompetencia": "Avanzado",
+                "proyectos": [
+                    {
+                        "nombre": "Rediseño de Plataforma Educativa",
+                        "descripcion": "Mejora de UX/UI para plataforma de aprendizaje online",
+                        "rol": "UX/UI Designer",
+                        "año": "2024"
+                    }
+                ],
+                "portafolio": "https://behance.net/maria-lopez",
+                "trabajoEquipo": "Me enfoco en facilitar la creatividad y la comunicación visual del equipo",
+                "rolGrupo": "Creativa y comunicadora",
+                "fortaleza": "Capacidad de visualizar soluciones y comunicar ideas complejas de forma simple",
+                "motivacion": "Hacer que la tecnología sea más accesible y humana através del diseño",
+                "serviciosInteres": ["Comunicación y diseño gráfico", "Capacitaciones", "Consultorías"],
+                "disponibilidad": "18 horas semanales",
+                "representacion": true,
+                "aporteCorto": "Mejorar la comunicación visual del semillero y crear material educativo",
+                "expectativasAprendizaje": "Aprender sobre design thinking aplicado a la investigación",
+                "fraseInspiracion": "El buen diseño es tan poco diseño como sea posible"
+            },
+            {
+                "id": 5,
+                "nombre": "María Fernanda López",
+                "email": "maria.lopez@universidad.edu",
+                "telefono": "+57 320 456 7890",
+                "linkedin": "https://linkedin.com/in/maria-lopez",
+                "programa": "Diseño Gráfico",
+                "semestre": 7,
+                "promedio": 4.7,
+                "otrosSemilleros": "Semillero de UX/UI",
+                "areasInteres": "Diseño de Experiencia de Usuario, Branding, Comunicación Visual",
+                "lenguajesProgramacion": ["HTML", "CSS", "JavaScript"],
+                "herramientas": ["Figma", "Adobe Creative Suite", "Sketch", "Principle"],
+                "nivelCompetencia": "Avanzado",
+                "proyectos": [
+                    {
+                        "nombre": "Rediseño de Plataforma Educativa",
+                        "descripcion": "Mejora de UX/UI para plataforma de aprendizaje online",
+                        "rol": "UX/UI Designer",
+                        "año": "2024"
+                    }
+                ],
+                "portafolio": "https://behance.net/maria-lopez",
+                "trabajoEquipo": "Me enfoco en facilitar la creatividad y la comunicación visual del equipo",
+                "rolGrupo": "Creativa y comunicadora",
+                "fortaleza": "Capacidad de visualizar soluciones y comunicar ideas complejas de forma simple",
+                "motivacion": "Hacer que la tecnología sea más accesible y humana através del diseño",
+                "serviciosInteres": ["Comunicación y diseño gráfico", "Capacitaciones", "Consultorías"],
+                "disponibilidad": "18 horas semanales",
+                "representacion": true,
+                "aporteCorto": "Mejorar la comunicación visual del semillero y crear material educativo",
+                "expectativasAprendizaje": "Aprender sobre design thinking aplicado a la investigación",
+                "fraseInspiracion": "El buen diseño es tan poco diseño como sea posible"
+            },
+            {
+                "id": 6,
+                "nombre": "María Fernanda López",
+                "email": "maria.lopez@universidad.edu",
+                "telefono": "+57 320 456 7890",
+                "linkedin": "https://linkedin.com/in/maria-lopez",
+                "programa": "Diseño Gráfico",
+                "semestre": 7,
+                "promedio": 4.7,
+                "otrosSemilleros": "Semillero de UX/UI",
+                "areasInteres": "Diseño de Experiencia de Usuario, Branding, Comunicación Visual",
+                "lenguajesProgramacion": ["HTML", "CSS", "JavaScript"],
+                "herramientas": ["Figma", "Adobe Creative Suite", "Sketch", "Principle"],
+                "nivelCompetencia": "Avanzado",
+                "proyectos": [
+                    {
+                        "nombre": "Rediseño de Plataforma Educativa",
+                        "descripcion": "Mejora de UX/UI para plataforma de aprendizaje online",
+                        "rol": "UX/UI Designer",
+                        "año": "2024"
+                    }
+                ],
+                "portafolio": "https://behance.net/maria-lopez",
+                "trabajoEquipo": "Me enfoco en facilitar la creatividad y la comunicación visual del equipo",
+                "rolGrupo": "Creativa y comunicadora",
+                "fortaleza": "Capacidad de visualizar soluciones y comunicar ideas complejas de forma simple",
+                "motivacion": "Hacer que la tecnología sea más accesible y humana através del diseño",
+                "serviciosInteres": ["Comunicación y diseño gráfico", "Capacitaciones", "Consultorías"],
+                "disponibilidad": "18 horas semanales",
+                "representacion": true,
+                "aporteCorto": "Mejorar la comunicación visual del semillero y crear material educativo",
+                "expectativasAprendizaje": "Aprender sobre design thinking aplicado a la investigación",
+                "fraseInspiracion": "El buen diseño es tan poco diseño como sea posible"
+            }
+        ];
+
+        function openModal(memberId) {
+            const member = membersData.find(m => m.id === memberId);
+            if (!member) return;
+
+            const modal = document.getElementById('memberModal');
+            const initials = member.nombre.split(' ').map(n => n[0]).join('').substring(0, 2);
+
+            document.getElementById('modalPhoto').textContent = initials;
+            document.getElementById('modalName').textContent = member.nombre;
+            document.getElementById('modalProgram').textContent = `${member.programa} - Semestre ${member.semestre}`;
+
+            const modalDetails = document.getElementById('modalDetails');
+            modalDetails.innerHTML = `
+        <div class="info-section">
+          <h3 class="info-title">Información de Contacto</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Email Institucional</div>
+              <div class="info-value">${member.email}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Teléfono</div>
+              <div class="info-value">${member.telefono}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">LinkedIn</div>
+              <div class="info-value"><a href="${member.linkedin}" target="_blank">Ver perfil</a></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Portafolio</div>
+              <div class="info-value"><a href="${member.portafolio}" target="_blank">Ver proyectos</a></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3 class="info-title">Información Académica</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Promedio Acumulado</div>
+              <div class="info-value">${member.promedio}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Otros Semilleros</div>
+              <div class="info-value">${member.otrosSemilleros}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Áreas de Interés</div>
+              <div class="info-value">${member.areasInteres}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3 class="info-title">Habilidades Técnicas</h3>
+          <div class="info-item">
+            <div class="info-label">Lenguajes de Programación</div>
+            <div class="tech-skills">
+              ${member.lenguajesProgramacion.map(lang => `<span class="tech-skill">${lang}</span>`).join('')}
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Herramientas y Tecnologías</div>
+            <div class="tech-skills">
+              ${member.herramientas.map(tool => `<span class="tech-skill">${tool}</span>`).join('')}
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Nivel de Competencia</div>
+            <div class="info-value">${member.nivelCompetencia}</div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3 class="info-title">Proyectos Destacados</h3>
+          ${member.proyectos.map(proyecto => `
+            <div class="info-item">
+              <div class="info-label">${proyecto.nombre} (${proyecto.año})</div>
+              <div class="info-value">
+                <strong>Rol:</strong> ${proyecto.rol}<br>
+                <strong>Descripción:</strong> ${proyecto.descripcion}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="info-section">
+          <h3 class="info-title">Perfil Personal</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Trabajo en Equipo</div>
+              <div class="info-value">${member.trabajoEquipo}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Rol en Grupos</div>
+              <div class="info-value">${member.rolGrupo}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Mayor Fortaleza</div>
+              <div class="info-value">${member.fortaleza}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Motivación</div>
+              <div class="info-value">${member.motivacion}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3 class="info-title">Disponibilidad y Servicios</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Disponibilidad Semanal</div>
+              <div class="info-value">${member.disponibilidad}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Servicios de Interés</div>
+              <div class="info-value">${member.serviciosInteres.join(', ')}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Representación en Eventos</div>
+              <div class="info-value">${member.representacion ? 'Sí' : 'No'}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3 class="info-title">Visión y Objetivos</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Aporte a Corto Plazo</div>
+              <div class="info-value">${member.aporteCorto}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Expectativas de Aprendizaje</div>
+              <div class="info-value">${member.expectativasAprendizaje}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Frase que lo Define</div>
+              <div class="info-value"><em>"${member.fraseInspiracion}"</em></div>
+            </div>
+          </div>
+        </div>
+      `;
+
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('memberModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function loadMembers() {
+            const container = document.getElementById('membersGrid');
+            container.innerHTML = '';
+            const itemsPerSlide = 3;
+            const totalSlides = Math.ceil(membersData.length / itemsPerSlide);
+
+            for (let i = 0; i < totalSlides; i++) {
+                const start = i * itemsPerSlide;
+                const end = start + itemsPerSlide;
+                const group = membersData.slice(start, end);
+
+                const rowItems = group.map(member => {
+                    const initials = member.nombre.split(' ').map(n => n[0]).join('').substring(0, 2);
+                    const skills = member.lenguajesProgramacion.slice(0, 3).map(skill => `<span class='skill-tag'>${skill}</span>`).join('');
+                    return `
+            <div class="col-md-4 d-flex">
+              <div class="member-card w-100" onclick="openModal(${member.id})">
+                <div class="member-photo">${initials}</div>
+                <div class="member-name">${member.nombre}</div>
+                <div class="member-program">${member.programa} - Semestre ${member.semestre}</div>
+                <div class="member-skills">${skills}</div>
+              </div>
+            </div>`;
+                }).join('');
+
+                container.innerHTML += `
+          <div class="carousel-item ${i === 0 ? 'active' : ''}">
+            <div class="row justify-content-center">
+              ${rowItems}
+            </div>
+          </div>`;
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            loadMembers();
+
+            // Cerrar modal con ESC
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+
+            // Cerrar modal clickeando fuera
+            document.getElementById('memberModal').addEventListener('click', function (e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+        });
+
+        // Inicializar carrusel
+        $(document).ready(function () {
+            $('#membersCarousel').carousel({
+                interval: 5000
+            });
+        });
+    </script>
+</body>
+
+</html>
