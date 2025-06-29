@@ -25,8 +25,7 @@
         body {
           background-image:
             linear-gradient(135deg, rgba(128, 0, 0, 0.8), rgba(64, 0, 0, 0.8)),
-            /*linear-gradient(135deg, #800000 0%, #400000 100%),*/
-            url('imgs/semillero_1_r.jpg'); /* cambia el nombre si es distinto */
+            url('imgs/semillero_1_r.jpg');
           background-size: cover;
           background-position: center;
           background-repeat: no-repeat;
@@ -317,7 +316,7 @@
 </head>
 
 <body>    
-    <old_header class="bg-light py-3 mb-4 shadow">
+    <header class="bg-light py-3 mb-4 shadow">
         <div class="container d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
                 <!--<div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;font-weight:bold;font-size:1.2rem;">SI</div>-->
@@ -340,32 +339,8 @@
               <button class="btn btn-link text-dark px-2" onclick="cambiarIdioma('en')" title="English">🇬🇧</button>
             </div>
         </div>
-    </old_header>
-    <header class="header-custom d-flex justify-content-between align-items-center px-4 py-3 flex-wrap">
-        <!-- LOGO + NOMBRE -->
-        <div class="d-flex align-items-center">
-            <img src="imgs/logo_informa.jpg" alt="Logo" class="logo-img">
-            <h1 class="mb-0 ml-3 saira-bold brand-title">Semillero Informa</h1>
-        </div>
-        
-        <!-- MENÚ DE NAVEGACIÓN -->
-        <nav class="d-flex align-items-center flex-wrap nav-links">
-            <button class="btn btn-maroon mx-1">Quiénes somos</button>
-            <button class="btn btn-maroon mx-1">Proyectos</button>
-            <button class="btn btn-maroon mx-1">Eventos</button>
-            <button class="btn btn-maroon mx-1">Contáctanos</button>
-        </nav>
-        
-        <!-- BÚSQUEDA + IDIOMA -->
-        <div class="d-flex align-items-center search-lang">
-            <form class="d-flex align-items-center mr-2" onsubmit="buscar(event)">
-              <input type="text" id="busqueda" class="form-control form-control-sm mr-1" placeholder="Buscar...">
-              <button type="submit" class="btn btn-outline-secondary btn-sm">🔍</button>
-            </form>
-            <button class="btn btn-link text-dark px-1" onclick="cambiarIdioma('es')">ES</button>
-            <button class="btn btn-link text-dark px-1" onclick="cambiarIdioma('en')">GB</button>
-        </div>
-    </header>
+    <header>
+   
 
     <div class="container text-center my-3">
         <h2 class="font-weight-light saira-normal">Conoce a nuestro equipo:</h2>
