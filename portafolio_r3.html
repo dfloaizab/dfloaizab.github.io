@@ -207,40 +207,7 @@
   font-variation-settings:
     "wdth" 100;
 }
-	  /* corregir recorte de las tarjetas de forma horizontal*/
-	  /* Asegura que los contenedores del carrusel no limiten la altura */
-#membersCarousel,
-#membersCarousel .carousel-inner,
-#membersCarousel .carousel-item {
-  height: auto;
-  min-height: fit-content;
-  overflow-y: visible;      /* Importante: que no recorte hacia abajo */
-  overflow-x: hidden;       /* Mantiene el recorte horizontal */
-}
-
-/* Si estás usando tarjetas o divs con contenido dentro del carrusel */
-#membersCarousel .carousel-item > div {
-  padding-bottom: 2rem;     /* Espacio extra por si el contenido es alto */
-}
-
-/* Opcional: si el contenido se ve apretado, puedes alinear mejor */
-#membersCarousel .carousel-item {
-  display: flex;
-  justify-content: center;
-  align-items: stretch;
-}
-
-	  .carousel-inner .row {
-  display: flex;
-  justify-content: center;
-  flex-wrap: nowrap; /* Para que no salten a otra línea */
-  gap: 1rem; /* Espacio entre tarjetas si lo deseas */
-}
-
-.carousel-inner .col-md-4 {
-  flex: 0 0 33.3333%;
-  max-width: 33.3333%;
-}
+	  
 	  /* corregir recorte de las tarjetas de forma horizontal*/
     
     /* Estilos responsive */
