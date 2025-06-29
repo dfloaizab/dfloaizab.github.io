@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portafolio con Carrusel Bootstrap</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Saira:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   <style>
     body {
       background: linear-gradient(135deg, #800000 0%, #400000 100%);
@@ -190,6 +193,14 @@
   height: auto;
   min-height: fit-content;
 }
+	  .saira-bold {
+  font-family: "Saira", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}
     
     /* Estilos responsive */
     @media (max-width: 768px) {
@@ -212,7 +223,7 @@
     <div class="container d-flex justify-content-between align-items-center">
       <div class="d-flex align-items-center">
         <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;font-weight:bold;font-size:1.2rem;">SI</div>
-        <h1 class="ml-3 mb-0" style="font-size:1.8rem; color:#800000;">Semillero INFORMA</h1>
+        <h1 class="ml-3 mb-0 saira-bold" style="font-size:1.8rem; color:#800000;">Semillero Informa</h1>
       </div>
       <nav>
         <a href="#proyectos">Proyectos</a>
