@@ -199,7 +199,7 @@
   font-variation-settings:
     "wdth" 100;
 }
-	  	  .saira-normal
+.saira-normal{
   font-family: "Saira", sans-serif;
   font-optical-sizing: auto;
   font-weight: 600;
@@ -207,6 +207,29 @@
   font-variation-settings:
     "wdth" 100;
 }
+	  /* corregir recorte de las tarjetas de forma horizontal*/
+	  /* Asegura que los contenedores del carrusel no limiten la altura */
+#membersCarousel,
+#membersCarousel .carousel-inner,
+#membersCarousel .carousel-item {
+  height: auto;
+  min-height: fit-content;
+  overflow-y: visible;      /* Importante: que no recorte hacia abajo */
+  overflow-x: hidden;       /* Mantiene el recorte horizontal */
+}
+
+/* Si estás usando tarjetas o divs con contenido dentro del carrusel */
+#membersCarousel .carousel-item > div {
+  padding-bottom: 2rem;     /* Espacio extra por si el contenido es alto */
+}
+
+/* Opcional: si el contenido se ve apretado, puedes alinear mejor */
+#membersCarousel .carousel-item {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+	  /* corregir recorte de las tarjetas de forma horizontal*/
     
     /* Estilos responsive */
     @media (max-width: 768px) {
@@ -229,7 +252,7 @@
     <div class="container d-flex justify-content-between align-items-center">
       <div class="d-flex align-items-center">
         <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;font-weight:bold;font-size:1.2rem;">SI</div>
-        <h1 class="ml-3 mb-0 saira-bold" style="font-size:5.0rem; color:#800000;">Semillero Informa</h1>
+        <h1 class="ml-3 mb-0 saira-bold" style="font-size:4.0rem; color:#800000;">Semillero Informa</h1>
       </div>
       <nav>
         <a href="#proyectos">Proyectos</a>
