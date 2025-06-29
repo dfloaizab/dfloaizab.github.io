@@ -290,6 +290,15 @@
                 <a href="#acerca">Eventos</a>
                 <a href="#contacto">Contáctanos</a>
             </nav>
+            <!-- Búsqueda + idioma -->
+            <div class="d-flex align-items-center">
+              <form class="d-flex align-items-center mr-2" onsubmit="buscar(event)">
+                <input type="text" id="busqueda" class="form-control mr-1" placeholder="Buscar...">
+                <button type="submit" class="btn btn-outline-danger">🔍</button>
+              </form>
+              <button class="btn btn-link text-dark px-2" onclick="cambiarIdioma('es')" title="Español">🇪🇸</button>
+              <button class="btn btn-link text-dark px-2" onclick="cambiarIdioma('en')" title="English">🇬🇧</button>
+            </div>
         </div>
     </header>
 
