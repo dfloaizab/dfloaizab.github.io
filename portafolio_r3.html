@@ -187,11 +187,16 @@
     }
 
 	  /* para evitar recorte de las tarjetas dentro del carrusel: */
-    .carousel,
-.carousel-inner,
+    
+.carousel-inner{
+	
+  overflow: visible; /* o auto */
+}
+	  .carousel,
 .carousel-item {
+  
+	min-height: 100%;
   height: auto;
-  min-height: fit-content;
 }
 	  .saira-bold {
   font-family: "Saira", sans-serif;
