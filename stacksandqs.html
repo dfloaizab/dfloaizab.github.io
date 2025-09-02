@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Pila y Cola Animadas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+    }
+    .container {
+      flex: 1;
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .stack, .queue {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      height: 220px;
+      border: 2px dashed #aaa;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      padding: 10px;
+      overflow: hidden;
+    }
+    .stack {
+      flex-direction: column-reverse;
+      width: 120px;
+      margin: auto;
+    }
+    .queue {
+      flex-direction: row;
+      width: 100%;
+    }
+    .box {
+      width: 60px;
+      height: 40px;
+      background-color: #3498db;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 6px;
+      margin: 4px;
+      font-weight: bold;
+      transition: all 0.5s ease;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    button {
+      margin: 5px;
+      padding: 8px 14px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    pre {
+      background: #1e1e1e;
+      color: #00ff9d;
+      padding: 15px;
+      border-radius: 8px;
+      height: 300px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">Pila (Stack)</div>
+    <div class="controls">
+      <button onclick="pushStack()">Push</button>
+      <button onclick="popStack()">Pop</button>
+    </div>
+    <div class="stack" id="stack"></div>
+  </div>
+
+  <div class="container">
+    <div class="title">Cola (Queue)</div>
+    <div class="controls">
+      <button onclick="enqueue()">Enqueue</button>
+      <button onclick="dequeue()">Dequeue</button>
+    </div>
+    <div class="queue" id="queue"></div>
+  </div>
+
+  <div class="container">
+    <div class="title">Código de Operaciones</div>
+    <pre id="codePanel">// Aquí aparecerán las operaciones
+    </pre>
+  </div>
+
+  <script>
+    let stack = [];
+    let queue = [];
+    let value = 1;
+
+    function updateCode(code) {
+      document.getElementById('codePanel').textContent = code;
+    }
+
+    function pushStack() {
+      if(stack.length >= 5) return;
+      stack.push(value);
+      const box = document.createElement('div');
+      box.className = 'box';
+      box.textContent = value++;
+      document.getElementById('stack').appendChild(box);
+      updateCode("stack.push(x);");
+    }
+
+    function popStack() {
+      if(stack.length === 0) return;
+      stack.pop();
+      const stackDiv = document.getElementById('stack');
+      stackDiv.removeChild(stackDiv.lastChild);
+      updateCode("stack.pop();");
+    }
+
+    function enqueue() {
+      if(queue.length >= 7) return;
+      queue.push(value);
+      const box = document.createElement('div');
+      box.className = 'box';
+      box.textContent = value++;
+      document.getElementById('queue').appendChild(box);
+      updateCode("queue.enqueue(x);");
+    }
+
+    function dequeue() {
+      if(queue.length === 0) return;
+      queue.shift();
+      const queueDiv = document.getElementById('queue');
+      queueDiv.removeChild(queueDiv.firstChild);
+      updateCode("queue.dequeue();");
+    }
+  </script>
+</body>
+</html>
