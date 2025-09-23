@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Resumen académico — Recursión y Recursión de Cola</title>
+<style>
+  :root{
+    --bg:#0f1724; --card:#0b1220; --muted:#9aa6b2; --accent:#39a0ed; --accent2:#7ee787; --white:#e6f0f7;
+  }
+  body{font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,#071226 0%, #071a25 100%); color:var(--white); margin:0; padding:24px;}
+  header{max-width:1100px; margin:0 auto 18px;}
+  h1{font-size:1.9rem; margin:0 0 6px; color:var(--accent);}
+  p.lead{color:var(--muted); margin:6px 0 18px;}
+  .container{max-width:1100px; margin:0 auto; display:grid; grid-template-columns: 1fr; gap:18px;}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.03); padding:18px; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.6);}
+  h2{color:var(--accent2); margin-top:0;}
+  pre{background:#071722; padding:12px; border-radius:8px; overflow:auto; color:#d6f3ff;}
+  code{font-family: "Courier New", monospace; font-size:0.95rem;}
+  .grid-2{display:grid; grid-template-columns: 1fr 420px; gap:16px;}
+  .diagram{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent); border-radius:8px; padding:12px; border:1px solid rgba(255,255,255,0.02);}
+  .btn {background:var(--accent); color:#04202b; padding:8px 12px; border-radius:8px; cursor:pointer; border:none; font-weight:700;}
+  .muted{color:var(--muted);}
+  ul{margin:8px 0 12px 20px;}
+  table{width:100%; border-collapse:collapse; margin:8px 0;}
+  td,th{padding:6px 8px; border-bottom:1px dashed rgba(255,255,255,0.03); text-align:left;}
+  .small{font-size:0.9rem; color:var(--muted);}
+  .example-title{font-weight:700; margin:8px 0;}
+  /* Call stack visualizer */
+  .stack-area{height:320px; background:#021019; border-radius:8px; padding:12px; overflow:auto; border:1px solid rgba(255,255,255,0.03);}
+  .frame{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); margin:8px 0; padding:10px; border-radius:6px; border-left:4px solid var(--accent); transform-origin:center; transition: transform 300ms, opacity 300ms;}
+  .frame.tail{border-left-color:var(--accent2);}
+  .controls{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  footer{max-width:1100px; margin:28px auto 10px; color:var(--muted); font-size:0.9rem;}
+  /* responsive */
+  @media (max-width:980px){ .grid-2{grid-template-columns: 1fr;} .stack-area{height:240px;} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Recursión — Resumen académico con ejemplos, diagramas y animaciones</h1>
+  <p class="lead">Definición, tipos (directa, indirecta, múltiple, de cola), estrategia dividir-y-vencer, comportamiento de la pila de llamadas y beneficios de la recursión de cola. Incluye ejemplos en Java y animaciones que ilustran la pila de llamadas.</p>
+</header>
+
+<div class="container">
+
+  <!-- WHAT IS -->
+  <section class="card" id="what-is">
+    <h2>¿Qué es la recursión?</h2>
+    <p>
+      La <strong>recursión</strong> es una técnica de diseño de algoritmos en la que una función se invoca a sí misma para resolver instancias más pequeñas del mismo problema.
+      Un algoritmo recursivo típico tiene:<br>
+      <strong>— Caso base:</strong> condición que detiene la recursión; <strong>— Paso recursivo:</strong> reducción del problema; <strong>— Combinación:</strong> ensamblado del resultado.
+    </p>
+    <p class="small muted">Nota: la recursión es una herramienta conceptual poderosa; en algunos lenguajes y casos puede reemplazarse por iteración. Su uso debe ponderarse por legibilidad, complejidad y limitaciones de pila.</p>
+  </section>
+
+  <!-- TYPES -->
+  <section class="card" id="types">
+    <h2>Tipos de recursión</h2>
+    <p class="small muted">A continuación se describen los tipos más importantes con 2 ejemplos Java por tipo.</p>
+
+    <!-- Directa -->
+    <div style="margin-top:12px;">
+      <h3>1. Recursión directa</h3>
+      <p>La función se llama a sí misma dentro de su propia definición. Es la forma más simple.</p>
+
+      <div class="grid-2">
+        <div>
+          <div class="example-title">Ejemplo A — Factorial (recursión directa)</div>
+          <pre><code class="language-java">// Factorial (recursión directa)
+public static long factorial(int n) {
+    if (n == 0) return 1; // caso base
+    return n * factorial(n - 1);
+}</code></pre>
+
+          <div class="example-title">Ejemplo B — Palíndromo (recursión directa)</div>
+          <pre><code class="language-java">// Palíndromo recursivo
+public static boolean esPalindromo(String s, int i, int j) {
+    if (i >= j) return true;
+    if (s.charAt(i) != s.charAt(j)) return false;
+    return esPalindromo(s, i + 1, j - 1);
+}</code></pre>
+        </div>
+
+        <div class="diagram">
+          <strong>Diagrama (recursión directa — pila crece):</strong>
+          <svg width="100%" height="220" viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <!-- stack frames -->
+            <rect x="240" y="26" width="140" height="36" rx="6" fill="#081827" stroke="#1b6b99"/>
+            <text x="250" y="48" fill="#9fd8ff" font-size="12">factorial(1)</text>
+
+            <rect x="240" y="70" width="140" height="36" rx="6" fill="#081827" stroke="#1b6b99"/>
+            <text x="250" y="92" fill="#9fd8ff" font-size="12">factorial(2)</text>
+
+            <rect x="240" y="114" width="140" height="36" rx="6" fill="#081827" stroke="#1b6b99"/>
+            <text x="250" y="136" fill="#9fd8ff" font-size="12">factorial(3)</text>
+
+            <rect x="240" y="158" width="140" height="36" rx="6" fill="#081827" stroke="#1b6b99"/>
+            <text x="250" y="180" fill="#9fd8ff" font-size="12">factorial(4)</text>
+
+            <line x1="240" y1="22" x2="240" y2="198" stroke="#083241" stroke-width="2" />
+            <text x="18" y="34" fill="#bfe7ff" font-size="13">La pila acumula marcos (frames). En recursión directa, cada llamada añade un frame.</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <hr style="opacity:0.06; margin:14px 0;">
+
+    <!-- Indirecta -->
+    <div>
+      <h3>2. Recursión indirecta (mutua)</h3>
+      <p>Dos o más funciones se llaman entre sí; A llama a B y B llama a A.</p>
+      <div class="grid-2">
+        <div>
+          <div class="example-title">Ejemplo A — Par / Impar (mutua)</div>
+          <pre><code class="language-java">// Par/Impar (mutua)
+public static boolean esPar(int n) {
+    if (n == 0) return true;
+    return esImpar(n - 1);
+}
+public static boolean esImpar(int n) {
+    if (n == 0) return false;
+    return esPar(n - 1);
+}</code></pre>
+
+          <div class="example-title">Ejemplo B — Evaluación de gramáticas simples</div>
+          <pre><code class="language-java">// Simplificado: A -> b | B c   ;  B -> d | A e
+// (demostración conceptual; no parse real)
+boolean A(Input i) { return i.consume('b') || (B(i) && i.consume('c')); }
+boolean B(Input i) { return i.consume('d') || (A(i) && i.consume('e')); }</code></pre>
+        </div>
+
+        <div class="diagram">
+          <strong>Diagrama (llamadas mutuas):</strong>
+          <svg width="100%" height="220" viewBox="0 0 420 220">
+            <rect x="22" y="30" width="160" height="46" fill="#071827" stroke="#3fa6e6" rx="8"/>
+            <text x="36" y="58" fill="#cfefff">A() → llama a B()</text>
+
+            <rect x="240" y="30" width="160" height="46" fill="#071827" stroke="#7ee787" rx="8"/>
+            <text x="255" y="58" fill="#dfffe6">B() → llama a A()</text>
+
+            <path d="M180 50 C210 60 230 60 240 50" stroke="#7fc6f0" fill="none" stroke-width="2" marker-end="url(#arrow)"/>
+            <path d="M240 76 C230 86 210 88 180 76" stroke="#7ee787" fill="none" stroke-width="2" marker-end="url(#arrow2)"/>
+
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="8" refX="8" refY="4">
+                <path d="M0 0 L8 4 L0 8 z" fill="#7fc6f0"/>
+              </marker>
+              <marker id="arrow2" markerWidth="8" markerHeight="8" refX="8" refY="4">
+                <path d="M0 0 L8 4 L0 8 z" fill="#7ee787"/>
+              </marker>
+            </defs>
+            <text x="18" y="18" fill="#9fd8ff" font-size="12">Mutua: la lógica alterna entre funciones</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <hr style="opacity:0.06; margin:14px 0;">
+
+    <!-- Multiple -->
+    <div>
+      <h3>3. Recursión múltiple (más de una llamada recursiva dentro de la función)</h3>
+      <p>Una función realiza varias llamadas recursivas en su paso recursivo (“árbol de recursión”).</p>
+
+      <div class="grid-2">
+        <div>
+          <div class="example-title">Ejemplo A — Fibonacci (recursión múltiple)</div>
+          <pre><code class="language-java">// Fibonacci (ineficiente, recursión múltiple)
+public static int fibonacci(int n) {
+    if (n <= 1) return n;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}</code></pre>
+
+          <div class="example-title">Ejemplo B — Recorrido de árbol (postorden)</div>
+          <pre><code class="language-java">// Recorrido postorden (árbol binario)
+void postorder(Node node) {
+    if (node == null) return;
+    postorder(node.left);
+    postorder(node.right);
+    visit(node);
+}</code></pre>
+        </div>
+
+        <div class="diagram">
+          <strong>Árbol de llamadas (Fibonacci 5):</strong>
+          <svg width="100%" height="220" viewBox="0 0 420 220">
+            <!-- root -->
+            <circle cx="210" cy="28" r="18" fill="#0b2630"/>
+            <text x="203" y="32" fill="#9fd8ff">f5</text>
+
+            <!-- level 1 -->
+            <circle cx="120" cy="90" r="16" fill="#07202a"/><text x="112" y="94" fill="#cfefff">f4</text>
+            <circle cx="300" cy="90" r="16" fill="#07202a"/><text x="292" y="94" fill="#cfefff">f3</text>
+
+            <!-- level 2 -->
+            <circle cx="72" cy="150" r="14" fill="#071a22"/><text x="64" y="154" fill="#dfefff">f3</text>
+            <circle cx="168" cy="150" r="14" fill="#071a22"/><text x="160" y="154" fill="#dfefff">f2</text>
+            <circle cx="260" cy="150" r="14" fill="#071a22"/><text x="252" y="154" fill="#dfefff">f2</text>
+            <circle cx="348" cy="150" r="14" fill="#071a22"/><text x="340" y="154" fill="#dfefff">f1</text>
+
+            <path d="M210 46 L130 74" stroke="#2c9fe9"/>
+            <path d="M210 46 L290 74" stroke="#2c9fe9"/>
+            <path d="M120 106 L80 136" stroke="#2c9fe9"/>
+            <path d="M120 106 L160 136" stroke="#2c9fe9"/>
+            <path d="M300 106 L260 136" stroke="#2c9fe9"/>
+            <path d="M300 106 L340 136" stroke="#2c9fe9"/>
+          </svg>
+          <p class="small muted">Cada nodo = llamada; la complejidad crece exponencialmente sin memoización.</p>
+        </div>
+      </div>
+    </div>
+
+    <hr style="opacity:0.06; margin:14px 0;">
+
+    <!-- Tail -->
+    <div>
+      <h3>4. Recursión de cola (Tail Recursion)</h3>
+      <p>
+        La llamada recursiva es la <strong>última operación</strong> que hace la función. Si el lenguaje/compilador implementa <em>tail-call optimization</em> (TCO),
+        los marcos de pila pueden reutilizarse, evitando crecimiento de pila.
+      </p>
+
+      <div class="grid-2">
+        <div>
+          <div class="example-title">Ejemplo A — Factorial (tail recursion)</div>
+          <pre><code class="language-java">// Factorial con acumulador (tail recursion)
+public static long factorialTail(int n, long acc) {
+    if (n == 0) return acc;
+    return factorialTail(n - 1, acc * n); // llamada en cola
+}</code></pre>
+
+          <div class="example-title">Ejemplo B — Fibonacci (tail recursion)</div>
+          <pre><code class="language-java">// Fibonacci con acumuladores
+public static int fibTail(int n, int a, int b) {
+    if (n == 0) return a;
+    if (n == 1) return b;
+    return fibTail(n - 1, b, a + b); // llamada en cola
+}</code></pre>
+
+          <p class="small muted">Importante: Java no garantiza TCO. Algunos compiladores/VMs no optimizan llamadas en cola; por tanto, en Java la recursión de cola es principalmente una estrategia conceptual o útil en lenguajes que sí optimizan (Scheme, ML, algunos compiladores de C).</p>
+        </div>
+
+        <div class="diagram">
+          <strong>Diagrama (recursión de cola):</strong>
+          <svg width="100%" height="220" viewBox="0 0 420 220">
+            <rect x="160" y="38" width="180" height="44" rx="6" fill="#071b22" stroke="#60e0a2"/>
+            <text x="176" y="66" fill="#dfffe6">factorialTail(n, acc)</text>
+            <text x="18" y="24" fill="#9fd8ff" font-size="12">La idea: la llamada recursiva reemplaza el frame anterior (si hay optimización TCO)</text>
+            <rect x="170" y="110" width="160" height="36" rx="6" fill="#071b22" opacity="0.5" stroke="#60e0a2"/>
+            <text x="180" y="132" fill="#dfffe6">mismo frame (reutilizable)</text>
+            <path d="M240 82 L240 110" stroke="#60e0a2" stroke-dasharray="4 4"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- DIVIDE AND CONQUER -->
+  <section class="card" id="divide-conquer">
+    <h2>Estrategia: Dividir y Vencer (Divide & Conquer)</h2>
+    <p>
+      <strong>Idea:</strong> dividir el problema en subproblemas del mismo tipo, resolverlos recursivamente y combinar resultados.
+    </p>
+    <ol>
+      <li><strong>Dividir:</strong> separar el problema en 2+ subproblemas independientes.</li>
+      <li><strong>Resolver:</strong> aplicar recursión a cada subproblema.</li>
+      <li><strong>Combinar:</strong> juntar resultados para obtener la solución final.</li>
+    </ol>
+
+    <h3>Partes y recomendaciones de diseño</h3>
+    <ul>
+      <li>Identificar un <em>caso base</em> sencillo y correcto.</li>
+      <li>Asegurar que cada paso recursivo reduzca el tamaño del problema.</li>
+      <li>Preferir subproblemas independientes (evitar sobreposición; si existe, usar memoización).</li>
+      <li>Analizar complejidad con <em>recurrencias</em> (ej. Master Theorem).</li>
+      <li>Evitar recursión profunda en lenguajes sin TCO; transformar a iteración o usar estructuras explícitas si es necesario.</li>
+    </ul>
+
+    <h3>Ejemplos notables</h3>
+    <ul>
+      <li><strong>Merge Sort:</strong> dividir en mitades, ordenar y mezclar — complejidad O(n log n).</li>
+      <li><strong>Quick Sort:</strong> pivotar y ordenar recursivamente — promedio O(n log n), peor O(n²).</li>
+      <li><strong>Búsqueda binaria:</strong> dividir rango en mitades — O(log n).</li>
+      <li><strong>Transformada rápida de Fourier (FFT):</strong> divide el polinomio en coeficientes pares/impares — O(n log n).</li>
+    </ul>
+
+    <div class="grid-2">
+      <div>
+        <div class="example-title">Merge sort — sketch en Java</div>
+        <pre><code class="language-java">// Merge Sort - esquema
+void mergeSort(int[] a, int l, int r) {
+    if (l >= r) return; // caso base
+    int m = (l + r) / 2;
+    mergeSort(a, l, m);
+    mergeSort(a, m+1, r);
+    merge(a, l, m, r); // combinación
+}</code></pre>
+      </div>
+      <div class="diagram">
+        <strong>Diagrama (divide → conquer → combine)</strong>
+        <svg width="100%" height="190" viewBox="0 0 420 190">
+          <rect x="22" y="18" width="376" height="40" rx="6" fill="#071e28" stroke="#3fa6e6"/>
+          <text x="34" y="42" fill="#dff8ff">array[0..n-1]</text>
+
+          <path d="M210 58 L140 96" stroke="#7fc6f0"/>
+          <path d="M210 58 L280 96" stroke="#7fc6f0"/>
+
+          <rect x="80" y="96" width="110" height="36" rx="6" fill="#071827" stroke="#60e0a2"/><text x="92" y="120" fill="#dfffe6">left half</text>
+          <rect x="230" y="96" width="110" height="36" rx="6" fill="#071827" stroke="#60e0a2"/><text x="242" y="120" fill="#dfffe6">right half</text>
+
+          <path d="M140 140 L210 170" stroke="#7fc6f0"/>
+          <path d="M280 140 L210 170" stroke="#7fc6f0"/>
+          <rect x="150" y="170" width="120" height="28" rx="6" fill="#071827" stroke="#7fc6f0"/><text x="162" y="188" fill="#dff8ff">merged</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALL STACK -->
+  <section class="card" id="call-stack">
+    <h2>¿Qué ocurre con la pila de llamadas (call stack)?</h2>
+    <p>La pila de llamadas almacena marcos (frames) por cada invocación: parámetros, variables locales, dirección de retorno y estado del CPU.</p>
+
+    <h3>Recursión que <em>no</em> es de cola (frames se acumulan)</h3>
+    <p class="small muted">Cada llamada produce un nuevo frame y espera el resultado de la(s) llamada(s) recursiva(s) antes de poder completar. Esto puede provocar crecimiento lineal o exponencial de la pila según la estructura de llamadas.</p>
+
+    <div class="grid-2">
+      <div>
+        <div class="diagram">
+          <strong>Animación: pila en recursión normal</strong>
+          <div style="margin-top:8px;">
+            <div id="stackNormal" class="stack-area" aria-live="polite"></div>
+            <div class="controls">
+              <button class="btn" onclick="runNormal()">Ejecutar animación (normal)</button>
+              <button class="btn" onclick="resetNormal()" style="background:#33484a;color:var(--white)">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="small muted">Ejemplo: <code>factorial(4)</code>. La animación mostrará push (cada llamada) y pop (cuando retorna).</p>
+        <pre><code class="language-java">// factorial normal (recursión no-tail)
+int factorial(int n) {
+    if (n == 0) return 1;
+    return n * factorial(n - 1);
+}</code></pre>
+      </div>
+    </div>
+
+    <h3 style="margin-top:12px;">Recursión de cola (si hay optimización: frames reutilizables)</h3>
+    <p class="small muted">Cuando la llamada recursiva es la última operación, un compilador/interprete con TCO puede reusar el mismo frame, evitando el crecimiento de la pila. En la práctica, en Java no hay garantía de TCO; pero la idea conceptual se ilustra así:</p>
+
+    <div class="grid-2" style="margin-top:8px;">
+      <div>
+        <div class="diagram">
+          <strong>Animación: recursión de cola (simulada)</strong>
+          <div style="margin-top:8px;">
+            <div id="stackTail" class="stack-area" aria-live="polite"></div>
+            <div class="controls">
+              <button class="btn" onclick="runTail()">Ejecutar animación (tail)</button>
+              <button class="btn" onclick="resetTail()" style="background:#33484a;color:var(--white)">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="small muted">Ejemplo: <code>factorialTail(4,1)</code>. La animación mostrará que el frame se actualiza/reemplaza en vez de acumularse (comportamiento ideal con TCO).</p>
+        <pre><code class="language-java">// factorial tail (recursión de cola)
+long factorialTail(int n, long acc) {
+    if (n == 0) return acc;
+    return factorialTail(n - 1, acc * n);
+}</code></pre>
+      </div>
+    </div>
+
+    <h3 class="small muted" style="margin-top:12px;">Observaciones prácticas</h3>
+    <ul>
+      <li>En lenguajes sin TCO (p. ej. la JVM estándar), la recursión de cola <em>no</em> reduce automáticamente el uso de pila; puede transformarse a iteración para evitar desbordamientos.</li>
+      <li>En lenguajes con TCO (Scheme, OCaml, Haskell en algunos casos), la recursión de cola suele ser la forma preferida para escribir bucles recursivos sin coste de pila.</li>
+    </ul>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="card" id="benefits">
+    <h2>Beneficios de la recursión de cola</h2>
+    <ul>
+      <li><strong>Posible uso constante de pila:</strong> con TCO, la memoria de pila puede ser O(1).</li>
+      <li><strong>Expresividad:</strong> permite describir procesos iterativos de forma declarativa y legible.</li>
+      <li><strong>Transformación fácil a bucles:</strong> muchas funciones tail-recursive se convierten directamente a bucles sin pérdida de semántica.</li>
+      <li><strong>Menos riesgo de duplicación de trabajo:</strong> combinada con acumuladores permite llevar estados parciales sin construir estructuras adicionales.</li>
+    </ul>
+    <p class="small muted">Contra: si el lenguaje no hace TCO, la recursión de cola no evita el uso de pila en la práctica; en esos casos es mejor reescribir iterativamente.</p>
+  </section>
+
+  <!-- PRACTICAL EXAMPLES: DIRECT AND TAIL -->
+  <section class="card" id="practical">
+    <h2>Ejemplos prácticos solicitados (resumen)</h2>
+
+    <h3>2 ejemplos de recursión directa (ya mostrados arriba)</h3>
+    <ol>
+      <li><strong>Factorial (directa)</strong> — código más arriba.</li>
+      <li><strong>Palíndromo (directa)</strong> — código más arriba.</li>
+    </ol>
+
+    <h3>2 o 3 ejemplos de recursión de cola (académicos y aplicados)</h3>
+    <ul>
+      <li><strong>Factorial tail</strong> — <code>factorialTail(n,1)</code> — útil para calcular factoriales grandes (si TCO disponible).</li>
+      <li><strong>Fibonacci tail</strong> — <code>fibTail(n, a, b)</code> — transforma la recursión múltiple en tail-recursive con acumuladores.</li>
+      <li><strong>Suma de arreglo con acumulador</strong> — <code>sumaTail(arr, i, acc)</code> — convierte la suma en tail recursion equivalente a un for.</li>
+    </ul>
+
+    <p class="small muted">Todas las versiones Java se encuentran en secciones previas; úsalas como plantillas para practicar.</p>
+  </section>
+
+</div>
+
+<footer>
+  <p>Archivo generado: resumen académico sobre recursión. Puedes guardar esta página para distribuirla como material de apoyo. Nota: los ejemplos Java son pedagógicos; cuando implementes en producción, revisa límites de pila, uso de BigInteger si corresponde, y considera iteración o memoización según el caso.</p>
+</footer>
+
+<script>
+/* -----------------------------
+   Animadores de pila (simulación)
+   - runNormal simula el apilar frames en recursión normal
+   - runTail simula actualización de frame en recursión de cola (si hubiera TCO)
+   Estas animaciones son pedagógicas (visualización).
+   ----------------------------- */
+
+function makeFrame(text, tail) {
+  const f = document.createElement('div');
+  f.className = 'frame' + (tail ? ' tail' : '');
+  f.textContent = text;
+  f.style.opacity = '0';
+  f.style.transform = 'translateY(-8px) scale(0.98)';
+  return f;
+}
+
+/* ---------- NORMAL ---------- */
+const stackNormal = document.getElementById('stackNormal');
+let normalRunning = false;
+let normalTimeouts = [];
+
+function resetNormal(){
+  normalRunning = false;
+  normalTimeouts.forEach(t => clearTimeout(t));
+  normalTimeouts = [];
+  stackNormal.innerHTML = '';
+}
+
+function runNormal(){
+  if(normalRunning) return;
+  resetNormal();
+  normalRunning = true;
+  // Simular factorial(4): push frames 4 -> 3 -> 2 -> 1 -> 0 then pop back
+  const calls = ['factorial(4)','factorial(3)','factorial(2)','factorial(1)','factorial(0)'];
+  // push sequence
+  calls.forEach((c, idx) => {
+    normalTimeouts.push(setTimeout(()=> {
+      const frame = makeFrame(c,false);
+      stackNormal.prepend(frame);
+      requestAnimationFrame(()=> { frame.style.opacity='1'; frame.style.transform='translateY(0) scale(1)'; });
+    }, idx * 600));
+  });
+  // pop sequence
+  calls.slice().reverse().forEach((c, idx) => {
+    normalTimeouts.push(setTimeout(()=> {
+      // añadir una nota de return encima
+      const frame = stackNormal.firstChild;
+      if(frame){
+        frame.style.opacity='0';
+        frame.style.transform='translateX(20px) scale(0.96)';
+        setTimeout(()=> { if(frame.parentNode) frame.parentNode.removeChild(frame); }, 300);
+      }
+      // push message about returning
+      const ret = makeFrame('return from ' + c, true);
+      stackNormal.prepend(ret);
+      requestAnimationFrame(()=> { ret.style.opacity='1'; ret.style.transform='translateY(0) scale(1)'; });
+      setTimeout(()=> {
+        ret.style.opacity='0';
+        ret.style.transform='translateX(20px) scale(0.96)';
+        setTimeout(()=> { if(ret.parentNode) ret.parentNode.removeChild(ret); }, 300);
+      }, 500);
+    }, calls.length * 600 + idx * 600 + 200));
+  });
+  // end
+  normalTimeouts.push(setTimeout(()=> { normalRunning=false; }, calls.length * 600 + calls.length * 600 + 500));
+}
+
+/* ---------- TAIL (simulada) ---------- */
+const stackTail = document.getElementById('stackTail');
+let tailRunning=false;
+let tailTimeouts=[];
+
+function resetTail(){
+  tailRunning=false;
+  tailTimeouts.forEach(t=>clearTimeout(t));
+  tailTimeouts=[];
+  stackTail.innerHTML='';
+}
+
+function runTail(){
+  if(tailRunning) return;
+  resetTail();
+  tailRunning=true;
+  // Simular factorialTail(4,1): show single frame being updated
+  const states = ['(n=4, acc=1)','(n=3, acc=4)','(n=2, acc=12)','(n=1, acc=24)','(n=0, acc=24)'];
+  const frame = makeFrame('factorialTail ' + states[0], true);
+  stackTail.prepend(frame);
+  requestAnimationFrame(()=> { frame.style.opacity='1'; frame.style.transform='translateY(0) scale(1)'; });
+  states.slice(1).forEach((s, idx) => {
+    tailTimeouts.push(setTimeout(()=> {
+      // animate replacing content (simulate frame reuse)
+      frame.style.transform='scale(0.98)';
+      frame.style.opacity='0.7';
+      setTimeout(()=> {
+        frame.textContent = 'factorialTail ' + s;
+        frame.style.transform='scale(1)';
+        frame.style.opacity='1';
+      }, 180);
+    }, (idx+1) * 700));
+  });
+  tailTimeouts.push(setTimeout(()=> { // final return display
+    const ret = makeFrame('return: 24', true);
+    stackTail.prepend(ret);
+    requestAnimationFrame(()=> { ret.style.opacity='1'; ret.style.transform='translateY(0) scale(1)'; });
+    setTimeout(()=> {
+      ret.style.opacity='0';
+      ret.style.transform='translateX(20px)';
+      setTimeout(()=> { if(ret.parentNode) ret.parentNode.removeChild(ret); }, 300);
+      resetTail();
+    }, 900);
+  }, states.length * 700 + 120));
+}
+
+/* Cleanup on unload */
+window.addEventListener('beforeunload', ()=>{ resetNormal(); resetTail(); });
+
+</script>
+</body>
+</html>
