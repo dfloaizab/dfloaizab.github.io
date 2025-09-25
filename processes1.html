@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gestión de procesos en sistemas operativos — Sistemas Operativos 2025B</title>
+  <style>
+    /* Estilos autocontenidos apropiados para embeber en Moodle */
+    :root{--bg:#ffffff;--card:#f7fafc;--accent:#0b5cff;--muted:#374151;--mono:#0f172a}
+    body{font-family:Inter,system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; line-height:1.45; color:var(--mono); margin:18px; background:var(--bg)}
+    header{border-bottom:1px solid #e6edf3;padding-bottom:12px;margin-bottom:14px}
+    h1{color:var(--accent); margin:6px 0}
+    h2{color:#0b3f7a;margin-top:18px}
+    .lead{color:var(--muted)}
+    nav{background:#fbfdff;border:1px solid #eef6ff;padding:12px;border-radius:8px;margin:8px 0}
+    nav a{display:inline-block;margin-right:10px;color:var(--accent);text-decoration:none}
+    section.card{background:var(--card);border-radius:8px;padding:14px;margin:12px 0;border:1px solid #e6eef6}
+    pre{background:#0b1020;color:#e6f3ff;padding:12px;border-radius:8px;overflow:auto}
+    code{font-family:Menlo, Monaco, 'Courier New', monospace;background:rgba(11,92,255,0.04);padding:2px 4px;border-radius:4px}
+    table{width:100%;border-collapse:collapse;margin:8px 0}
+    th,td{padding:8px;border:1px solid #e6eef6;text-align:left}
+    .diagram{border:1px solid #e6eef6;padding:8px;border-radius:6px;background:#ffffff}
+    .small{font-size:0.95rem;color:var(--muted)}
+    .kbd{background:#eef6ff;border:1px solid #d7ecff;padding:2px 6px;border-radius:6px;font-weight:700;color:var(--accent)}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:12px}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
+    .note{background:#fff7ed;border-left:4px solid #ffb020;padding:8px;border-radius:6px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Gestión de procesos en sistemas operativos - Sistemas Operativos 2025B</h1>    
+  </header>
+
+  <nav>
+    <a href="#que-es">Qué es un proceso</a>
+    <a href="#tipos">Tipos (Linux)</a>
+    <a href="#ciclos">Ciclos de vida (2/5/7)</a>
+    <a href="#linux-states">Estados en Linux</a>
+    <a href="#creacion">Cómo se crea un proceso</a>
+    <a href="#context-switch">Cambio de contexto</a>
+    <a href="#multiprogramacion">Multiprogramación</a>
+    <a href="#concurrencia">Concurrencia</a>
+    <a href="#planificacion">Planificación y algoritmos</a>
+  </nav>
+
+  <!-- 1 -->
+  <section id="que-es" class="card">
+    <h2>1. ¿Qué es un proceso?</h2>
+    <p class="small">Un <strong>proceso</strong> es una instancia en ejecución de un programa: conjunto de recursos (memoria, descriptores de archivo, credenciales), información de ejecución (contador de programa, registros) y su <em>imagen</em> en memoria (text/code, data, heap, stack).</p>
+
+    <h3>Componentes principales</h3>
+    <ul>
+      <li><strong>Imagen</strong>: código ejecutable (.text), datos estáticos (.data/.bss), heap (alloc dinámico), pila de ejecución (stack).</li>
+      <li><strong>PCB (Process Control Block)</strong>: estructura del núcleo que contiene PID, estado, contadores, registros, punteros a tablas (MM, files), prioridad, contadores de CPU.</li>
+      <li><strong>Recursos asociados</strong>: tablas de archivos abiertos, señales pendientes, credenciales, espacio de direcciones virtuales.</li>
+    </ul>
+
+    <div class="note">
+      <strong>Concepto clave:</strong> la <em>imagen</em> es el contenido de memoria compartible entre procesos (p. ej. código), mientras que el <em>PCB</em> es la información de control mantenida por el kernel y única por proceso.
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="tipos" class="card">
+    <h2>2. Tipos de procesos en Linux</h2>
+    <p class="small">En Linux (y UNIX en general) se distinguen varios tipos conceptuales:</p>
+    <ul>
+      <li><strong>Procesos de usuario</strong>: procesos ordinarios ejecutándose en modo usuario.</li>
+      <li><strong>Hilos / procesos ligeros</strong> (threads): compartiendo espacio de direcciones (pthreads). En Linux cada hilo es una tarea <code>task_struct</code> con CLONE_THREAD.</li>
+      <li><strong>Kernel threads</strong>: procesos que ejecutan código del kernel (p.ej. kworker, kswapd).</li>
+      <li><strong>Demonios (daemons)</strong>: procesos de fondo que no están ligados a terminal (p. ej. cron, sshd).</li>
+      <li><strong>Procesos en tiempo real</strong>: con políticas SCHED_FIFO, SCHED_RR o SCHED_DEADLINE; destinados a baja latencia/alta prioridad.</li>
+      <li><strong>Procesos huérfanos y zombies</strong>: huérfanos son adoptados por init/systemd; zombies mantienen entrada en la tabla de procesos hasta que el padre realiza wait().</li>
+    </ul>
+
+    <h3>Notas prácticas</h3>
+    <ul>
+      <li>En Linux no hay distinción rígida entre 'proceso' y 'hilo' internamente: ambos son entradas <code>task_struct</code> (con distintas banderas).</li>
+      <li>El kernel crea tareas internas; los procesos de usuario se crean por llamadas al sistema <code>fork/clone</code>.</li>
+    </ul>
+  </section>
+
+  <!-- 3 -->
+  <section id="ciclos" class="card">
+    <h2>3. Ciclos de vida de un proceso (modelos 2, 5 y 7 estados)</h2>
+
+    <h3>Modelo simple (2 estados)</h3>
+    <p class="small"><strong>Running / Not running</strong>. Muy esquemático: sirve para modelos teóricos de multiprogramación.</p>
+    <svg width="100%" height="110" viewBox="0 0 700 110" class="diagram" role="img" aria-label="Modelo 2 estados">
+      <rect x="40" y="20" width="240" height="60" rx="8" fill="#eaf4ff" stroke="#cfe8ff"></rect>
+      <text x="70" y="55" fill="#0b3f7a">Not running</text>
+      <rect x="420" y="20" width="240" height="60" rx="8" fill="#eafbf0" stroke="#cff8e6"></rect>
+      <text x="480" y="55" fill="#036a3a">Running</text>
+      <path d="M280 50 L420 50" stroke="#9aa6b2" stroke-width="2" marker-end="url(#arr)" marker-start="url(#arr2)"/>
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="8" refY="4"><path d="M0 0 L8 4 L0 8 z" fill="#9aa6b2"/></marker>
+        <marker id="arr2" markerWidth="8" markerHeight="8" refX="0" refY="4"><path d="M8 0 L0 4 L8 8 z" fill="#9aa6b2"/></marker>
+      </defs>
+    </svg>
+
+    <h3>Modelo clásico (5 estados)</h3>
+    <p class="small"><strong>New → Ready → Running → Waiting → Terminated</strong>. Muy usado en enseñanza.</p>
+    <svg width="100%" height="200" viewBox="0 0 900 200" class="diagram">
+      <!-- boxes -->
+      <rect x="18" y="20" width="150" height="56" rx="6" fill="#fff4e6" stroke="#ffd8a8"></rect>
+      <text x="36" y="55" fill="#8a4b00">NEW</text>
+      <rect x="198" y="20" width="170" height="56" rx="6" fill="#e8f5ff" stroke="#bfe0ff"></rect>
+      <text x="236" y="55" fill="#075a9a">READY</text>
+      <rect x="406" y="20" width="170" height="56" rx="6" fill="#e6ffeb" stroke="#bff3d2"></rect>
+      <text x="444" y="55" fill="#086b37">RUNNING</text>
+      <rect x="618" y="20" width="170" height="56" rx="6" fill="#fff0f6" stroke="#ffd6e9"></rect>
+      <text x="660" y="55" fill="#8a1850">WAITING</text>
+      <rect x="816" y="20" width="70" height="56" rx="6" fill="#f2f5f8" stroke="#dbe7f1"></rect>
+      <text x="830" y="55" fill="#485769">TERMINATED</text>
+      <!-- arrows -->
+      <path d="M168 48 L198 48" stroke="#9aa6b2" stroke-width="2" marker-end="url(#a1)"/>
+      <path d="M368 48 L406 48" stroke="#9aa6b2" stroke-width="2" marker-end="url(#a1)"/>
+      <path d="M576 48 L618 48" stroke="#9aa6b2" stroke-width="2" marker-end="url(#a1)"/>
+      <path d="M616 76 L616 120 L366 120" stroke="#9aa6b2" stroke-width="2" marker-end="url(#a1)"/>
+      <path d="M476 76 L476 120 L826 120" stroke="#9aa6b2" stroke-width="2" marker-end="url(#a1)"/>
+      <defs><marker id="a1" markerWidth="8" markerHeight="8" refX="8" refY="4"><path d="M0 0 L8 4 L0 8 z" fill="#9aa6b2"/></marker></defs>
+    </svg>
+
+    <h3>Modelo extendido (7 estados)</h3>
+    <p class="small">Ejemplo: <em>New → Ready → Running → Blocked → Suspended (Ready/Blocked) → Terminated</em>. Útil para sistemas con swapping o hibernación de procesos.</p>
+  </section>
+
+  <!-- 4 -->
+  <section id="linux-states" class="card">
+    <h2>4. ¿Qué modelo maneja Linux?</h2>
+    <p class="small">Linux expone estados a nivel de usuario sencillos (running, runnable, sleeping, stopped, zombie) pero internamente mantiene banderas más detalladas en <code>task_struct</code>:</p>
+    <ul>
+      <li><code>TASK_RUNNING</code> — ejecutable o ejecutándose;</li>
+      <li><code>TASK_INTERRUPTIBLE</code> — dormido a la espera de evento (interrumpible por señales);</li>
+      <li><code>TASK_UNINTERRUPTIBLE</code> — dormido por I/O (no interrumpible por señales);</li>
+      <li><code>TASK_STOPPED</code>, <code>TASK_TRACED</code> — detenido o depurado;</li>
+      <li><code>EXIT_ZOMBIE</code>, <code>EXIT_DEAD</code> — terminación y limpieza.</li>
+    </ul>
+
+    <p class="small">A nivel pedagógico puede mapearse al modelo de 5 estados: <em>READY ≈ TASK_RUNNING & runnable; WAITING ≈ TASK_INTERRUPTIBLE/UNINTERRUPTIBLE; TERMINATED ≈ EXIT_ZOMBIE/EXIT_DEAD</em>.</p>
+  </section>
+
+  <!-- 5 -->
+  <section id="creacion" class="card">
+    <h2>5. ¿Cómo se crea un proceso? ¿Quién lo crea?</h2>
+
+    <h3>Invocación: llamada al sistema</h3>
+    <p class="small">Un proceso existente solicita la creación de un nuevo proceso mediante llamadas al sistema:</p>
+    <ul>
+      <li><code>fork()</code>: duplica el proceso actual (copy-on-write de espacio de direcciones); el hijo recibe PID distinto.</li>
+      <li><code>vfork()</code>: variante optimizada para exec inmediato (comportamiento distinto con la pila).</li>
+      <li><code>clone()</code>: crea proceso/hilo con control granular sobre qué recursos compartir (bases de pthreads).</li>
+      <li>Tras <code>fork()</code>, se suele llamar a <code>execve()</code> para cargar nueva imagen de programa en el proceso hijo.</li>
+    </ul>
+
+    <h3>Pasos internales resumidos (kernel)</h3>
+    <ol>
+      <li>El kernel aloca una <code>task_struct</code> y inicializa campos (PID, credenciales, punteros a mm, files).</li>
+      <li>Se configura el espacio de direcciones del hijo (usualmente copy-on-write).</li>
+      <li>Se duplican/describen recursos (fd), se copian señales y estados mínimos.</li>
+      <li>El proceso hijo se inserta en la cola de <em>ready</em> y esperará al despachador.</li>
+    </ol>
+
+    <h3>Zombies y huérfanos</h3>
+    <p class="small">Cuando un proceso termina, se convierte en <strong>zombie</strong> hasta que el padre recupera su estado con <code>wait()</code>. Si el padre termina sin recoger al hijo, el hijo es adoptado por <code>init</code>/systemd (huerfano) y el kernel limpiará el zombie cuando corresponda.</p>
+
+    <h3>Fragmento C: crear un proceso simple</h3>
+    <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+
+int main(){
+    printf("Padre PID=%d\n", getpid());
+    pid_t pid = fork();
+    if(pid &lt; 0){ perror("fork"); return 1; }
+    if(pid == 0){
+        // proceso hijo
+        printf("Soy hijo PID=%d, PPID=%d\n", getpid(), getppid());
+        execlp("/bin/ls","ls","-l",NULL); // reemplaza la imagen con ls
+        _exit(1);
+    } else {
+        // padre
+        wait(NULL); // recoge al hijo
+        printf("Padre detecta que hijo terminó\n");
+    }
+    return 0;
+}
+</code></pre>
+    <p class="small">Explicación: <code>fork()</code> crea el proceso hijo copiando (lógicamente) el contexto; <code>execlp()</code> reemplaza la imagen del hijo; <code>wait()</code> evita zombies.</p>
+  </section>
+
+  <!-- 6 -->
+  <section id="context-switch" class="card">
+    <h2>6. Cambio de contexto (context switch)</h2>
+    <p class="small">El <strong>context switch</strong> es la operación por la cual el kernel suspende un proceso en ejecución y reanuda otro. Incluye salvar/restaurar estado y cambiar espacios de direcciones cuando corresponda.</p>
+
+    <h3>Pasos esenciales (resumidos)</h3>
+    <ol>
+      <li>Guardar registros de CPU (PC, SP, registros generales) del proceso saliente en su PCB.</li>
+      <li>Guardar estado adicional (FPU/AVX, flags, contador de tiempo).</li>
+      <li>Seleccionar nuevo proceso por el scheduler (runqueue).</li>
+      <li>Cambiar el <em>stack pointer</em> al stack del proceso entrante y restaurar sus registros.</li>
+      <li>Si se cambia de espacio virtual, actualizar la tabla de páginas (CR3 en x86) y posiblemente invalidar TLB.</li>
+      <li>Reanudar ejecución del nuevo proceso (retorno desde interrupción o IRET).</li>
+    </ol>
+
+    <h3>Pseudocódigo (conceptual)</h3>
+    <pre><code>// context_switch(prev, next)
+save_registers(prev.regs);
+if (prev.uses_fpu) save_fpu_state(prev.fpu);
+prev.state = TASK_READY;
+load_page_table(next.mm);
+load_registers(next.regs);
+if (next.uses_fpu) load_fpu_state(next.fpu);
+current = next;
+resume_execution(next);</code></pre>
+
+    <p class="small">Costo: el context switch tiene sobrecarga no despreciable (microsegundos en sistemas modernos), por eso los diseñadores de schedulers intentan amortizarlo.</p>
+  </section>
+
+  <!-- 7 -->
+  <section id="multiprogramacion" class="card">
+    <h2>7. Modelo de multiprogramación</h2>
+    <p class="small">Multiprogramación: mantener varios procesos en memoria y listos para ejecutar para que la CPU siempre tenga trabajo. Permite ocultar latencias de I/O y aumentar utilización de CPU.</p>
+    <h3>Componentes</h3>
+    <ul>
+      <li>Cola de listos (ready queue)</li>
+      <li>Scheduler (decide qué proceso correr)</li>
+      <li>Dispatcher (realiza el context switch)</li>
+    </ul>
+
+    <div class="diagram">
+      <svg width="100%" height="160" viewBox="0 0 900 160">
+        <rect x="18" y="18" width="200" height="48" rx="6" fill="#eaf4ff" stroke="#cfe8ff"></rect>
+        <text x="46" y="48" fill="#075a9a">I/O devices / Users</text>
+        <rect x="260" y="18" width="260" height="48" rx="6" fill="#fff0f6" stroke="#ffd6e9"></rect>
+        <text x="320" y="48" fill="#8a1850">Ready Queue (multiplos procesos)</text>
+        <rect x="560" y="18" width="160" height="48" rx="6" fill="#e6ffeb" stroke="#bff3d2"></rect>
+        <text x="582" y="48" fill="#086b37">CPU (Running)</text>
+
+        <path d="M220 42 L260 42" stroke="#9aa6b2" marker-end="url(#arr)"/>
+        <path d="M720 42 L850 42" stroke="#9aa6b2" marker-end="url(#arr)"/>
+        <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="8" refY="4"><path d="M0 0 L8 4 L0 8 z" fill="#9aa6b2"/></marker></defs>
+      </svg>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section id="concurrencia" class="card">
+    <h2>8. Concurrencia</h2>
+    <p class="small">La <strong>concurrencia</strong> es la capacidad de un sistema para soportar múltiples tareas que progresan simultáneamente (conceptualmente), aunque físicamente puedan ejecutarse en una sola CPU mediante multiplexación.</p>
+    <h3>Concurrencia vs Paralelismo</h3>
+    <ul>
+      <li><strong>Concurrencia:</strong> orden lógico de ejecución; interleaving de operaciones.</li>
+      <li><strong>Paralelismo:</strong> ejecución real en múltiples núcleos/CPUs al mismo tiempo.</li>
+    </ul>
+
+    <h3>Problemas clásicos de concurrencia</h3>
+    <ol>
+      <li><strong>Condiciones de carrera</strong>: acceso concurrente a datos compartidos sin sincronización (p. ej. incremento de contador).</li>
+      <li><strong>Secciones críticas</strong>: región donde los accesos deben ser mutuamente excluyentes.</li>
+      <li><strong>Deadlock</strong>: bloqueo circular por recursos (mutua exclusión, espera y retención, no-preempción, espera circular).</li>
+      <li><strong>Livelock</strong>: procesos cambian estado sin progresar útilmente.</li>
+      <li><strong>Starvation</strong>: un proceso nunca obtiene recursos (prioridades mal diseñadas).</li>
+    </ol>
+
+    <h3>Soluciones comunes</h3>
+    <ul>
+      <li>Mutexes, semáforos, monitores, variables de condición.</li>
+      <li>Operaciones atómicas (compare-and-swap), barreras y primitivos lock-free.</li>
+      <li>Políticas de prevención/evitación de deadlocks (orden fijo de recursos, algoritmo del banquero).</li>
+    </ul>
+
+    <h3>Diagrama: condición de carrera</h3>
+    <svg width="100%" height="120" viewBox="0 0 900 120" class="diagram">
+      <text x="20" y="20" fill="#0b3f7a">Counter = 0</text>
+      <rect x="18" y="30" width="360" height="30" rx="6" fill="#fff4f4" stroke="#ffdede"></rect>
+      <text x="40" y="50" fill="#8a1a1a">Thread A: read c; c = c + 1; write c</text>
+      <rect x="420" y="30" width="360" height="30" rx="6" fill="#fff4f4" stroke="#ffdede"></rect>
+      <text x="440" y="50" fill="#8a1a1a">Thread B: read c; c = c + 1; write c</text>
+      <text x="20" y="100" fill="#374151">Sin sincronización, ambas lecturas pueden ver 0 → resultado final 1 (inconsistente)</text>
+    </svg>
+  </section>
+
+  <!-- 9 -->
+  <section id="planificacion" class="card">
+    <h2>9. Planificación (scheduling)</h2>
+    <p class="small">La planificación decide qué proceso usar la CPU y por cuánto tiempo. Los objetivos comunes: equidad, alta utilización de CPU, bajo tiempo de respuesta, baja latencia, alta equidad y prevención de inanición.</p>
+
+    <h3>Terminología</h3>
+    <ul>
+      <li><strong>Throughput</strong>: procesos completados por unidad de tiempo.</li>
+      <li><strong>Turnaround time</strong>: tiempo total desde envío a finalización.</li>
+      <li><strong>Waiting time</strong>: tiempo en la cola listo.</li>
+      <li><strong>Response time</strong>: tiempo hasta la primera respuesta (importante en sistemas interactivos).</li>
+    </ul>
+
+    <h3>Componentes</h3>
+    <ul>
+      <li>Scheduler (long-term, mid-term, short-term): en sistemas complejos hay distintas jerarquías.</li>
+      <li>Dispatcher: mecanismo que ejecuta <code>context_switch()</code>.</li>
+    </ul>
+
+    <h3>Algoritmos comunes</h3>
+    <h4>FCFS (First Come, First Served)</h4>
+    <p class="small">No preemptivo, cola FIFO. Simple pero puede provocar <em>convoy effect</em> y mal tiempo de respuesta para procesos cortos.</p>
+
+    <h4>SJF (Shortest Job First) / SRTF (preemptive Shortest Remaining Time First)</h4>
+    <p class="small">Selecciona el trabajo con menor tiempo de CPU estimado. Óptimo para minimizar tiempo medio de espera si las estimaciones son correctas; susceptible a inanición de procesos largos.</p>
+
+    <h4>Priority Scheduling</h4>
+    <p class="small">Selecciona según prioridad; puede ser preemptivo o no. Riesgo de starvation para prioridades bajas.</p>
+
+    <h4>Round Robin (RR)</h4>
+    <p class="small">Planificador preemptivo con quantum fijo. Bueno para sistemas interactivos, reduce tiempo de respuesta; quantum muy pequeño incrementa overhead por context switch.</p>
+
+    <div class="diagram">
+      <strong>Ejemplo Round Robin (quantum = 4):</strong>
+      <pre><code>// Procesos con burst times
+P1: 10, P2: 4, P3: 6
+Orden: P1(4) P2(4) P3(4) P1(4) P3(2) P1(2)</code></pre>
+    </div>
+
+    <h4>Multilevel Queue / Multilevel Feedback Queue</h4>
+    <p class="small">Colas separadas por tipo de proceso (sistemas, interactivos, batch). Feedback permite mover procesos entre colas según su comportamiento (I/O bound vs CPU bound).</p>
+
+    <h4>CFS (Completely Fair Scheduler) — Linux</h4>
+    <p class="small">Diseñado para ofrecer reparto equitativo de CPU. Mantiene un <em>vruntime</em> por proceso (tiempo virtual ponderado) y usa una estructura de árbol (red-black tree) ordenada por vruntime. El proceso con menor vruntime es seleccionado para ejecutar.</p>
+    <ul>
+      <li>Los procesos con mayor "nice" (menor prioridad) acumulan vruntime más rápido (pesos).</li>
+      <li>Permite división fina de la CPU y buena interactividad.</li>
+    </ul>
+
+    <h4>Brain Fuck Scheduler (BFS)</h4>
+    <p class="small">BFS (por Con Kolivas) fue un intento experimental de simplificar el scheduler para reducir latencias e incrementar interactividad en sistemas de escritorio. Utilizaba estructuras más simples que CFS y apuntaba a latencias bajas para cargas de escritorio. En años recientes evolucionó hacia MuQSS (Multiple Queue Skiplist Scheduler).</p>
+
+    <h4>Planificación en tiempo real</h4>
+    <p class="small">SCHED_FIFO (prioridad real, no time-slice), SCHED_RR (time-sliced) y SCHED_DEADLINE (basado en reservas temporales) disponibles en Linux para tareas con requisitos temporales.</p>
+  </section>
+
+  <!-- 10: code examples -->
+  <section id="code" class="card">
+    <h2>10. Código corto en C explicado</h2>
+
+    <h3>A. fork + wait (ya mostrado antes)</h3>
+    <pre><code class="language-c">// Ver sección anterior: creación de procesos con fork() y exec()</code></pre>
+
+    <h3>B. Establecer política de scheduling (SCHED_RR) — requiere privilegios</h3>
+    <pre><code class="language-c">#include &lt;sched.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;errno.h&gt;
+
+int main(){
+    struct sched_param p;
+    p.sched_priority = 10; // prioridad real
+    if(sched_setscheduler(0, SCHED_RR, &p) == -1){
+        perror("sched_setscheduler");
+        return 1;
+    }
+    // ahora este proceso correrá con política SCHED_RR
+    while(1) { /* trabajo */ }
+    return 0;
+}
+</code></pre>
+    <p class="small">Explicación: <code>sched_setscheduler()</code> cambia la política de planificación del proceso actual; normalmente solo root puede asignar políticas reales.</p>
+
+    <h3>C. Simulador simple de Round Robin (usuario-space)</h3>
+    <pre><code class="language-c">/* Simulación conceptual de Round Robin en espacio de usuario */
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main(){
+    int burst[] = {10,4,6};
+    int n = 3; int q = 4; int t=0;
+    int rem[3]; for(int i=0;i<n;i++) rem[i]=burst[i];
+    while(1){
+        int done=1;
+        for(int i=0;i&lt;n;i++){
+            if(rem[i]>0){
+                done=0;
+                int use = rem[i]&gt;q? q: rem[i];
+                printf("t=%2d: P%d runs for %d\n", t, i+1, use);
+                rem[i]-=use; t+=use;
+                if(rem[i]==0) printf("P%d finished at t=%d\n", i+1, t);
+            }
+        }
+        if(done) break;
+    }
+    return 0;
+}
+</code></pre>
+    <p class="small">Explicación: el simulador itera por los procesos, asignando tiempo máximo <code>q</code> por turno. No refleja preempción a nivel de CPU real, pero ilustra el orden de ejecución.</p>
+  </section>
+
+  <!-- 11: scheduling animation (simple JS) -->
+  <section class="card">
+    <h2>11. Animación didáctica: Round Robin vs CFS (simulador ligero)</h2>
+    <p class="small">Ejecuta la simulación para ver cómo se seleccionan procesos en RR y (simplificado) en un esquema tipo CFS.</p>
+
+    <div class="grid">
+      <div>
+        <div style="padding:8px;border:1px solid #eef6ff;border-radius:8px;background:#fff;">
+          <strong>Round Robin</strong>
+          <div id="rrLog" style="height:160px;overflow:auto;border:1px dashed #e6eef6;padding:8px;margin-top:8px;background:#fbfdff"></div>
+          <div style="margin-top:8px;"><button onclick="runRR()">Run RR</button><button onclick="resetRR()">Reset</button></div>
+        </div>
+      </div>
+      <div>
+        <div style="padding:8px;border:1px solid #eef6ff;border-radius:8px;background:#fff;">
+          <strong>Simulación CFS (vruntime simplificado)</strong>
+          <div id="cfsLog" style="height:160px;overflow:auto;border:1px dashed #e6eef6;padding:8px;margin-top:8px;background:#fbfdff"></div>
+          <div style="margin-top:8px;"><button onclick="runCFS()">Run CFS</button><button onclick="resetCFS()">Reset</button></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    // Simuladores didácticos
+    function resetRR(){ document.getElementById('rrLog').innerText = ''; }
+    function runRR(){ resetRR();
+      const bursts=[10,4,6]; const q=4; let rem = bursts.slice(); let t=0; let log = document.getElementById('rrLog');
+      while(true){ let done=true; for(let i=0;i<rem.length;i++){ if(rem[i]>0){ done=false; let use = Math.min(rem[i], q); rem[i]-=use; log.innerText += `t=${t}: P${i+1} runs for ${use}\n`; t+=use; if(rem[i]==0) log.innerText += `P${i+1} finished at t=${t}\n`; } } if(done) break; }
+    }
+
+    function resetCFS(){ document.getElementById('cfsLog').innerText=''; }
+    function runCFS(){ resetCFS();
+      // Simplified CFS: each process has weight; vruntime += delta / weight; pick min vruntime
+      let processes=[{id:1,burst:10, vr:0, weight:1},{id:2,burst:4, vr:0, weight:2},{id:3,burst:6, vr:0, weight:1}];
+      let t=0; const slice=1; const log=document.getElementById('cfsLog');
+      while(processes.some(p=>p.burst>0)){
+        // select min vruntime among runnable
+        processes.sort((a,b)=> a.vr - b.vr);
+        const p = processes.find(x=> x.burst>0);
+        if(!p) break;
+        p.burst -= slice; p.vr += (slice / p.weight); t+=slice;
+        log.innerText += `t=${t}: P${p.id} executed slice (vr=${p.vr.toFixed(2)})\n`;
+        if(p.burst<=0) log.innerText += `P${p.id} finished at t=${t}\n`;
+      }
+    }
+    </script>
+  </section>
+
+  <!-- 12: closing -->
+  <section class="card">
+    <h2>12. Buenas prácticas y referencias didácticas</h2>
+    <ul>
+      <li>Evitar recursión profunda en código kernel o procesos críticos; preferir estructuras iterativas o límites.</li>
+      <li>Usar primitivos de sincronización correctos (mutex, semáforos). Evitar soluciones ad-hoc con sleeps.</li>
+      <li>Para programación de tiempo real en Linux, comprender las políticas SCHED_FIFO / SCHED_RR / SCHED_DEADLINE y sus implicaciones de seguridad.</li>
+    </ul>
+    <p class="small">Referencias sugeridas: libros de Sistemas Operativos (Silberschatz, Galvin &amp; Gagne), documentación del kernel Linux (Documentation/scheduler), y artículos sobre CFS y BFS para comprender detalles de implementación.</p>
+  </section>
+
+  <footer style="font-size:0.9rem;color:var(--muted);margin-top:10px">
+    <p>Generado para uso docente: este documento está pensado como material para introducir la gestión de procesos. Para detalles de implementación en kernels específicos, consulte la documentación del kernel y fuentes primarias.</p>
+  </footer>
+
+  <!-- ADICIONES: referencias, codigo y ampliaciones -->
+  <section class="card">
+    <h2>13. Referencias y bibliografía recomendada</h2>
+    <p class="small">A continuación se listan referencias académicas y capítulos concretos útiles para profundizar.</p>
+    <ul>
+      <li><strong>Abraham Silberschatz, Peter B. Galvin, Greg Gagne</strong> — <em>Operating System Concepts</em>. Capítulos recomendados: <em>Chapter 1 (Introduction)</em>, <em>Chapter 3 (Process Scheduling)</em>, <em>Chapter 5 (Synchronization)</em>, <em>Chapter 6 (Deadlocks)</em>.</li>
+      <li><strong>William Stallings</strong> — <em>Operating Systems: Internals and Design Principles</em>. Capítulos clave: <em>Chapter 3 (Processes and Threads)</em>, <em>Chapter 4 (Process Synchronization)</em>, <em>Chapter 5 (CPU Scheduling)</em>, <em>Chapter 11 (Protection)</em>. Stallings ofrece diagramas claros y ejemplos de políticas de planificación y de sincronización.</li>
+      <li><strong>Andrew S. Tanenbaum</strong> — <em>Modern Operating Systems</em>. Capítulos sugeridos: <em>Chapter 1 (Intro)</em>, <em>Chapter 2 (Processes and Threads)</em>, <em>Chapter 3 (Concurrency)</em>, <em>Chapter 5 (Paging and Virtual Memory)</em>, <em>Chapter 6 (File Systems)</em>. Tanenbaum es excelente para comprensión conceptual y modelos didácticos.</li>
+      <li>Documentación del kernel Linux: <code>Documentation/scheduler</code> en el árbol del kernel y artículos técnicos sobre <em>CFS</em> y <em>MuQSS</em>.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>14. Más código de ejemplo (C)</h2>
+    <p class="small">Se agregan ejemplos prácticos que ilustran casos reales: <code>clone()</code>, <code>vfork()</code>, <code>waitpid</code> no bloqueante, y un ejemplo con pthreads para sincronización con mutex.</p>
+
+    <h3>A. clone() (creación de hilo/proceso con flags)</h3>
+    <pre><code class="language-c">#define _GNU_SOURCE
+#include &lt;sched.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+
+int child_fn(void *arg){
+    printf("[child] pid=%d, getpid()=%d, getppid()=%d
+", (int)getpid(), getpid(), getppid());
+    return 0;
+}
+
+int main(){
+    const int STACK_SIZE = 1024*1024;
+    void *stack = malloc(STACK_SIZE);
+    if(!stack){ perror("malloc"); return 1; }
+    // CLONE_VM -> comparte espacio de direcciones (comportamiento similar a hilo)
+    pid_t pid = clone(child_fn, (char*)stack + STACK_SIZE, CLONE_VM | SIGCHLD, NULL);
+    if(pid == -1){ perror("clone"); free(stack); return 1; }
+    printf("[parent] spawned child with pid=%d
+", pid);
+    waitpid(pid, NULL, 0);
+    free(stack);
+    return 0;
+}
+</code></pre>
+
+    <h3>B. vfork() + exec (uso cuidadoso)</h3>
+    <pre><code class="language-c">#include &lt;unistd.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;sys/wait.h&gt;
+
+int main(){
+    pid_t pid = vfork();
+    if(pid &lt; 0){ perror("vfork"); return 1; }
+    if(pid == 0){
+        // en child tras vfork() hay que evitar cambiar el espacio de pila del padre
+        execlp("/bin/echo","echo","hello from vfork", NULL);
+        _exit(1);
+    } else {
+        waitpid(pid, NULL, 0);
+        printf("parent: child finished
+");
+    }
+    return 0;
+}
+</code></pre>
+
+    <h3>C. waitpid() no bloqueante</h3>
+    <pre><code class="language-c">#include &lt;sys/wait.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int main(){
+    pid_t pid = fork();
+    if(pid == 0){ sleep(2); return 42; }
+    int status;
+    pid_t r;
+    do{
+        r = waitpid(pid, &status, WNOHANG);
+        if(r == 0){ printf("child still running...
+"); sleep(1); }
+    } while(r == 0);
+    if(WIFEXITED(status)) printf("child exit status=%d
+", WEXITSTATUS(status));
+    return 0;
+}
+</code></pre>
+
+    <h3>D. Ejemplo con pthreads y mutex</h3>
+    <pre><code class="language-c">#include &lt;pthread.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int counter = 0; pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
+
+void* worker(void* arg){
+    for(int i=0;i&lt;100000;i++){
+        pthread_mutex_lock(&m);
+        counter++;
+        pthread_mutex_unlock(&m);
+    }
+    return NULL;
+}
+
+int main(){
+    pthread_t t1,t2; pthread_create(&t1,NULL,worker,NULL); pthread_create(&t2,NULL,worker,NULL);
+    pthread_join(t1,NULL); pthread_join(t2,NULL);
+    printf("counter=%d
+", counter);
+    return 0;
+}
+</code></pre>
+  </section>
+
+  <section class="card">
+    <h2>15. Ampliación: modelos de ciclo de vida y planificación</h2>
+    <h3>Modelos de ciclo de vida — profundidad</h3>
+    <p class="small">Además de los modelos 2/5/7, existen variantes que introducen estados adicionales para representar swapping (suspended), bloqueo por I/O, y estados intermedios de creación/destrucción. En sistemas modernos se suele distinguir:</p>
+    <ul>
+      <li><strong>NEW:</strong> proceso en creación; recursos pendientes.</li>
+      <li><strong>READY (runnable):</strong> listo para ejecutarse; en la runqueue del scheduler.</li>
+      <li><strong>RUNNING:</strong> actualmente ejecutándose en CPU.</li>
+      <li><strong>WAITING / BLOCKED:</strong> a la espera de un evento (I/O, señal).</li>
+      <li><strong>SUSPENDED (SWAPPED):</strong> no residente en memoria principal; puede ser "ready" o "blocked" pero en disco.</li>
+      <li><strong>STOPPED / TRACED:</strong> detenido por la intervención del usuario o depurador.</li>
+      <li><strong>ZOMBIE / EXIT:</strong> finalizado pero pendiente de recolección por el padre.</li>
+    </ul>
+
+    <p class="small">En implementaciones prácticas, la transición entre estos estados puede involucrar colas diferenciadas (runqueue per-cpu, wait queues), y mecanismos para migración de tareas entre CPUs en sistemas multiprocesador.</p>
+
+    <h3>Planificación — ampliación conceptual</h3>
+    <p class="small">El diseño de un scheduler implica: eficiencia, equidad, latencia predecible y escalabilidad en múltiples núcleos. Las estrategias incluyen:</p>
+    <ul>
+      <li><strong>Políticas no preemptivas</strong>: FCFS, SJF no preemptivo.</li>
+      <li><strong>Políticas preemptivas</strong>: RR, SRTF, Priority preemptive, CFS.</li>
+      <li><strong>Políticas en tiempo real</strong>: SCHED_FIFO, SCHED_RR, SCHED_DEADLINE (reservas temporales estrictas).</li>
+      <li><strong>Multilevel Feedback Queues</strong>: adaptativas; ajustan prioridad según comportamiento (I/O-bound &lt;-&gt; CPU-bound).</li>
+    </ul>
+
+    <h3>Aspectos cuantitativos</h3>
+    <p class="small">Indicadores que se analizan:</p>
+    <ul>
+      <li><strong>Tiempo medio de espera (WT):</strong> promedio del tiempo que procesos esperan en cola ready.</li>
+      <li><strong>Turnaround time (TAT):</strong> promedio de tiempo desde submission a fin.</li>
+      <li><strong>Response time (RT):</strong> tiempo hasta la primera respuesta; crítico en sistemas interactivos.</li>
+    </ul>
+
+    <h3>Estrategias prácticas y trade-offs</h3>
+    <ul>
+      <li>Quantum pequeño → baja latencia, pero mayor overhead por context switches.</li>
+      <li>Quantum grande → mejor throughput para procesos CPU-bound pero peor respuesta interactiva.</li>
+      <li>Uso de prioridades → mejora RT de procesos críticos pero puede causar starvation (usar aging para prevenirlo).</li>
+      <li>CFS busca equidad mediante <code>vruntime</code>; traducir recursos a tiempo virtual permite balance de carga y compartición proporcional de CPU.</li>
+    </ul>
+
+    <h3>Algoritmos adicionales (breve)</h3>
+    <ul>
+      <li><strong>Aging:</strong> incrementar prioridad de procesos que esperan mucho para evitar starvation.</li>
+      <li><strong>Lottery Scheduling:</strong> asigna "boletos"; probabilidad proporcional a tickets → simple y justa en expectativas.</li>
+      <li><strong>Stride Scheduling:</strong> asigna "pasos" inversamente proporcionales a la cuota; determinista y proporcional.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p class="small">Actualizado: se añadieron referencias, más código y ampliaciones sobre ciclos de vida y planificación. ¿Deseas que lo exporte a PDF o que incorpore diagramas de interacción entre runqueues por CPU (NUMA-aware)?</p>
+    <!-- ADICIONES: runqueues por CPU, NUMA-aware y diagramas de algoritmos de planificación -->
+  <section class="card">
+    <h2>16. Diagramas: Runqueues por CPU y estrategia NUMA-aware</h2>
+    <p class="small">En kernels modernos (Linux) la planificación es <strong>per-cpu</strong> para reducir la contención y mejorar la localidad: cada CPU tiene su propia runqueue (cola de listos). Además, sistemas NUMA (Non-Uniform Memory Access) introducen consideraciones de afinidad para mantener memoria y ejecución cercanas.</p>
+
+    <h3>Runqueues per-CPU (simplificado)</h3>
+    <div class="diagram">
+      <svg width="100%" height="240" viewBox="0 0 1000 240" role="img" aria-label="Runqueues per CPU">
+        <!-- CPUs -->
+        <rect x="24" y="18" width="240" height="56" rx="6" fill="#f0f8ff" stroke="#d0e9ff"></rect>
+        <text x="48" y="48" fill="#0b3f7a">CPU0</text>
+        <rect x="288" y="18" width="240" height="56" rx="6" fill="#f0f8ff" stroke="#d0e9ff"></rect>
+        <text x="332" y="48" fill="#0b3f7a">CPU1</text>
+        <rect x="552" y="18" width="220" height="56" rx="6" fill="#f0f8ff" stroke="#d0e9ff"></rect>
+        <text x="590" y="48" fill="#0b3f7a">CPU2</text>
+
+        <!-- runqueues -->
+        <rect x="24" y="96" width="220" height="110" rx="6" fill="#fffaf0" stroke="#fff0d0"></rect>
+        <text x="36" y="118" fill="#8a4b00">Runqueue CPU0</text>
+        <text x="36" y="136" fill="#6b4b2a" font-size="12">P1 (vr=1.2)</text>
+        <text x="36" y="154" fill="#6b4b2a" font-size="12">P3 (vr=2.7)</text>
+        <text x="36" y="172" fill="#6b4b2a" font-size="12">P7 (vr=4.1)</text>
+
+        <rect x="288" y="96" width="220" height="110" rx="6" fill="#fffaf0" stroke="#fff0d0"></rect>
+        <text x="300" y="118" fill="#8a4b00">Runqueue CPU1</text>
+        <text x="300" y="136" fill="#6b4b2a" font-size="12">P2 (vr=0.5)</text>
+        <text x="300" y="154" fill="#6b4b2a" font-size="12">P5 (vr=1.9)</text>
+
+        <rect x="552" y="96" width="220" height="110" rx="6" fill="#fffaf0" stroke="#fff0d0"></rect>
+        <text x="564" y="118" fill="#8a4b00">Runqueue CPU2</text>
+        <text x="564" y="136" fill="#6b4b2a" font-size="12">P4 (vr=0.8)</text>
+        <text x="564" y="154" fill="#6b4b2a" font-size="12">P6 (vr=3.0)</text>
+
+        <!-- load balancer -->
+        <rect x="820" y="32" width="140" height="60" rx="6" fill="#f0fff6" stroke="#d0ffd9"></rect>
+        <text x="836" y="60" fill="#0a7a43">Load Balancer / Scheduler</text>
+        <path d="M244 80 L836 80" stroke="#9aa6b2" stroke-dasharray="4 4"/>
+        <path d="M508 80 L836 80" stroke="#9aa6b2" stroke-dasharray="4 4"/>
+
+        <text x="24" y="220" fill="#374151" font-size="12">Cada CPU selecciona localmente el proceso de su runqueue. Ocasionalmente se balancea carga entre CPUs (steal / migrate) para evitar desbalance.</text>
+      </svg>
+    </div>
+
+    <h3>NUMA-aware scheduling (afinidad CPU–memoria)</h3>
+    <p class="small">En arquitecturas NUMA la latencia de acceso a memoria depende de la distancia entre CPU y nodo de memoria. Un scheduler NUMA-aware prioriza ejecutar hilos en CPUs cercanas a la memoria que contienen sus páginas (reducción de remote memory access).</p>
+
+    <div class="diagram">
+      <svg width="100%" height="240" viewBox="0 0 1000 240">
+        <!-- NUMA nodes -->
+        <rect x="24" y="18" width="420" height="96" rx="8" fill="#f8fbff" stroke="#dfefff"></rect>
+        <text x="40" y="46" fill="#075a9a">NUMA Node 0 (CPUs 0-1) — Memoria A (local)</text>
+        <rect x="520" y="18" width="420" height="96" rx="8" fill="#fffaf8" stroke="#ffeedd"></rect>
+        <text x="540" y="46" fill="#8a3f1a">NUMA Node 1 (CPUs 2-3) — Memoria B (local)</text>
+
+        <!-- processes and memory locality -->
+        <text x="40" y="86" fill="#374151">P1 (pages in Mem A)</text>
+        <text x="40" y="106" fill="#374151">P2 (pages in Mem A)</text>
+        <text x="540" y="86" fill="#374151">P3 (pages in Mem B)</text>
+        <text x="540" y="106" fill="#374151">P4 (pages in Mem B)</text>
+
+        <!-- arrows showing migration cost -->
+        <path d="M180 130 L420 160 L620 160" stroke="#9aa6b2" stroke-dasharray="6 4"/>
+        <text x="260" y="148" fill="#374151" font-size="12">Migration / remote access cost</text>
+
+        <text x="24" y="200" fill="#374151" font-size="12">Estrategia NUMA-aware: preferir ejecutar P1/P2 en CPUs 0-1 para mantener locality; evitar migraciones hacia CPUs 2-3 salvo balance necesario.</text>
+      </svg>
+    </div>
+
+    <p class="small">Mecanismos típicos: <em>cpusets</em>, políticas de preferencia de memoria, migración controlada (auto-balancing), y heurísticas que miden acceso remoto y latencias para decidir acciones.</p>
+  </section>
+
+  <section class="card">
+    <h2>17. Diagramas de métodos de planificación importantes</h2>
+    <p class="small">Se ilustran visualmente los comportamientos típicos de algoritmos clave con ejemplos simples.</p>
+
+    <h3>Round Robin (RR)</h3>
+    <div class="diagram">
+      <svg width="100%" height="140" viewBox="0 0 900 140">
+        <text x="16" y="20" fill="#0b3f7a">Quantum = 4</text>
+        <rect x="16" y="36" width="860" height="40" rx="6" fill="#fff7f0" stroke="#ffe6d0"></rect>
+        <text x="30" y="62" fill="#6b4220">P1(4) | P2(4) | P3(4) | P1(4) | P3(2) | P1(2)</text>
+        <text x="16" y="110" fill="#374151" font-size="12">Observación: RR interleavea procesos en quantum fijo; buen tiempo de respuesta para interactividad, overhead por cambios de contexto.</text>
+      </svg>
+    </div>
+
+    <h3>CFS (esquema simplificado)</h3>
+    <div class="diagram">
+      <svg width="100%" height="180" viewBox="0 0 900 180">
+        <text x="16" y="20" fill="#0b3f7a">CFS — selecciona proceso con menor vruntime</text>
+        <rect x="16" y="36" width="860" height="40" rx="6" fill="#f0fff6" stroke="#e0ffea"></rect>
+        <text x="30" y="62" fill="#0a7a43">Orden de ejecución aproximado según vruntime: P2 (vr=0.5) → P4 (0.8) → P1 (1.2) → P5 ...</text>
+        <text x="16" y="110" fill="#374151" font-size="12">Observación: CFS busca reparto proporcional basado en peso; cada proceso corre según su "fair share".</text>
+        <text x="16" y="132" fill="#374151" font-size="12">Implementación: árbol RB ordenado por vruntime, selección O(log N).</text>
+      </svg>
+    </div>
+
+    <h3>SJF / SRTF</h3>
+    <div class="diagram">
+      <svg width="100%" height="140" viewBox="0 0 900 140">
+        <text x="16" y="20" fill="#0b3f7a">SJF (no preemptivo) / SRTF (preemptive)</text>
+        <rect x="16" y="36" width="860" height="40" rx="6" fill="#f7f7ff" stroke="#e6e6ff"></rect>
+        <text x="30" y="62" fill="#2b2b7a">Orden (SJF): P2(2) → P3(3) → P1(7)</text>
+        <text x="16" y="110" fill="#374151" font-size="12">Observación: ideal para minimizar turnaround, requiere estimaciones de burst y puede causar starving.</text>
+      </svg>
+    </div>
+
+    <h3>Multilevel Feedback Queue (MLFQ)</h3>
+    <div class="diagram">
+      <svg width="100%" height="200" viewBox="0 0 900 200">
+        <text x="16" y="20" fill="#0b3f7a">MLFQ — múltiples colas con prioridades dinámicas</text>
+        <rect x="16" y="36" width="220" height="36" rx="6" fill="#fff0f6" stroke="#ffd6e9"></rect>
+        <text x="28" y="60" fill="#7a1a4b">Queue 0 (high priority)</text>
+        <rect x="256" y="36" width="220" height="36" rx="6" fill="#fff7e6" stroke="#ffeac6"></rect>
+        <text x="268" y="60" fill="#a35a1a">Queue 1 (medium)</text>
+        <rect x="496" y="36" width="220" height="36" rx="6" fill="#f0fff6" stroke="#e0ffe9"></rect>
+        <text x="508" y="60" fill="#1a6a3a">Queue 2 (low)</text>
+
+        <path d="M35 76 L35 120" stroke="#9aa6b2"/><text x="42" y="110" fill="#374151" font-size="12">If process uses entire quantum → demote to lower queue</text>
+        <text x="16" y="150" fill="#374151" font-size="12">Observación: MLFQ adapta prioridad según comportamiento; favorece procesos I/O-bound y evita starvation con aging.</text>
+      </svg>
+    </div>
+
+    <h3>Lottery &amp; Stride Scheduling (concepto)</h3>
+    <div class="diagram">
+      <svg width="100%" height="160" viewBox="0 0 900 160">
+        <text x="16" y="20" fill="#0b3f7a">Lottery / Stride — asignación proporcional</text>
+        <text x="16" y="44" fill="#374151" font-size="12">Lottery: procesos reciben tickets; selección aleatoria proporcional a tickets.</text>
+        <text x="16" y="64" fill="#374151" font-size="12">Stride: cada proceso tiene stride inverso a su cuota; selecciona el que tiene menor pass counter; determinista.</text>
+        <text x="16" y="100" fill="#374151" font-size="12">Observación: útiles para reparto proporcional de CPU (ej. cuotas por cliente).</text>
+      </svg>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>18. Pseudocódigo: gestión de runqueues y migración (conceptual)</h2>
+    <p class="small">El siguiente pseudocódigo ilustra cómo un scheduler por CPU puede manejar su runqueue y realizar balanceo: esto es conceptual y simplificado.</p>
+
+    <pre><code>// cada CPU tiene su runqueue local
+while(true){
+    p = pick_next_task(local_runqueue);
+    if(!p){
+        // intentar robar trabajo de otras CPUs
+        p = steal_task_from_other_cpu();
+        if(!p){ idle(); continue; }
+    }
+    context_switch(current, p);
+    // después de ejecutar, actualizar vruntime y volver a encolar si es necesario
+    if(p still runnable) enqueue(local_runqueue, p);
+    // periódicamente: balanceo global (migraciones)
+    if(time_to_balance()) {
+        evaluate_load();
+        migrate_tasks_for_balance();
+    }
+}
+
+// migración NUMA-aware
+function migrate_tasks_for_balance(){
+    for each cpu in cpus:
+        for each task in cpu.runqueue:
+            if(task.memory_affinity != cpu.node){
+                if(remote_access_cost(task, cpu) > threshold) migrate_task_to_preferred_cpu(task);
+            }
+}
+</code></pre>
+
+    <p class="small">El scheduler local intenta mantener trabajo local para minimizar coste de migración; solo cuando el desbalance es significativo se realizan migraciones controladas.</p>
+  </section>
+
+  <footer>
+    <p class="small">Universidad Santiago de Cali, 2025</p>
+  </footer>
+</body>
+</html>
