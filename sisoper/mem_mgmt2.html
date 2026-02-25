@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Gestión de Memoria - Versión Extendida</title>
+
+<style>
+
+body{
+    font-family: 'Segoe UI', sans-serif;
+    margin:0;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:#f1f1f1;
+}
+
+header{
+    padding:40px;
+    text-align:center;
+    background:rgba(0,0,0,0.3);
+}
+
+h1{
+    margin:0;
+}
+
+.section{
+    background:white;
+    color:#222;
+    margin:40px;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+h2{
+    color:#1f4e79;
+}
+
+.card{
+    background:#f4f9ff;
+    padding:20px;
+    border-left:5px solid #1f4e79;
+    margin:20px 0;
+}
+
+svg{
+    width:100%;
+    margin-top:20px;
+}
+
+.block{
+    transition: all 0.8s ease;
+}
+
+.block:hover{
+    transform: scale(1.05);
+    fill:#ffcc00 !important;
+}
+
+/* Animación para algoritmo */
+@keyframes highlight {
+    0% { fill:#ccc; }
+    50% { fill:#ff6666; }
+    100% { fill:#ccc; }
+}
+
+.animate{
+    animation: highlight 2s infinite;
+}
+
+table{
+    width:100%;
+    border-collapse: collapse;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:10px;
+}
+
+th{
+    background:#1f4e79;
+    color:white;
+}
+
+pre{
+    background:#222;
+    color:#0f0;
+    padding:15px;
+    overflow:auto;
+}
+
+</style>
+</head>
+<body>
+
+<header>
+<h1>Gestión de Memoria - Explicación Exhaustiva y Visual</h1>
+<p>Con algoritmos, animaciones y referencias académicas</p>
+</header>
+
+<!-- =========================== -->
+<div class="section">
+<h2>1️⃣ Particionamiento Dinámico (Best Fit y Worst Fit)</h2>
+
+<div class="card">
+<b>Concepto:</b> La memoria se asigna exactamente según tamaño requerido.
+Estructura usada: lista enlazada de bloques libres (base, tamaño).
+</div>
+
+<h3>Ejemplo Visual</h3>
+
+<svg height="120">
+<rect class="block" x="10" y="40" width="120" height="40" fill="#8dd3c7"/>
+<rect class="block animate" x="130" y="40" width="60" height="40" fill="#ccc"/>
+<rect class="block" x="190" y="40" width="150" height="40" fill="#bebada"/>
+<rect class="block" x="340" y="40" width="90" height="40" fill="#ccc"/>
+<rect class="block" x="430" y="40" width="120" height="40" fill="#fb8072"/>
+</svg>
+
+<p>
+Los bloques grises son libres. La animación indica bloque evaluado.
+</p>
+
+<h3>Algoritmo Best Fit</h3>
+
+<pre>
+entrada: tamaño_proceso
+mejor_bloque = NULL
+para cada bloque libre:
+    si bloque.tamaño >= tamaño_proceso:
+        si mejor_bloque es NULL
+           o bloque.tamaño < mejor_bloque.tamaño:
+              mejor_bloque = bloque
+si mejor_bloque != NULL:
+    asignar
+</pre>
+
+<h3>Algoritmo Worst Fit</h3>
+
+<pre>
+entrada: tamaño_proceso
+peor_bloque = NULL
+para cada bloque libre:
+    si bloque.tamaño >= tamaño_proceso:
+        si peor_bloque es NULL
+           o bloque.tamaño > peor_bloque.tamaño:
+              peor_bloque = bloque
+si peor_bloque != NULL:
+    asignar
+</pre>
+
+</div>
+
+<!-- =========================== -->
+<div class="section">
+<h2>2️⃣ Paginación</h2>
+
+<div class="card">
+Estructuras:
+- Tabla de páginas
+- TLB
+Dirección lógica = (número_página, desplazamiento)
+</div>
+
+<h3>Diagrama con Traducción</h3>
+
+<svg height="200">
+
+<text x="30" y="30">Dirección lógica</text>
+<rect x="30" y="50" width="120" height="40" fill="#80b1d3"/>
+<text x="45" y="75">Página = 2</text>
+
+<rect x="180" y="50" width="120" height="40" fill="#fdb462"/>
+<text x="195" y="75">Offset</text>
+
+<line x1="150" y1="70" x2="180" y2="70" stroke="black"/>
+
+<rect x="350" y="40" width="120" height="50" fill="#b3de69"/>
+<text x="360" y="70">Tabla</text>
+
+<line x1="300" y1="70" x2="350" y2="65" stroke="black"/>
+
+<rect x="520" y="50" width="120" height="40" fill="#fccde5"/>
+<text x="540" y="75">Marco 7</text>
+
+</svg>
+
+<h3>Algoritmo Traducción de Página</h3>
+
+<pre>
+entrada: dir_logica
+pagina = extraer_bits_superiores(dir_logica)
+offset = extraer_bits_inferiores(dir_logica)
+
+si pagina en TLB:
+    marco = TLB[pagina]
+sino:
+    marco = tabla_paginas[pagina]
+    actualizar TLB
+
+direccion_fisica = marco * tamaño_pagina + offset
+</pre>
+
+</div>
+
+<!-- =========================== -->
+<div class="section">
+<h2>3️⃣ Segmentación</h2>
+
+<div class="card">
+Dirección lógica = (segmento, desplazamiento)
+Tabla de segmentos:
+(segmento → base, límite)
+</div>
+
+<h3>Diagrama</h3>
+
+<svg height="200">
+
+<rect x="40" y="60" width="120" height="40" fill="#8dd3c7"/>
+<text x="55" y="85">Segmento 1</text>
+
+<line x1="160" y1="80" x2="240" y2="80" stroke="black"/>
+
+<rect x="240" y="50" width="150" height="60" fill="#bebada"/>
+<text x="260" y="75">Base=4000</text>
+<text x="260" y="95">Límite=200</text>
+
+<line x1="390" y1="80" x2="470" y2="80" stroke="black"/>
+
+<rect x="470" y="60" width="140" height="40" fill="#fb8072"/>
+<text x="485" y="85">Dir Física</text>
+
+</svg>
+
+<h3>Algoritmo Traducción Segmentación</h3>
+
+<pre>
+entrada: (segmento, desplazamiento)
+
+entrada_tabla = tabla_segmentos[segmento]
+
+si desplazamiento >= entrada_tabla.limite:
+    error (violación)
+sino:
+    direccion_fisica = entrada_tabla.base + desplazamiento
+</pre>
+
+</div>
+
+<!-- =========================== -->
+<div class="section">
+<h2>4️⃣ Memoria Virtual (Extendido)</h2>
+
+<div class="card">
+Permite que el espacio lógico sea mayor que la memoria física.
+Combina paginación + almacenamiento secundario.
+</div>
+
+<h3>Proceso de Fallo de Página</h3>
+
+<pre>
+si página no presente:
+    generar interrupción
+    SO localiza página en disco
+    elegir marco víctima (FIFO, LRU)
+    escribir página víctima si modificada
+    cargar nueva página
+    actualizar tabla
+    reanudar proceso
+</pre>
+
+<h3>Diagrama Traducción Completa</h3>
+
+<svg height="220">
+
+<text x="40" y="30">CPU</text>
+<rect x="40" y="50" width="120" height="50" fill="#80b1d3"/>
+
+<line x1="160" y1="75" x2="260" y2="75" stroke="black"/>
+
+<rect x="260" y="40" width="160" height="70" fill="#b3de69"/>
+<text x="280" y="80">Tabla Páginas</text>
+
+<line x1="420" y1="75" x2="520" y2="75" stroke="black"/>
+
+<rect x="520" y="50" width="160" height="50" fill="#fccde5"/>
+<text x="540" y="80">Memoria Física</text>
+
+<line x1="340" y1="110" x2="340" y2="180" stroke="black"/>
+
+<rect x="260" y="180" width="160" height="50" fill="#ffed6f"/>
+<text x="290" y="210">Disco</text>
+
+</svg>
+
+</div>
+
+<!-- =========================== -->
+<div class="section">
+<h2>📊 Tabla Comparativa Avanzada</h2>
+
+<table>
+<tr>
+<th>Método</th>
+<th>Fragmentación</th>
+<th>Protección</th>
+<th>Soporta Virtual</th>
+<th>Estructura</th>
+<th>Complejidad HW</th>
+</tr>
+
+<tr>
+<td>Estático</td>
+<td>Interna</td>
+<td>Baja</td>
+<td>No</td>
+<td>Tabla fija</td>
+<td>Baja</td>
+</tr>
+
+<tr>
+<td>Dinámico</td>
+<td>Externa</td>
+<td>Media</td>
+<td>No</td>
+<td>Lista libre</td>
+<td>Media</td>
+</tr>
+
+<tr>
+<td>Paginación</td>
+<td>Interna mínima</td>
+<td>Alta</td>
+<td>Sí</td>
+<td>Tabla páginas + TLB</td>
+<td>Alta</td>
+</tr>
+
+<tr>
+<td>Segmentación</td>
+<td>Externa</td>
+<td>Alta</td>
+<td>Limitado</td>
+<td>Tabla segmentos</td>
+<td>Media</td>
+</tr>
+
+<tr>
+<td>Virtual</td>
+<td>Depende</td>
+<td>Alta</td>
+<td>Sí</td>
+<td>Tablas + Disco</td>
+<td>Alta</td>
+</tr>
+
+</table>
+
+</div>
+
+<!-- =========================== -->
+<div class="section">
+<h2>📚 Referencias Bibliográficas</h2>
+
+<p>
+Silberschatz, A., Galvin, P., & Gagne, G.  
+<b>Operating System Concepts</b>, Cap. 8 (Memory Management), Cap. 9 (Virtual Memory).
+</p>
+
+<p>
+Stallings, W.  
+<b>Operating Systems: Internals and Design Principles</b>,  
+Cap. 7 (Memory Management), Cap. 8 (Virtual Memory).
+</p>
+
+<p>
+Tanenbaum, A. & Bos, H.  
+<b>Modern Operating Systems</b>,  
+Cap. 3 (Memory Management), Cap. 4 (Virtual Memory).
+</p>
+
+</div>
+
+</body>
+</html>
