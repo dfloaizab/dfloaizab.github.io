@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Gestión de Memoria - Explicación Exhaustiva</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin:40px;
+    line-height:1.6;
+}
+h1,h2{
+    color:#1f4e79;
+}
+.section{
+    margin-bottom:60px;
+}
+svg{
+    border:1px solid #ccc;
+    margin-top:15px;
+}
+table{
+    border-collapse: collapse;
+    width:100%;
+}
+th, td{
+    border:1px solid #999;
+    padding:10px;
+    text-align:left;
+}
+th{
+    background-color:#e6f0fa;
+}
+</style>
+
+</head>
+<body>
+
+<h1>Gestión de Memoria en Sistemas Operativos</h1>
+
+<p>
+La gestión de memoria es una función central del sistema operativo. Su objetivo es asignar,
+controlar y proteger el uso de la memoria principal entre múltiples procesos,
+optimizando rendimiento y utilización.
+</p>
+
+<!-- ===================================================== -->
+<div class="section">
+<h2>1. Particionamiento Estático</h2>
+
+<h3>Concepto</h3>
+<p>
+La memoria principal se divide en particiones fijas antes de la ejecución.
+Cada partición puede alojar exactamente un proceso.
+</p>
+
+<h3>Tipos</h3>
+<ul>
+<li><b>Particiones de igual tamaño</b></li>
+<li><b>Particiones de distinto tamaño</b></li>
+</ul>
+
+<h3>Funcionamiento</h3>
+<p>
+Cuando un proceso llega:
+1. El sistema operativo busca una partición libre.
+2. Si el proceso cabe, se asigna.
+3. Si no cabe en ninguna partición, espera en cola.
+</p>
+
+<h3>Problema Principal: Fragmentación Interna</h3>
+<p>
+Si el proceso ocupa menos memoria que la partición asignada,
+el espacio sobrante se desperdicia.
+</p>
+
+<h3>Diagrama</h3>
+
+<svg width="500" height="150">
+<rect x="10" y="20" width="100" height="80" fill="#a6cee3"/>
+<rect x="110" y="20" width="100" height="80" fill="#b2df8a"/>
+<rect x="210" y="20" width="100" height="80" fill="#fb9a99"/>
+<rect x="310" y="20" width="100" height="80" fill="#fdbf6f"/>
+<text x="30" y="65">P1</text>
+<text x="130" y="65">P2</text>
+<text x="230" y="65">Libre</text>
+<text x="330" y="65">P3</text>
+</svg>
+
+<h3>Ventajas</h3>
+<ul>
+<li>Simplicidad de implementación</li>
+<li>Bajo costo computacional</li>
+</ul>
+
+<h3>Desventajas</h3>
+<ul>
+<li>Fragmentación interna</li>
+<li>Baja flexibilidad</li>
+</ul>
+
+</div>
+
+<!-- ===================================================== -->
+<div class="section">
+<h2>2. Particionamiento Dinámico</h2>
+
+<h3>Concepto</h3>
+<p>
+La memoria no se divide previamente.
+Cada proceso recibe exactamente el tamaño que necesita.
+</p>
+
+<h3>Estructura de Datos Utilizada</h3>
+<ul>
+<li>Lista enlazada o arreglo de bloques libres</li>
+<li>Cada nodo contiene: dirección base y tamaño</li>
+</ul>
+
+<h3>Fragmentación Externa</h3>
+<p>
+Con el tiempo quedan huecos pequeños dispersos que pueden impedir asignaciones grandes.
+</p>
+
+<h3>Algoritmos de Asignación</h3>
+
+<h4>Best Fit</h4>
+<p>
+Busca el bloque libre más pequeño que sea suficiente.
+Minimiza desperdicio inmediato, pero genera muchos huecos pequeños.
+</p>
+
+<h4>Worst Fit</h4>
+<p>
+Asigna el bloque más grande disponible.
+Intenta dejar bloques grandes restantes.
+</p>
+
+<h3>Diagrama</h3>
+
+<svg width="600" height="150">
+<rect x="10" y="30" width="80" height="60" fill="#b2df8a"/>
+<rect x="90" y="30" width="50" height="60" fill="#ffffff"/>
+<rect x="140" y="30" width="120" height="60" fill="#a6cee3"/>
+<rect x="260" y="30" width="60" height="60" fill="#ffffff"/>
+<rect x="320" y="30" width="150" height="60" fill="#fb9a99"/>
+<text x="20" y="70">P1</text>
+<text x="95" y="70">Libre</text>
+<text x="160" y="70">P2</text>
+<text x="265" y="70">Libre</text>
+<text x="340" y="70">P3</text>
+</svg>
+
+<h3>Ventajas</h3>
+<ul>
+<li>Sin fragmentación interna</li>
+<li>Mejor aprovechamiento inicial</li>
+</ul>
+
+<h3>Desventajas</h3>
+<ul>
+<li>Fragmentación externa</li>
+<li>Necesita compactación</li>
+</ul>
+
+</div>
+
+<!-- ===================================================== -->
+<div class="section">
+<h2>3. Paginación</h2>
+
+<h3>Concepto</h3>
+<p>
+Divide memoria lógica en páginas de tamaño fijo.
+Divide memoria física en marcos del mismo tamaño.
+</p>
+
+<h3>Estructura de Datos</h3>
+<ul>
+<li>Tabla de páginas</li>
+<li>TLB (Translation Lookaside Buffer)</li>
+</ul>
+
+<h3>Traducción de Direcciones</h3>
+<p>
+Dirección lógica = (Número de página, desplazamiento)
+</p>
+
+<p>
+1. Se consulta la tabla de páginas.
+2. Se obtiene número de marco.
+3. Dirección física = (Marco, desplazamiento)
+</p>
+
+<h3>Diagrama</h3>
+
+<svg width="600" height="180">
+<rect x="50" y="30" width="120" height="40" fill="#a6cee3"/>
+<rect x="50" y="70" width="120" height="40" fill="#b2df8a"/>
+<rect x="50" y="110" width="120" height="40" fill="#fb9a99"/>
+<text x="70" y="55">Página 0</text>
+<text x="70" y="95">Página 1</text>
+<text x="70" y="135">Página 2</text>
+
+<rect x="300" y="30" width="120" height="40" fill="#b2df8a"/>
+<rect x="300" y="70" width="120" height="40" fill="#fb9a99"/>
+<rect x="300" y="110" width="120" height="40" fill="#a6cee3"/>
+<text x="320" y="55">Marco 3</text>
+<text x="320" y="95">Marco 7</text>
+<text x="320" y="135">Marco 1</text>
+</svg>
+
+<h3>Ventajas</h3>
+<ul>
+<li>Elimina fragmentación externa</li>
+<li>Soporta memoria virtual fácilmente</li>
+</ul>
+
+<h3>Desventajas</h3>
+<ul>
+<li>Fragmentación interna mínima</li>
+<li>Overhead de tabla de páginas</li>
+</ul>
+
+</div>
+
+<!-- ===================================================== -->
+<div class="section">
+<h2>4. Segmentación</h2>
+
+<h3>Concepto</h3>
+<p>
+Divide memoria en segmentos lógicos (código, datos, pila).
+Cada segmento tiene tamaño variable.
+</p>
+
+<h3>Estructura de Datos</h3>
+<ul>
+<li>Tabla de segmentos</li>
+<li>Cada entrada contiene:
+    <ul>
+        <li>Base</li>
+        <li>Límite</li>
+    </ul>
+</li>
+</ul>
+
+<h3>Traducción de Direcciones</h3>
+<p>
+Dirección lógica = (Segmento, desplazamiento)
+</p>
+
+<p>
+1. Se consulta tabla de segmentos.
+2. Se verifica que desplazamiento < límite.
+3. Dirección física = base + desplazamiento.
+</p>
+
+<h3>Ventajas</h3>
+<ul>
+<li>Representación lógica natural</li>
+<li>Facilita protección y compartición</li>
+</ul>
+
+<h3>Desventajas</h3>
+<ul>
+<li>Fragmentación externa</li>
+</ul>
+
+</div>
+
+<!-- ===================================================== -->
+<div class="section">
+<h2>5. Memoria Virtual</h2>
+
+<h3>Concepto</h3>
+<p>
+Permite ejecutar procesos más grandes que la memoria física disponible.
+</p>
+
+<h3>Mecanismo</h3>
+<ul>
+<li>Uso de disco como extensión</li>
+<li>Fallos de página</li>
+<li>Algoritmos de reemplazo (FIFO, LRU)</li>
+</ul>
+
+<h3>Ventajas</h3>
+<ul>
+<li>Mayor multiprogramación</li>
+<li>Aislamiento entre procesos</li>
+</ul>
+
+<h3>Desventajas</h3>
+<ul>
+<li>Overhead de acceso a disco</li>
+<li>Complejidad del sistema</li>
+</ul>
+
+</div>
+
+<!-- ===================================================== -->
+<div class="section">
+<h2>Tabla Comparativa</h2>
+
+<table>
+<tr>
+<th>Método</th>
+<th>Fragmentación</th>
+<th>Estructura de Datos</th>
+<th>Traducción de Direcciones</th>
+<th>Complejidad</th>
+<th>Uso Moderno</th>
+</tr>
+
+<tr>
+<td>Particionamiento Estático</td>
+<td>Interna</td>
+<td>Tabla simple de particiones</td>
+<td>Base fija</td>
+<td>Baja</td>
+<td>No común hoy</td>
+</tr>
+
+<tr>
+<td>Particionamiento Dinámico</td>
+<td>Externa</td>
+<td>Lista de bloques libres</td>
+<td>Base dinámica</td>
+<td>Media</td>
+<td>Poco común</td>
+</tr>
+
+<tr>
+<td>Paginación</td>
+<td>Interna mínima</td>
+<td>Tabla de páginas + TLB</td>
+<td>Página → Marco</td>
+<td>Alta</td>
+<td>Estándar actual</td>
+</tr>
+
+<tr>
+<td>Segmentación</td>
+<td>Externa</td>
+<td>Tabla de segmentos</td>
+<td>Base + desplazamiento</td>
+<td>Media</td>
+<td>Combinada con paginación</td>
+</tr>
+
+<tr>
+<td>Memoria Virtual</td>
+<td>Depende del esquema</td>
+<td>Tablas + Disco</td>
+<td>Incluye paginación</td>
+<td>Alta</td>
+<td>Fundamental hoy</td>
+</tr>
+
+</table>
+</div>
+
+<!-- ===================================================== -->
+<div class="section">
+<h2>Referencia Bibliográfica</h2>
+<p>
+Silberschatz, A., Galvin, P. B., & Gagne, G. 
+<i>Operating System Concepts</i>. Wiley.
+</p>
+<p>
+Tanenbaum, A. S., & Bos, H. 
+<i>Modern Operating Systems</i>. Pearson.
+</p>
+</div>
+
+</body>
+</html>
