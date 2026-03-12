@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Resumen de Programación Orientada a Objetos</title>
+<style>
+body{
+font-family: Georgia, "Times New Roman", serif;
+margin:40px;
+background:#f7f7f7;
+color:#222;
+line-height:1.6;
+}
+
+h1,h2,h3{
+color:#1a1a1a;
+}
+
+section{
+background:white;
+padding:25px;
+margin-bottom:30px;
+border:1px solid #ddd;
+}
+
+code{
+background:#eee;
+padding:3px 5px;
+}
+
+pre{
+background:#f0f0f0;
+padding:15px;
+overflow:auto;
+border-left:4px solid #444;
+}
+
+svg{
+display:block;
+margin:20px auto;
+background:white;
+border:1px solid #ccc;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Fundamentos de Programación Orientada a Objetos</h1>
+
+<section>
+<h2>Clase</h2>
+
+<p>
+Una clase es una estructura conceptual y técnica que describe las propiedades y comportamientos que tendrán los objetos que se creen a partir de ella. Una clase funciona como un molde o plantilla que define atributos (datos) y métodos (acciones).
+</p>
+
+<p>
+En términos simples, una clase define cómo es algo y qué puede hacer.
+</p>
+
+<h3>Ejemplo conceptual</h3>
+
+<p>
+La idea de “Automóvil” puede considerarse una clase. Esa clase puede describir atributos como color, velocidad o marca, y comportamientos como acelerar o frenar.
+</p>
+
+<svg width="420" height="200">
+<rect x="110" y="30" width="200" height="140" fill="#fafafa" stroke="#000"/>
+<line x1="110" y1="70" x2="310" y2="70" stroke="#000"/>
+<line x1="110" y1="120" x2="310" y2="120" stroke="#000"/>
+<text x="180" y="55" font-size="16">Clase Automovil</text>
+
+<text x="120" y="95" font-size="13">color</text>
+<text x="120" y="110" font-size="13">velocidad</text>
+
+<text x="120" y="145" font-size="13">acelerar()</text>
+<text x="120" y="160" font-size="13">frenar()</text>
+</svg>
+
+<h3>Ejemplo en Java</h3>
+
+<pre>
+class Automovil {
+
+    String color;
+    int velocidad;
+
+    void acelerar(){
+        velocidad += 10;
+    }
+
+    void frenar(){
+        velocidad -= 10;
+    }
+}
+</pre>
+
+</section>
+
+<section>
+
+<h2>Objeto</h2>
+
+<p>
+Un objeto es una instancia concreta de una clase. Si la clase es el molde conceptual, el objeto es la realización específica creada a partir de ese molde.
+</p>
+
+<p>
+Los objetos poseen estado (valores concretos de atributos) y comportamiento (métodos definidos por la clase).
+</p>
+
+<h3>Ejemplo conceptual</h3>
+
+<p>
+Un automóvil rojo marca Toyota con velocidad de 60 km/h es un objeto específico derivado de la clase Automóvil.
+</p>
+
+<svg width="420" height="200">
+<rect x="110" y="30" width="200" height="140" fill="#fafafa" stroke="#000"/>
+<line x1="110" y1="70" x2="310" y2="70" stroke="#000"/>
+<text x="170" y="55" font-size="16">Objeto</text>
+
+<text x="120" y="95" font-size="13">color = rojo</text>
+<text x="120" y="115" font-size="13">marca = Toyota</text>
+<text x="120" y="135" font-size="13">velocidad = 60</text>
+</svg>
+
+<h3>Ejemplo en Java</h3>
+
+<pre>
+public class Main {
+
+    public static void main(String[] args){
+
+        Automovil auto1 = new Automovil();
+
+        auto1.color = "Rojo";
+        auto1.velocidad = 60;
+
+        auto1.acelerar();
+    }
+}
+</pre>
+
+</section>
+
+<section>
+
+<h2>Diferencia entre clase y objeto</h2>
+
+<p>
+La clase define la estructura general y describe las propiedades comunes que tendrán todos los objetos de ese tipo. El objeto es una instancia concreta creada en memoria durante la ejecución del programa.
+</p>
+
+<p>
+En analogía con la arquitectura, una clase equivale al plano de una casa, mientras que un objeto corresponde a una casa construida siguiendo ese plano.
+</p>
+
+<svg width="500" height="220">
+<rect x="60" y="70" width="160" height="90" fill="#f5f5f5" stroke="#000"/>
+<text x="110" y="120">Clase</text>
+
+<line x1="220" y1="115" x2="290" y2="115" stroke="#000"/>
+
+<rect x="290" y="40" width="160" height="60" fill="#fafafa" stroke="#000"/>
+<rect x="290" y="120" width="160" height="60" fill="#fafafa" stroke="#000"/>
+
+<text x="335" y="75">Objeto 1</text>
+<text x="335" y="155">Objeto 2</text>
+</svg>
+
+</section>
+
+<section>
+
+<h2>Modificadores y palabras clave importantes</h2>
+
+<h3>public</h3>
+
+<p>
+Indica que un atributo, método o clase puede ser accedido desde cualquier otra parte del programa.
+</p>
+
+<h3>private</h3>
+
+<p>
+Restringe el acceso únicamente a la propia clase. Se utiliza para proteger datos internos.
+</p>
+
+<h3>protected</h3>
+
+<p>
+Permite el acceso dentro del mismo paquete y también en clases hijas que heredan de la clase original.
+</p>
+
+<h3>static</h3>
+
+<p>
+Indica que un atributo o método pertenece a la clase en sí misma y no a instancias individuales.
+</p>
+
+<pre>
+class Contador {
+
+    static int total = 0;
+
+    Contador(){
+        total++;
+    }
+
+}
+</pre>
+
+</section>
+
+<section>
+
+<h2>Encapsulamiento</h2>
+
+<p>
+El encapsulamiento consiste en ocultar los detalles internos de un objeto y permitir el acceso a sus datos únicamente a través de métodos controlados.
+</p>
+
+<h3>Ejemplos de la vida real</h3>
+
+<p>
+Un cajero automático permite retirar dinero mediante una interfaz simple, pero el usuario no tiene acceso directo al sistema interno del banco.
+</p>
+
+<p>
+Un automóvil permite conducir mediante pedales y volante, pero el conductor no manipula directamente el funcionamiento interno del motor.
+</p>
+
+<h3>Ejemplo en Java</h3>
+
+<pre>
+class CuentaBancaria {
+
+    private double saldo;
+
+    public void depositar(double cantidad){
+        saldo += cantidad;
+    }
+
+    public double consultarSaldo(){
+        return saldo;
+    }
+}
+</pre>
+
+</section>
+
+<section>
+
+<h2>Abstracción</h2>
+
+<p>
+La abstracción consiste en representar únicamente las características esenciales de un objeto, ignorando los detalles irrelevantes para el contexto del problema.
+</p>
+
+<h3>Ejemplos de la vida real</h3>
+
+<p>
+Un control remoto permite operar un televisor mediante pocos botones, ocultando toda la complejidad electrónica interna.
+</p>
+
+<p>
+Un mapa del metro muestra estaciones y conexiones relevantes, sin representar cada edificio o calle de la ciudad.
+</p>
+
+<h3>Ejemplo en Java</h3>
+
+<pre>
+abstract class Animal {
+
+    abstract void hacerSonido();
+
+}
+</pre>
+
+</section>
+
+<section>
+
+<h2>Herencia</h2>
+
+<p>
+La herencia permite que una clase derive de otra, reutilizando atributos y métodos. La clase derivada puede extender o modificar el comportamiento heredado.
+</p>
+
+<h3>Ejemplos de la vida real</h3>
+
+<p>
+Un perro y un gato pueden considerarse tipos específicos de animal.
+</p>
+
+<p>
+Un profesor y un estudiante pueden considerarse tipos particulares de persona.
+</p>
+
+<h3>Ejemplo en Java</h3>
+
+<pre>
+class Animal {
+
+    void respirar(){
+        System.out.println("Respirando...");
+    }
+
+}
+
+class Perro extends Animal {
+
+    void ladrar(){
+        System.out.println("Guau");
+    }
+
+}
+</pre>
+
+</section>
+
+<section>
+
+<h2>Polimorfismo</h2>
+
+<p>
+El polimorfismo permite que distintos objetos respondan de manera diferente a una misma operación.
+</p>
+
+<h3>Ejemplos de la vida real</h3>
+
+<p>
+El verbo “moverse” se manifiesta de forma distinta en un automóvil, una persona o un pez.
+</p>
+
+<p>
+El método “emitir sonido” se expresa de manera distinta en un perro, un gato o un ave.
+</p>
+
+<h3>Ejemplo en Java</h3>
+
+<pre>
+class Animal {
+
+    void sonido(){
+        System.out.println("Sonido genérico");
+    }
+
+}
+
+class Perro extends Animal {
+
+    @Override
+    void sonido(){
+        System.out.println("Guau");
+    }
+
+}
+
+class Gato extends Animal {
+
+    @Override
+    void sonido(){
+        System.out.println("Miau");
+    }
+
+}
+</pre>
+
+</section>
+
+</body>
+</html>
