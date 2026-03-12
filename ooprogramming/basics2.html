@@ -1,0 +1,451 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Programación Orientada a Objetos - Resumen Completo</title>
+
+<style>
+
+body{
+font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+margin:0;
+background:#eef2f7;
+color:#1c1c1c;
+line-height:1.65;
+}
+
+header{
+background:linear-gradient(120deg,#2c3e50,#34495e);
+color:white;
+padding:40px;
+text-align:center;
+}
+
+header h1{
+margin:0;
+font-weight:600;
+}
+
+main{
+max-width:1000px;
+margin:auto;
+padding:30px;
+}
+
+section{
+background:white;
+padding:30px;
+margin-bottom:35px;
+border-radius:10px;
+box-shadow:0 6px 14px rgba(0,0,0,0.08);
+}
+
+h2{
+color:#2c3e50;
+margin-top:0;
+border-bottom:2px solid #e6e6e6;
+padding-bottom:10px;
+}
+
+h3{
+color:#34495e;
+}
+
+pre{
+background:#1f2933;
+color:#e6edf3;
+padding:16px;
+border-radius:6px;
+overflow:auto;
+}
+
+code{
+font-family: Consolas, monospace;
+}
+
+.diagram{
+text-align:center;
+margin:25px 0;
+}
+
+svg{
+background:white;
+border:1px solid #ddd;
+border-radius:6px;
+}
+
+.example{
+background:#f6f8fb;
+border-left:4px solid #3b82f6;
+padding:14px;
+margin:15px 0;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+<h1>Fundamentos de Programación Orientada a Objetos</h1>
+<p>Resumen conceptual y técnico con ejemplos prácticos y código en Java</p>
+</header>
+
+<main>
+
+<section>
+
+<h2>Clase</h2>
+
+<p>
+Una clase es una estructura conceptual y técnica que define un tipo de objeto dentro de un programa. 
+Describe las propiedades que tendrán sus instancias mediante atributos, y las acciones que podrán realizar mediante métodos.
+</p>
+
+<p>
+Puede entenderse como un molde o plantilla a partir del cual se construyen objetos concretos durante la ejecución del programa.
+</p>
+
+<div class="diagram">
+
+<svg width="420" height="200">
+<rect x="110" y="30" width="200" height="140" fill="#f9fafb" stroke="#333"/>
+<line x1="110" y1="70" x2="310" y2="70" stroke="#333"/>
+<line x1="110" y1="120" x2="310" y2="120" stroke="#333"/>
+<text x="180" y="55" font-size="16">Clase Automovil</text>
+
+<text x="120" y="95" font-size="13">color</text>
+<text x="120" y="110" font-size="13">velocidad</text>
+
+<text x="120" y="145" font-size="13">acelerar()</text>
+<text x="120" y="160" font-size="13">frenar()</text>
+</svg>
+
+</div>
+
+<h3>Ejemplo conceptual</h3>
+
+<div class="example">
+La idea de “Automóvil” describe características generales como color o velocidad. Cada automóvil específico será un objeto derivado de esta clase.
+</div>
+
+<h3>Ejemplo adicional</h3>
+
+<div class="example">
+La clase “Libro” puede contener atributos como título, autor y número de páginas, así como métodos como abrir o cerrar.
+</div>
+
+<h3>Ejemplo en Java</h3>
+
+<pre>
+class Automovil {
+
+    String color;
+    int velocidad;
+
+    void acelerar(){
+        velocidad += 10;
+    }
+
+    void frenar(){
+        velocidad -= 10;
+    }
+
+}
+</pre>
+
+<h3>Segundo ejemplo en Java</h3>
+
+<pre>
+class Libro {
+
+    String titulo;
+    String autor;
+
+    void abrir(){
+        System.out.println("El libro ha sido abierto");
+    }
+
+}
+</pre>
+
+</section>
+
+<section>
+
+<h2>Objeto</h2>
+
+<p>
+Un objeto es una instancia concreta de una clase creada durante la ejecución del programa. 
+Cada objeto posee valores específicos en sus atributos y puede ejecutar los métodos definidos por su clase.
+</p>
+
+<div class="diagram">
+
+<svg width="420" height="200">
+<rect x="110" y="30" width="200" height="140" fill="#f9fafb" stroke="#333"/>
+<line x1="110" y1="70" x2="310" y2="70" stroke="#333"/>
+<text x="170" y="55">Objeto</text>
+
+<text x="120" y="95">color = rojo</text>
+<text x="120" y="115">marca = Toyota</text>
+<text x="120" y="135">velocidad = 60</text>
+</svg>
+
+</div>
+
+<h3>Ejemplo conceptual</h3>
+
+<div class="example">
+Un automóvil rojo de marca Toyota constituye una instancia específica de la clase Automóvil.
+</div>
+
+<h3>Ejemplo adicional</h3>
+
+<div class="example">
+Un libro concreto titulado "Cien años de soledad" con un autor y un número de páginas es un objeto derivado de la clase Libro.
+</div>
+
+<h3>Ejemplo en Java</h3>
+
+<pre>
+Automovil auto1 = new Automovil();
+
+auto1.color = "Rojo";
+auto1.velocidad = 60;
+</pre>
+
+<h3>Segundo ejemplo en Java</h3>
+
+<pre>
+Libro libro1 = new Libro();
+
+libro1.titulo = "Cien años de soledad";
+libro1.autor = "Gabriel García Márquez";
+</pre>
+
+</section>
+
+<section>
+
+<h2>Encapsulamiento</h2>
+
+<p>
+El encapsulamiento consiste en ocultar los detalles internos de un objeto y restringir el acceso directo a sus datos. 
+La interacción con el objeto se realiza mediante métodos controlados que garantizan la integridad del estado interno.
+</p>
+
+<h3>Ejemplo de la vida real</h3>
+
+<div class="example">
+Un cajero automático permite retirar dinero mediante una interfaz sencilla sin exponer el sistema bancario interno.
+</div>
+
+<h3>Ejemplo adicional</h3>
+
+<div class="example">
+Un teléfono móvil permite realizar llamadas mediante botones o pantalla táctil sin que el usuario manipule directamente los circuitos internos.
+</div>
+
+<h3>Ejemplo en Java</h3>
+
+<pre>
+class CuentaBancaria {
+
+    private double saldo;
+
+    public void depositar(double cantidad){
+        saldo += cantidad;
+    }
+
+    public double consultarSaldo(){
+        return saldo;
+    }
+
+}
+</pre>
+
+<h3>Segundo ejemplo en Java</h3>
+
+<pre>
+class Persona {
+
+    private int edad;
+
+    public void setEdad(int edad){
+        if(edad > 0){
+            this.edad = edad;
+        }
+    }
+
+    public int getEdad(){
+        return edad;
+    }
+
+}
+</pre>
+
+</section>
+
+<section>
+
+<h2>Abstracción</h2>
+
+<p>
+La abstracción consiste en representar únicamente las características esenciales de un objeto y ocultar los detalles innecesarios para el contexto del problema.
+</p>
+
+<h3>Ejemplo de la vida real</h3>
+
+<div class="example">
+Un control remoto permite manejar un televisor mediante pocos botones, ocultando la complejidad electrónica interna.
+</div>
+
+<h3>Ejemplo adicional</h3>
+
+<div class="example">
+Un mapa del metro representa estaciones y conexiones sin mostrar todos los edificios de la ciudad.
+</div>
+
+<h3>Ejemplo en Java</h3>
+
+<pre>
+abstract class Animal {
+
+    abstract void hacerSonido();
+
+}
+</pre>
+
+<h3>Segundo ejemplo en Java</h3>
+
+<pre>
+abstract class Vehiculo {
+
+    abstract void mover();
+
+}
+</pre>
+
+</section>
+
+<section>
+
+<h2>Herencia</h2>
+
+<p>
+La herencia permite que una clase derive de otra, reutilizando atributos y métodos ya definidos. 
+La clase derivada puede extender o modificar ese comportamiento.
+</p>
+
+<h3>Ejemplo de la vida real</h3>
+
+<div class="example">
+Un perro es un tipo particular de animal y comparte características comunes con otros animales.
+</div>
+
+<h3>Ejemplo adicional</h3>
+
+<div class="example">
+Un profesor y un estudiante pueden considerarse tipos específicos de persona.
+</div>
+
+<h3>Ejemplo en Java</h3>
+
+<pre>
+class Animal {
+
+    void respirar(){
+        System.out.println("Respirando");
+    }
+
+}
+
+class Perro extends Animal {
+
+    void ladrar(){
+        System.out.println("Guau");
+    }
+
+}
+</pre>
+
+<h3>Segundo ejemplo en Java</h3>
+
+<pre>
+class Persona {
+
+    String nombre;
+
+}
+
+class Estudiante extends Persona {
+
+    String carrera;
+
+}
+</pre>
+
+</section>
+
+<section>
+
+<h2>Polimorfismo</h2>
+
+<p>
+El polimorfismo permite que distintos objetos respondan de manera diferente a una misma operación.
+</p>
+
+<h3>Ejemplo de la vida real</h3>
+
+<div class="example">
+El verbo “moverse” se manifiesta de forma distinta en un automóvil, una persona o un pez.
+</div>
+
+<h3>Ejemplo adicional</h3>
+
+<div class="example">
+El método emitir sonido se manifiesta de manera distinta en perros, gatos y aves.
+</div>
+
+<h3>Ejemplo en Java</h3>
+
+<pre>
+class Animal {
+
+    void sonido(){
+        System.out.println("Sonido generico");
+    }
+
+}
+
+class Perro extends Animal {
+
+    void sonido(){
+        System.out.println("Guau");
+    }
+
+}
+</pre>
+
+<h3>Segundo ejemplo en Java</h3>
+
+<pre>
+class Gato extends Animal {
+
+    void sonido(){
+        System.out.println("Miau");
+    }
+
+}
+</pre>
+
+</section>
+
+</main>
+
+</body>
+</html>
+```
