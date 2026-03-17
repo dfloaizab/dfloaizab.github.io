@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recursión — Guía Completa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:     #1a1814;
+    --ink2:    #3d3a35;
+    --ink3:    #6b6760;
+    --paper:   #f5f2ed;
+    --paper2:  #ede9e2;
+    --paper3:  #e4dfd6;
+    --rule:    #d4cfc6;
+    --accent:  #2d5a8e;
+    --accent2: #1a3a5c;
+    --accent3: #c0d6ef;
+    --red:     #8b2c2c;
+    --green:   #2c6b3a;
+    --amber:   #7a5c1a;
+    --mono:    'DM Mono', monospace;
+    --serif:   'DM Serif Display', serif;
+    --sans:    'DM Sans', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); font-size: 15px; line-height: 1.7; }
+
+  header {
+    background: var(--ink); color: var(--paper);
+    padding: 4rem 2rem 3rem; position: relative; overflow: hidden;
+  }
+  header::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(255,255,255,0.03) 31px, rgba(255,255,255,0.03) 32px);
+  }
+  .header-inner { max-width: 900px; margin: 0 auto; position: relative; }
+  .header-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; color: var(--accent3); text-transform: uppercase; margin-bottom: 1rem; }
+  header h1 { font-family: var(--serif); font-size: clamp(2.8rem, 6vw, 4.5rem); line-height: 1.05; color: #fff; margin-bottom: 1.25rem; }
+  header h1 em { color: var(--accent3); font-style: italic; }
+  .header-desc { font-size: 15px; color: #a09890; max-width: 560px; line-height: 1.75; }
+
+  nav { background: var(--paper2); border-bottom: 1px solid var(--rule); position: sticky; top: 0; z-index: 100; }
+  .nav-inner { max-width: 900px; margin: 0 auto; padding: 0 2rem; display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
+  .nav-inner::-webkit-scrollbar { display: none; }
+  nav a { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--ink3); text-decoration: none; padding: 0.85rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
+  nav a:hover { color: var(--ink); border-bottom-color: var(--accent); }
+
+  main { max-width: 900px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+  section { margin-bottom: 4rem; }
+
+  .section-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; color: var(--ink3); text-transform: uppercase; margin-bottom: 0.5rem; }
+  h2 { font-family: var(--serif); font-size: clamp(1.6rem, 3vw, 2.2rem); color: var(--ink); margin-bottom: 1.25rem; line-height: 1.2; }
+  h3 { font-family: var(--sans); font-size: 1rem; font-weight: 500; color: var(--ink2); margin-bottom: 0.5rem; margin-top: 1.5rem; }
+  p { color: var(--ink2); margin-bottom: 0.85rem; }
+  p:last-child { margin-bottom: 0; }
+
+  .divider { height: 1px; background: var(--rule); margin: 3.5rem 0; }
+
+  .cards { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .cards-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .cards-3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .card { background: var(--paper); padding: 1.5rem; }
+  .card-accent-top { border-top: 3px solid var(--accent); }
+  .card-accent-red  { border-top: 3px solid var(--red); }
+  .card-accent-green{ border-top: 3px solid var(--green); }
+  .card-icon { width: 32px; height: 32px; margin-bottom: 0.85rem; color: var(--accent); }
+  .card h3 { margin-top: 0; }
+  .card p  { font-size: 14px; }
+
+  .def-box { border-left: 3px solid var(--accent); background: var(--paper2); padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+  .def-box p { font-size: 15px; font-weight: 300; font-style: italic; color: var(--ink); margin: 0; }
+
+  .code-tabs { margin: 1.5rem 0; }
+  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--rule); }
+  .tab-btn { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; background: none; border: none; padding: 0.55rem 1rem; color: var(--ink3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.12s; }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  pre { background: var(--ink); color: #d4d0c8; font-family: var(--mono); font-size: 12.5px; line-height: 1.65; padding: 1.25rem 1.5rem; overflow-x: auto; }
+  .kw  { color: #7eb8f7; }
+  .fn  { color: #f7c97e; }
+  .cm  { color: #7a7570; font-style: italic; }
+  .str { color: #a8d8a8; }
+  .num { color: #f7a87e; }
+  .tp  { color: #c8a8f7; }
+
+  .table-wrap { overflow-x: auto; margin: 1.25rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; font-weight: 400; padding: 0.65rem 1rem; text-align: left; }
+  td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--rule); color: var(--ink2); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: var(--paper2); }
+  td code { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+
+  .svg-wrap { background: var(--paper2); border: 1px solid var(--rule); padding: 1.5rem; margin: 1.5rem 0; overflow-x: auto; }
+  .svg-wrap svg { display: block; margin: 0 auto; max-width: 100%; }
+
+  .callout { background: var(--paper2); border: 1px solid var(--rule); border-left: 3px solid var(--amber); padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: 14px; color: var(--ink2); }
+  .callout strong { color: var(--ink); }
+
+  .exercises { counter-reset: ex; list-style: none; }
+  .exercises li { counter-increment: ex; padding: 1rem 1rem 1rem 3.5rem; border-bottom: 1px solid var(--rule); position: relative; font-size: 14px; color: var(--ink2); }
+  .exercises li:last-child { border-bottom: none; }
+  .exercises li::before { content: counter(ex, decimal-leading-zero); position: absolute; left: 1rem; top: 1rem; font-family: var(--mono); font-size: 11px; color: var(--ink3); letter-spacing: 0.05em; }
+  .exercises li strong { display: block; font-size: 14px; color: var(--ink); margin-bottom: 0.2rem; }
+  .ex-tag { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; padding: 1px 7px; border: 1px solid var(--rule); color: var(--ink3); margin-left: 0.4rem; vertical-align: middle; }
+  .tag-hard { border-color: var(--red); color: var(--red); }
+  .tag-med  { border-color: var(--amber); color: var(--amber); }
+  .tag-easy { border-color: var(--green); color: var(--green); }
+
+  .parts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 1.25rem 0; }
+  .part { background: var(--paper); padding: 1.25rem; }
+  .part-num { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 0.35rem; }
+  .part h4 { font-family: var(--sans); font-size: 14px; font-weight: 500; margin-bottom: 0.4rem; }
+  .part p  { font-size: 13px; color: var(--ink3); margin: 0; }
+
+  .example-block { border: 1px solid var(--rule); margin: 2rem 0; }
+  .example-header { background: var(--paper3); padding: 0.75rem 1.25rem; display: flex; align-items: baseline; gap: 0.75rem; border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+  .example-header .ex-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; color: var(--ink3); }
+  .example-header h3 { font-size: 14px; font-weight: 500; color: var(--ink); margin: 0; }
+  .example-header .ex-badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; background: var(--accent3); color: var(--accent2); margin-left: auto; white-space: nowrap; }
+  .example-body { padding: 1.25rem; }
+  .example-body p { font-size: 14px; margin-bottom: 0.75rem; }
+
+  footer { background: var(--ink); color: var(--ink3); text-align: center; padding: 2rem; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; }
+
+  @media (max-width: 600px) {
+    main { padding: 2rem 1rem 4rem; }
+    header { padding: 2.5rem 1rem 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-label">Algoritmos &middot; Unidad III</div>
+    <h1>Recursion &amp; <em>Dividir y Vencer</em></h1>
+    <p class="header-desc">Una guia tecnica completa con definiciones, tipos, analisis de complejidad, estrategia divide &amp; conquer y ejercicios practicos en Java.</p>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#que-es">Definicion</a>
+    <a href="#tipos">Tipos</a>
+    <a href="#importancia">Importancia</a>
+    <a href="#cuando">Cuando usar</a>
+    <a href="#complejidad">Complejidad</a>
+    <a href="#dividir">Dividir y Vencer</a>
+    <a href="#ejemplos">Ejemplos</a>
+    <a href="#ejercicios">Ejercicios</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ── 1. QUE ES RECURSION ──────────────────────────────────────── -->
+<section id="que-es">
+  <div class="section-label">01 &mdash; Concepto fundamental</div>
+  <h2>¿Qué es la recursión?</h2>
+  <p>La <strong>recursión</strong> es una técnica de programación en la que una función se llama a sí misma para resolver un problema, descomponiéndolo en subproblemas más pequeños del mismo tipo hasta llegar a una condición de parada conocida como <em>caso base</em>.</p>
+
+  <div class="def-box">
+    <p>"Una función recursiva es aquella que, para resolver una instancia del problema, invoca a una instancia más pequeña del mismo problema, hasta alcanzar un caso trivial resoluble directamente."</p>
+  </div>
+
+  <p>Todo algoritmo recursivo debe tener al menos un <strong>caso base</strong> (que no recurse) y al menos un <strong>caso recursivo</strong> (que reduzca el problema). Sin caso base, se produce una recursión infinita que agota la pila de llamadas.</p>
+
+  <div class="svg-wrap">
+    <svg width="640" height="210" viewBox="0 0 640 210" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Mono',monospace">
+      <text x="320" y="20" text-anchor="middle" font-size="11" fill="#6b6760" letter-spacing="2">PILA DE LLAMADAS &mdash; factorial(4)</text>
+      <rect x="50"  y="36" width="540" height="36" rx="2" fill="#2d5a8e" fill-opacity="0.10" stroke="#2d5a8e" stroke-width="1"/>
+      <rect x="90"  y="80" width="460" height="36" rx="2" fill="#2d5a8e" fill-opacity="0.16" stroke="#2d5a8e" stroke-width="1"/>
+      <rect x="130" y="124" width="380" height="36" rx="2" fill="#2d5a8e" fill-opacity="0.22" stroke="#2d5a8e" stroke-width="1"/>
+      <rect x="170" y="168" width="300" height="30" rx="2" fill="#2d5a8e" fill-opacity="0.34" stroke="#2d5a8e" stroke-width="1.5"/>
+      <text x="320" y="58"  text-anchor="middle" font-size="12.5" fill="#1a1814">factorial(4)  &rarr;  4 &times; factorial(3)</text>
+      <text x="320" y="102" text-anchor="middle" font-size="12.5" fill="#1a1814">factorial(3)  &rarr;  3 &times; factorial(2)</text>
+      <text x="320" y="146" text-anchor="middle" font-size="12.5" fill="#1a1814">factorial(2)  &rarr;  2 &times; factorial(1)</text>
+      <text x="320" y="188" text-anchor="middle" font-size="12.5" fill="#1a3a5c" font-weight="500">factorial(1)  &rarr;  1  &larr; caso base</text>
+      <text x="28" y="58"  font-size="11" fill="#6b6760">&#9660;</text>
+      <text x="28" y="102" font-size="11" fill="#6b6760">&#9660;</text>
+      <text x="28" y="146" font-size="11" fill="#6b6760">&#9660;</text>
+      <circle cx="30" cy="185" r="4" fill="#2d5a8e"/>
+    </svg>
+  </div>
+
+  <div class="code-tabs">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab(this,'pseudo-fact')">Pseudocodigo</button>
+      <button class="tab-btn" onclick="switchTab(this,'java-fact')">Java</button>
+    </div>
+    <div id="pseudo-fact" class="tab-pane active">
+<pre><span class="kw">funcion</span> <span class="fn">factorial</span>(n):
+    <span class="cm">// Caso base</span>
+    <span class="kw">si</span> n == 0 <span class="kw">o</span> n == 1:
+        <span class="kw">retornar</span> <span class="num">1</span>
+    <span class="cm">// Caso recursivo</span>
+    <span class="kw">retornar</span> n * <span class="fn">factorial</span>(n - <span class="num">1</span>)</pre>
+    </div>
+    <div id="java-fact" class="tab-pane">
+<pre><span class="kw">public static</span> <span class="tp">long</span> <span class="fn">factorial</span>(<span class="tp">int</span> n) {
+    <span class="cm">// Caso base</span>
+    <span class="kw">if</span> (n &lt;= <span class="num">1</span>) <span class="kw">return</span> <span class="num">1L</span>;
+    <span class="cm">// Caso recursivo</span>
+    <span class="kw">return</span> n * <span class="fn">factorial</span>(n - <span class="num">1</span>);
+}</pre>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 2. TIPOS ──────────────────────────────────────────────────── -->
+<section id="tipos">
+  <div class="section-label">02 &mdash; Clasificacion</div>
+  <h2>Tipos de recursión</h2>
+
+  <div class="cards cards-3" style="margin-bottom:1.5rem">
+    <div class="card card-accent-top">
+      <svg class="card-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="12" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M16 10 L16 22 M12 14 L16 10 L20 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h3>Directa</h3>
+      <p>La funcion se llama a si misma directamente dentro de su propio cuerpo. Es la forma mas comun y sencilla.</p>
+      <p style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:0.5rem">f() &rarr; f()</p>
+    </div>
+    <div class="card card-accent-top" style="border-top-color:var(--amber)">
+      <svg class="card-icon" viewBox="0 0 32 32" fill="none" style="color:var(--amber)" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="10" cy="16" r="7" stroke="currentColor" stroke-width="1.5"/>
+        <circle cx="22" cy="16" r="7" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M17 13 L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M17 19 L13 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <h3>Indirecta (mutua)</h3>
+      <p>La funcion A llama a B y B llama a A. El ciclo puede involucrar mas de dos funciones.</p>
+      <p style="font-family:var(--mono);font-size:11px;color:var(--amber);margin-top:0.5rem">f() &rarr; g() &rarr; f()</p>
+    </div>
+    <div class="card card-accent-top" style="border-top-color:var(--green)">
+      <svg class="card-icon" viewBox="0 0 32 32" fill="none" style="color:var(--green)" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 26 L26 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="26" cy="6"  r="4" stroke="currentColor" stroke-width="1.5"/>
+        <circle cx="6"  cy="26" r="4" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+      <h3>De cola (tail)</h3>
+      <p>La llamada recursiva es la <em>ultima</em> operacion de la funcion. Permite TCO, equivalente a un bucle.</p>
+      <p style="font-family:var(--mono);font-size:11px;color:var(--green);margin-top:0.5rem">return f(n-1)  &larr; ultima op.</p>
+    </div>
+  </div>
+
+  <h3>Recursion indirecta &mdash; ejemplo</h3>
+  <div class="code-tabs">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab(this,'pseudo-mut')">Pseudocodigo</button>
+      <button class="tab-btn" onclick="switchTab(this,'java-mut')">Java</button>
+    </div>
+    <div id="pseudo-mut" class="tab-pane active">
+<pre><span class="kw">funcion</span> <span class="fn">esPar</span>(n):
+    <span class="kw">si</span> n == 0: <span class="kw">retornar</span> verdadero
+    <span class="kw">retornar</span> <span class="fn">esImpar</span>(n - <span class="num">1</span>)
+
+<span class="kw">funcion</span> <span class="fn">esImpar</span>(n):
+    <span class="kw">si</span> n == 0: <span class="kw">retornar</span> falso
+    <span class="kw">retornar</span> <span class="fn">esPar</span>(n - <span class="num">1</span>)</pre>
+    </div>
+    <div id="java-mut" class="tab-pane">
+<pre><span class="kw">static boolean</span> <span class="fn">esPar</span>(<span class="tp">int</span> n) {
+    <span class="kw">if</span> (n == <span class="num">0</span>) <span class="kw">return true</span>;
+    <span class="kw">return</span> <span class="fn">esImpar</span>(n - <span class="num">1</span>);
+}
+<span class="kw">static boolean</span> <span class="fn">esImpar</span>(<span class="tp">int</span> n) {
+    <span class="kw">if</span> (n == <span class="num">0</span>) <span class="kw">return false</span>;
+    <span class="kw">return</span> <span class="fn">esPar</span>(n - <span class="num">1</span>);
+}</pre>
+    </div>
+  </div>
+
+  <h3>Recursion de cola &mdash; Fibonacci con acumulador</h3>
+  <div class="code-tabs">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab(this,'pseudo-tail')">Pseudocodigo</button>
+      <button class="tab-btn" onclick="switchTab(this,'java-tail')">Java</button>
+    </div>
+    <div id="pseudo-tail" class="tab-pane active">
+<pre><span class="kw">funcion</span> <span class="fn">fibTail</span>(n, a=0, b=1):
+    <span class="kw">si</span> n == 0: <span class="kw">retornar</span> a
+    <span class="kw">retornar</span> <span class="fn">fibTail</span>(n - <span class="num">1</span>, b, a + b)  <span class="cm">// tail call</span></pre>
+    </div>
+    <div id="java-tail" class="tab-pane">
+<pre><span class="kw">static long</span> <span class="fn">fibTail</span>(<span class="tp">int</span> n, <span class="tp">long</span> a, <span class="tp">long</span> b) {
+    <span class="kw">if</span> (n == <span class="num">0</span>) <span class="kw">return</span> a;
+    <span class="kw">return</span> <span class="fn">fibTail</span>(n - <span class="num">1</span>, b, a + b); <span class="cm">// tail call</span>
+}
+<span class="cm">// fibTail(10, 0, 1); -> 55</span></pre>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 3. IMPORTANCIA ────────────────────────────────────────────── -->
+<section id="importancia">
+  <div class="section-label">03 &mdash; Relevancia</div>
+  <h2>Importancia de la recursión</h2>
+
+  <div class="cards cards-2" style="margin:1.5rem 0">
+    <div class="card">
+      <h3>Expresividad y legibilidad</h3>
+      <p>Muchos problemas tienen estructura naturalmente recursiva (arboles, grafos, sistemas de archivos). La solucion recursiva mapea directamente esa estructura, resultando en codigo mas claro y conciso.</p>
+    </div>
+    <div class="card">
+      <h3>Base teorica solida</h3>
+      <p>La recursion es la base del calculo lambda, la definicion formal de funciones computables (tesis Church-Turing) y muchos paradigmas funcionales como Haskell, Erlang y Lisp.</p>
+    </div>
+    <div class="card">
+      <h3>Fundamento de algoritmos avanzados</h3>
+      <p>Merge Sort, Quick Sort, busqueda binaria, DFS en grafos, backtracking y programacion dinamica se expresan naturalmente con recursion y son de uso cotidiano en la industria.</p>
+    </div>
+    <div class="card">
+      <h3>Industria y produccion</h3>
+      <p>Parsers de compiladores, motores de renderizado HTML/XML, sistemas de archivos, evaluadores de expresiones matematicas y motores de busqueda usan recursion en su nucleo.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 4. CUANDO SI / NO ─────────────────────────────────────────── -->
+<section id="cuando">
+  <div class="section-label">04 &mdash; Criterios de uso</div>
+  <h2>¿Cuándo usar (y cuándo no) la recursión?</h2>
+
+  <div class="cards cards-2" style="margin:1.5rem 0">
+    <div class="card card-accent-green">
+      <h3 style="color:var(--green)">&#10003; Buena eleccion</h3>
+      <ul style="font-size:14px;color:var(--ink2);padding-left:1.2rem;line-height:2.1">
+        <li>El problema tiene <strong>subestructura recursiva</strong> natural (arboles, grafos)</li>
+        <li>La profundidad de recursion es <strong>moderada y acotada</strong></li>
+        <li>Se aplica estrategia <strong>dividir y vencer</strong></li>
+        <li>El codigo recursivo es <strong>notablemente mas claro</strong> que el iterativo</li>
+        <li>Se usa <strong>memoizacion</strong> para evitar recalculos</li>
+        <li>Lenguaje con optimizacion de cola (<strong>TCO</strong>)</li>
+      </ul>
+    </div>
+    <div class="card card-accent-red">
+      <h3 style="color:var(--red)">&#10007; Mala eleccion</h3>
+      <ul style="font-size:14px;color:var(--ink2);padding-left:1.2rem;line-height:2.1">
+        <li>La entrada puede causar <strong>stack overflow</strong> (n muy grande)</li>
+        <li>Hay <strong>solapamiento masivo</strong> sin memoizacion</li>
+        <li>La version iterativa es <strong>igual de clara</strong> y mas eficiente</li>
+        <li>El entorno tiene <strong>pila de llamadas limitada</strong> (embebidos)</li>
+        <li>El lenguaje <strong>no optimiza TCO</strong> (Java, Python)</li>
+        <li>Se requieren <strong>garantias de tiempo real</strong> estrictas</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Nota sobre Java:</strong> Java no implementa optimizacion de recursion de cola (TCO). La recursion profunda (&gt; ~5.000&ndash;10.000 frames) lanzara un <code>StackOverflowError</code>. Para n grande, convierte a iterativa o usa un stack explicito con <code>Deque</code>.
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 5. COMPLEJIDAD ────────────────────────────────────────────── -->
+<section id="complejidad">
+  <div class="section-label">05 &mdash; Analisis</div>
+  <h2>Análisis de complejidad</h2>
+  <p>La complejidad de un algoritmo recursivo se determina construyendo una <strong>relacion de recurrencia</strong> y resolviendola: por arbol de recursion, sustitucion o el <em>Teorema Maestro</em>.</p>
+
+  <div class="svg-wrap">
+    <svg width="640" height="220" viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Mono',monospace">
+      <defs>
+        <marker id="a1" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+          <path d="M1 1 L6 3.5 L1 6" fill="none" stroke="#9ba8b8" stroke-width="1"/>
+        </marker>
+      </defs>
+      <text x="320" y="18" text-anchor="middle" font-size="11" fill="#6b6760" letter-spacing="2">ARBOL DE RECURSION &mdash; T(n) = 2T(n/2) + n</text>
+      <rect x="240" y="26" width="160" height="30" rx="2" fill="#2d5a8e" fill-opacity="0.14" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="320" y="45" text-anchor="middle" font-size="12" fill="#1a1814">T(n) &rarr; costo: n</text>
+      <line x1="295" y1="56" x2="175" y2="80" stroke="#9ba8b8" stroke-width="1" marker-end="url(#a1)"/>
+      <line x1="345" y1="56" x2="465" y2="80" stroke="#9ba8b8" stroke-width="1" marker-end="url(#a1)"/>
+      <rect x="105" y="80" width="140" height="28" rx="2" fill="#2d5a8e" fill-opacity="0.11" stroke="#2d5a8e" stroke-width="1"/>
+      <rect x="395" y="80" width="140" height="28" rx="2" fill="#2d5a8e" fill-opacity="0.11" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="175" y="98" text-anchor="middle" font-size="11.5" fill="#1a1814">T(n/2) &rarr; n/2</text>
+      <text x="465" y="98" text-anchor="middle" font-size="11.5" fill="#1a1814">T(n/2) &rarr; n/2</text>
+      <line x1="145" y1="108" x2="90"  y2="130" stroke="#9ba8b8" stroke-width="1" marker-end="url(#a1)"/>
+      <line x1="205" y1="108" x2="260" y2="130" stroke="#9ba8b8" stroke-width="1" marker-end="url(#a1)"/>
+      <line x1="435" y1="108" x2="380" y2="130" stroke="#9ba8b8" stroke-width="1" marker-end="url(#a1)"/>
+      <line x1="495" y1="108" x2="550" y2="130" stroke="#9ba8b8" stroke-width="1" marker-end="url(#a1)"/>
+      <rect x="45"  y="130" width="90" height="24" rx="2" fill="#2d5a8e" fill-opacity="0.08" stroke="#2d5a8e" stroke-width="1"/>
+      <rect x="215" y="130" width="90" height="24" rx="2" fill="#2d5a8e" fill-opacity="0.08" stroke="#2d5a8e" stroke-width="1"/>
+      <rect x="335" y="130" width="90" height="24" rx="2" fill="#2d5a8e" fill-opacity="0.08" stroke="#2d5a8e" stroke-width="1"/>
+      <rect x="505" y="130" width="90" height="24" rx="2" fill="#2d5a8e" fill-opacity="0.08" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="90"  y="146" text-anchor="middle" font-size="10.5" fill="#3d3a35">n/4</text>
+      <text x="260" y="146" text-anchor="middle" font-size="10.5" fill="#3d3a35">n/4</text>
+      <text x="380" y="146" text-anchor="middle" font-size="10.5" fill="#3d3a35">n/4</text>
+      <text x="550" y="146" text-anchor="middle" font-size="10.5" fill="#3d3a35">n/4</text>
+      <text x="320" y="190" text-anchor="middle" font-size="10.5" fill="#6b6760">... hojas: n nodos de costo O(1) cada uno</text>
+      <rect x="170" y="200" width="300" height="18" rx="2" fill="#c0d6ef" fill-opacity="0.5"/>
+      <text x="320" y="213" text-anchor="middle" font-size="11" fill="#1a3a5c" font-weight="500">log&#8322;n niveles x n por nivel &rarr; O(n log n)</text>
+    </svg>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Algoritmo</th>
+          <th>Recurrencia</th>
+          <th>Complejidad</th>
+          <th>Notas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Factorial</td><td><code>T(n) = T(n-1) + 1</code></td><td><code>O(n)</code></td><td>Espacio O(n) en pila</td></tr>
+        <tr><td>Fibonacci ingenuo</td><td><code>T(n) = T(n-1) + T(n-2)</code></td><td><code>O(2&#8319;)</code></td><td>Exponencial: evitar sin memoizacion</td></tr>
+        <tr><td>Fibonacci con memo</td><td><code>T(n) = O(1)</code> (cached)</td><td><code>O(n)</code></td><td>Programacion dinamica top-down</td></tr>
+        <tr><td>Busqueda binaria</td><td><code>T(n) = T(n/2) + 1</code></td><td><code>O(log n)</code></td><td>Teorema Maestro caso 2</td></tr>
+        <tr><td>Merge Sort</td><td><code>T(n) = 2T(n/2) + n</code></td><td><code>O(n log n)</code></td><td>Optimo para ordenamiento por comparacion</td></tr>
+        <tr><td>Quick Sort (prom.)</td><td><code>T(n) = 2T(n/2) + n</code></td><td><code>O(n log n)</code></td><td>Peor caso O(n&sup2;) con pivote malo</td></tr>
+        <tr><td>Torres de Hanoi</td><td><code>T(n) = 2T(n-1) + 1</code></td><td><code>O(2&#8319;)</code></td><td>Exponencial inherente al problema</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <strong>Teorema Maestro:</strong> Para T(n) = aT(n/b) + f(n): si f(n) = &#920;(n<sup>log<sub>b</sub>a</sup>) entonces T(n) = &#920;(n<sup>log<sub>b</sub>a</sup> log n). Si f(n) domina polinomialmente &rarr; T(n) = &#920;(f(n)). Si el termino recursivo domina &rarr; T(n) = &#920;(n<sup>log<sub>b</sub>a</sup>).
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 6. DIVIDIR Y VENCER ───────────────────────────────────────── -->
+<section id="dividir">
+  <div class="section-label">06 &mdash; Estrategia</div>
+  <h2>Dividir y Vencer</h2>
+  <p><em>Divide and Conquer</em> resuelve un problema descomponiendolo en subproblemas independientes mas pequeños del mismo tipo, resolviendolos recursivamente y combinando sus soluciones.</p>
+
+  <div class="parts-grid">
+    <div class="part">
+      <div class="part-num">PASO 01</div>
+      <h4>Dividir</h4>
+      <p>Partir el problema en dos o mas subproblemas del mismo tipo pero de menor tamaño. Ejemplo: partir un arreglo por la mitad en Merge Sort.</p>
+    </div>
+    <div class="part">
+      <div class="part-num">PASO 02</div>
+      <h4>Vencer (resolver)</h4>
+      <p>Resolver cada subproblema recursivamente. El caso base es cuando el subproblema es lo suficientemente pequeño para resolverse directamente.</p>
+    </div>
+    <div class="part">
+      <div class="part-num">PASO 03</div>
+      <h4>Combinar</h4>
+      <p>Integrar las soluciones de los subproblemas para construir la solucion del problema original. En Merge Sort: intercalar dos subarreglos ordenados.</p>
+    </div>
+  </div>
+
+  <div class="svg-wrap" style="margin-top:1.5rem">
+    <svg width="640" height="185" viewBox="0 0 640 185" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Mono',monospace">
+      <defs>
+        <marker id="a2" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+          <path d="M1 1 L6 3.5 L1 6" fill="none" stroke="#9ba8b8" stroke-width="1"/>
+        </marker>
+        <marker id="a3" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+          <path d="M1 1 L6 3.5 L1 6" fill="none" stroke="#2c6b3a" stroke-width="1"/>
+        </marker>
+      </defs>
+      <text x="320" y="16" text-anchor="middle" font-size="11" fill="#6b6760" letter-spacing="2">FLUJO &mdash; DIVIDIR Y VENCER</text>
+      <rect x="230" y="24" width="180" height="32" rx="2" fill="#2d5a8e" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="320" y="44" text-anchor="middle" font-size="12" fill="#fff" font-weight="500">Problema original</text>
+      <line x1="268" y1="56" x2="140" y2="82" stroke="#9ba8b8" stroke-width="1.2" marker-end="url(#a2)"/>
+      <line x1="372" y1="56" x2="500" y2="82" stroke="#9ba8b8" stroke-width="1.2" marker-end="url(#a2)"/>
+      <text x="185" y="75" text-anchor="middle" font-size="10" fill="#6b6760">dividir</text>
+      <text x="455" y="75" text-anchor="middle" font-size="10" fill="#6b6760">dividir</text>
+      <rect x="65"  y="84" width="150" height="28" rx="2" fill="#2d5a8e" fill-opacity="0.22" stroke="#2d5a8e" stroke-width="1"/>
+      <rect x="425" y="84" width="150" height="28" rx="2" fill="#2d5a8e" fill-opacity="0.22" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="140" y="102" text-anchor="middle" font-size="11" fill="#1a1814">subproblema L</text>
+      <text x="500" y="102" text-anchor="middle" font-size="11" fill="#1a1814">subproblema R</text>
+      <line x1="140" y1="112" x2="140" y2="132" stroke="#9ba8b8" stroke-width="1.2" marker-end="url(#a2)"/>
+      <line x1="500" y1="112" x2="500" y2="132" stroke="#9ba8b8" stroke-width="1.2" marker-end="url(#a2)"/>
+      <rect x="65"  y="132" width="150" height="28" rx="2" fill="#2c6b3a" fill-opacity="0.16" stroke="#2c6b3a" stroke-width="1"/>
+      <rect x="425" y="132" width="150" height="28" rx="2" fill="#2c6b3a" fill-opacity="0.16" stroke="#2c6b3a" stroke-width="1"/>
+      <text x="140" y="150" text-anchor="middle" font-size="11" fill="#1a4028">solucion L</text>
+      <text x="500" y="150" text-anchor="middle" font-size="11" fill="#1a4028">solucion R</text>
+      <line x1="215" y1="146" x2="278" y2="162" stroke="#2c6b3a" stroke-width="1.2" marker-end="url(#a3)"/>
+      <line x1="425" y1="146" x2="362" y2="162" stroke="#2c6b3a" stroke-width="1.2" marker-end="url(#a3)"/>
+      <rect x="255" y="162" width="130" height="18" rx="2" fill="#2c6b3a" fill-opacity="0.75"/>
+      <text x="320" y="175" text-anchor="middle" font-size="10.5" fill="#fff">combinar &rarr; resultado</text>
+    </svg>
+  </div>
+
+  <div class="code-tabs" style="margin-top:1.5rem">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab(this,'pseudo-dc')">Pseudocodigo</button>
+      <button class="tab-btn" onclick="switchTab(this,'java-dc')">Java (patron)</button>
+    </div>
+    <div id="pseudo-dc" class="tab-pane active">
+<pre><span class="kw">funcion</span> <span class="fn">dividirYVencer</span>(problema):
+    <span class="cm">// 1. Caso base</span>
+    <span class="kw">si</span> problema es trivial:
+        <span class="kw">retornar</span> <span class="fn">resolverDirectamente</span>(problema)
+
+    <span class="cm">// 2. Dividir</span>
+    (sub1, sub2) &larr; <span class="fn">dividir</span>(problema)
+
+    <span class="cm">// 3. Vencer (recursion)</span>
+    resultado1 &larr; <span class="fn">dividirYVencer</span>(sub1)
+    resultado2 &larr; <span class="fn">dividirYVencer</span>(sub2)
+
+    <span class="cm">// 4. Combinar</span>
+    <span class="kw">retornar</span> <span class="fn">combinar</span>(resultado1, resultado2)</pre>
+    </div>
+    <div id="java-dc" class="tab-pane">
+<pre><span class="kw">static</span> <span class="tp">Resultado</span> <span class="fn">dividirYVencer</span>(<span class="tp">Problema</span> p) {
+    <span class="cm">// 1. Caso base</span>
+    <span class="kw">if</span> (<span class="fn">esTrivial</span>(p)) <span class="kw">return</span> <span class="fn">resolverDirecto</span>(p);
+
+    <span class="cm">// 2. Dividir</span>
+    <span class="tp">Problema</span>[] subs = <span class="fn">dividir</span>(p);
+
+    <span class="cm">// 3. Vencer</span>
+    <span class="tp">Resultado</span> r1 = <span class="fn">dividirYVencer</span>(subs[<span class="num">0</span>]);
+    <span class="tp">Resultado</span> r2 = <span class="fn">dividirYVencer</span>(subs[<span class="num">1</span>]);
+
+    <span class="cm">// 4. Combinar</span>
+    <span class="kw">return</span> <span class="fn">combinar</span>(r1, r2);
+}</pre>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 7. EJEMPLOS ──────────────────────────────────────────────── -->
+<section id="ejemplos">
+  <div class="section-label">07 &mdash; Aplicaciones practicas</div>
+  <h2>Ejemplos académicos y comerciales</h2>
+
+  <!-- EJ 1: Merge Sort -->
+  <div class="example-block">
+    <div class="example-header">
+      <span class="ex-num">EJ 01</span>
+      <h3>Merge Sort &mdash; Ordenamiento</h3>
+      <span class="ex-badge">Academico &middot; Produccion</span>
+    </div>
+    <div class="example-body">
+      <p>Utilizado en Java (<code>Arrays.sort</code> para objetos), Python (<code>sorted()</code>), bases de datos para ordenar registros y motores de busqueda. Complejidad garantizada O(n log n).</p>
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab(this,'pseudo-ms')">Pseudocodigo</button>
+          <button class="tab-btn" onclick="switchTab(this,'java-ms')">Java</button>
+        </div>
+        <div id="pseudo-ms" class="tab-pane active">
+<pre><span class="kw">funcion</span> <span class="fn">mergeSort</span>(arr):
+    <span class="kw">si</span> longitud(arr) &lt;= 1: <span class="kw">retornar</span> arr   <span class="cm">// caso base</span>
+    mid  &larr; longitud(arr) / 2
+    izq  &larr; <span class="fn">mergeSort</span>(arr[0..mid])          <span class="cm">// dividir</span>
+    der  &larr; <span class="fn">mergeSort</span>(arr[mid..n])           <span class="cm">// dividir</span>
+    <span class="kw">retornar</span> <span class="fn">merge</span>(izq, der)               <span class="cm">// combinar</span>
+
+<span class="kw">funcion</span> <span class="fn">merge</span>(izq, der):
+    resultado &larr; []
+    <span class="kw">mientras</span> izq no vacio <span class="kw">y</span> der no vacio:
+        <span class="kw">si</span> izq[0] &lt;= der[0]:
+            agregar izq[0] a resultado; quitar izq[0]
+        <span class="kw">sino</span>:
+            agregar der[0] a resultado; quitar der[0]
+    <span class="kw">retornar</span> resultado + izq + der</pre>
+        </div>
+        <div id="java-ms" class="tab-pane">
+<pre><span class="kw">static void</span> <span class="fn">mergeSort</span>(<span class="tp">int</span>[] a, <span class="tp">int</span> l, <span class="tp">int</span> r) {
+    <span class="kw">if</span> (l >= r) <span class="kw">return</span>;  <span class="cm">// caso base</span>
+    <span class="tp">int</span> mid = (l + r) / <span class="num">2</span>;
+    <span class="fn">mergeSort</span>(a, l, mid);
+    <span class="fn">mergeSort</span>(a, mid + <span class="num">1</span>, r);
+    <span class="fn">merge</span>(a, l, mid, r);
+}
+<span class="kw">static void</span> <span class="fn">merge</span>(<span class="tp">int</span>[] a, <span class="tp">int</span> l, <span class="tp">int</span> mid, <span class="tp">int</span> r) {
+    <span class="tp">int</span>[] tmp = Arrays.<span class="fn">copyOfRange</span>(a, l, r + <span class="num">1</span>);
+    <span class="tp">int</span> i = <span class="num">0</span>, j = mid - l + <span class="num">1</span>, k = l;
+    <span class="kw">while</span> (i &lt;= mid - l &amp;&amp; j &lt;= r - l)
+        a[k++] = (tmp[i] &lt;= tmp[j]) ? tmp[i++] : tmp[j++];
+    <span class="kw">while</span> (i &lt;= mid - l) a[k++] = tmp[i++];
+    <span class="kw">while</span> (j &lt;= r - l)   a[k++] = tmp[j++];
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EJ 2: Busqueda binaria -->
+  <div class="example-block">
+    <div class="example-header">
+      <span class="ex-num">EJ 02</span>
+      <h3>Búsqueda Binaria</h3>
+      <span class="ex-badge">Produccion &middot; Bases de datos</span>
+    </div>
+    <div class="example-body">
+      <p>Base de los indices B-Tree en MySQL, PostgreSQL y MongoDB. Usada en APIs de busqueda rapida y catalogos de productos. O(log n) vs O(n) lineal.</p>
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab(this,'pseudo-bs')">Pseudocodigo</button>
+          <button class="tab-btn" onclick="switchTab(this,'java-bs')">Java</button>
+        </div>
+        <div id="pseudo-bs" class="tab-pane active">
+<pre><span class="kw">funcion</span> <span class="fn">binSearch</span>(arr, target, lo, hi):
+    <span class="kw">si</span> lo > hi: <span class="kw">retornar</span> -<span class="num">1</span>         <span class="cm">// no encontrado</span>
+    mid &larr; (lo + hi) / 2
+    <span class="kw">si</span> arr[mid] == target: <span class="kw">retornar</span> mid
+    <span class="kw">si</span> arr[mid] > target:
+        <span class="kw">retornar</span> <span class="fn">binSearch</span>(arr, target, lo, mid-1)
+    <span class="kw">retornar</span> <span class="fn">binSearch</span>(arr, target, mid+1, hi)</pre>
+        </div>
+        <div id="java-bs" class="tab-pane">
+<pre><span class="kw">static int</span> <span class="fn">binSearch</span>(<span class="tp">int</span>[] a, <span class="tp">int</span> t, <span class="tp">int</span> lo, <span class="tp">int</span> hi) {
+    <span class="kw">if</span> (lo > hi) <span class="kw">return</span> -<span class="num">1</span>;
+    <span class="tp">int</span> mid = lo + (hi - lo) / <span class="num">2</span>; <span class="cm">// evita overflow</span>
+    <span class="kw">if</span> (a[mid] == t) <span class="kw">return</span> mid;
+    <span class="kw">if</span> (a[mid] > t)  <span class="kw">return</span> <span class="fn">binSearch</span>(a, t, lo, mid - <span class="num">1</span>);
+    <span class="kw">return</span> <span class="fn">binSearch</span>(a, t, mid + <span class="num">1</span>, hi);
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EJ 3: Arbol binario -->
+  <div class="example-block">
+    <div class="example-header">
+      <span class="ex-num">EJ 03</span>
+      <h3>Recorrido de Árbol Binario (Inorden)</h3>
+      <span class="ex-badge">Compiladores &middot; Editores &middot; BD</span>
+    </div>
+    <div class="example-body">
+      <p>Los compiladores usan arboles AST para analizar codigo fuente. Los editores de texto usan arboles Rope para edicion eficiente. El recorrido inorden de un BST produce elementos ordenados.</p>
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab(this,'pseudo-tree')">Pseudocodigo</button>
+          <button class="tab-btn" onclick="switchTab(this,'java-tree')">Java</button>
+        </div>
+        <div id="pseudo-tree" class="tab-pane active">
+<pre><span class="kw">funcion</span> <span class="fn">inorden</span>(nodo):
+    <span class="kw">si</span> nodo es nulo: <span class="kw">retornar</span>   <span class="cm">// caso base</span>
+    <span class="fn">inorden</span>(nodo.izquierdo)       <span class="cm">// vencer izq</span>
+    <span class="fn">imprimir</span>(nodo.valor)          <span class="cm">// procesar</span>
+    <span class="fn">inorden</span>(nodo.derecho)         <span class="cm">// vencer der</span></pre>
+        </div>
+        <div id="java-tree" class="tab-pane">
+<pre><span class="kw">class</span> <span class="tp">Nodo</span> {
+    <span class="tp">int</span> valor;
+    <span class="tp">Nodo</span> izq, der;
+}
+<span class="kw">static void</span> <span class="fn">inorden</span>(<span class="tp">Nodo</span> n) {
+    <span class="kw">if</span> (n == <span class="kw">null</span>) <span class="kw">return</span>;  <span class="cm">// caso base</span>
+    <span class="fn">inorden</span>(n.izq);
+    System.out.<span class="fn">print</span>(n.valor + <span class="str">" "</span>);
+    <span class="fn">inorden</span>(n.der);
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EJ 4: Quick Sort -->
+  <div class="example-block">
+    <div class="example-header">
+      <span class="ex-num">EJ 04</span>
+      <h3>Quick Sort</h3>
+      <span class="ex-badge">JDK &middot; STL &middot; Sistemas operativos</span>
+    </div>
+    <div class="example-body">
+      <p>Java usa Dual-Pivot Quicksort en <code>Arrays.sort</code> para primitivos. Excelente rendimiento en datos reales con pivote aleatorio. O(n log n) promedio.</p>
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab(this,'pseudo-qs')">Pseudocodigo</button>
+          <button class="tab-btn" onclick="switchTab(this,'java-qs')">Java</button>
+        </div>
+        <div id="pseudo-qs" class="tab-pane active">
+<pre><span class="kw">funcion</span> <span class="fn">quickSort</span>(arr, lo, hi):
+    <span class="kw">si</span> lo >= hi: <span class="kw">retornar</span>          <span class="cm">// caso base</span>
+    p &larr; <span class="fn">particionar</span>(arr, lo, hi)   <span class="cm">// dividir</span>
+    <span class="fn">quickSort</span>(arr, lo, p - 1)       <span class="cm">// vencer izq</span>
+    <span class="fn">quickSort</span>(arr, p + 1, hi)       <span class="cm">// vencer der</span>
+
+<span class="kw">funcion</span> <span class="fn">particionar</span>(arr, lo, hi):
+    pivote &larr; arr[hi]; i &larr; lo - 1
+    <span class="kw">para</span> j &larr; lo <span class="kw">hasta</span> hi - 1:
+        <span class="kw">si</span> arr[j] &lt;= pivote:
+            i &larr; i + 1; <span class="fn">intercambiar</span>(arr[i], arr[j])
+    <span class="fn">intercambiar</span>(arr[i+1], arr[hi])
+    <span class="kw">retornar</span> i + 1</pre>
+        </div>
+        <div id="java-qs" class="tab-pane">
+<pre><span class="kw">static void</span> <span class="fn">quickSort</span>(<span class="tp">int</span>[] a, <span class="tp">int</span> lo, <span class="tp">int</span> hi) {
+    <span class="kw">if</span> (lo >= hi) <span class="kw">return</span>;
+    <span class="tp">int</span> p = <span class="fn">partition</span>(a, lo, hi);
+    <span class="fn">quickSort</span>(a, lo, p - <span class="num">1</span>);
+    <span class="fn">quickSort</span>(a, p + <span class="num">1</span>, hi);
+}
+<span class="kw">static int</span> <span class="fn">partition</span>(<span class="tp">int</span>[] a, <span class="tp">int</span> lo, <span class="tp">int</span> hi) {
+    <span class="tp">int</span> pivot = a[hi], i = lo - <span class="num">1</span>;
+    <span class="kw">for</span> (<span class="tp">int</span> j = lo; j &lt; hi; j++)
+        <span class="kw">if</span> (a[j] &lt;= pivot) {
+            <span class="tp">int</span> t = a[++i]; a[i] = a[j]; a[j] = t;
+        }
+    <span class="tp">int</span> t = a[i+<span class="num">1</span>]; a[i+<span class="num">1</span>] = a[hi]; a[hi] = t;
+    <span class="kw">return</span> i + <span class="num">1</span>;
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EJ 5: Torres de Hanoi -->
+  <div class="example-block">
+    <div class="example-header">
+      <span class="ex-num">EJ 05</span>
+      <h3>Torres de Hanói</h3>
+      <span class="ex-badge">Academico &middot; Backtracking</span>
+    </div>
+    <div class="example-body">
+      <p>Problema clasico de recursion. Mueve n discos del poste A al poste C usando B como auxiliar. Requiere exactamente 2&#8319;&minus;1 movimientos, demostrando por que algunos problemas son inherentemente exponenciales.</p>
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab(this,'pseudo-han')">Pseudocodigo</button>
+          <button class="tab-btn" onclick="switchTab(this,'java-han')">Java</button>
+        </div>
+        <div id="pseudo-han" class="tab-pane active">
+<pre><span class="kw">funcion</span> <span class="fn">hanoi</span>(n, origen, destino, auxiliar):
+    <span class="kw">si</span> n == 1:                               <span class="cm">// caso base</span>
+        <span class="fn">imprimir</span>(<span class="str">"Disco 1: "</span> + origen + <span class="str">" -> "</span> + destino)
+        <span class="kw">retornar</span>
+    <span class="fn">hanoi</span>(n-1, origen, auxiliar, destino)    <span class="cm">// mover n-1 a aux</span>
+    <span class="fn">imprimir</span>(<span class="str">"Disco "</span> + n + <span class="str">": "</span> + origen + <span class="str">" -> "</span> + destino)
+    <span class="fn">hanoi</span>(n-1, auxiliar, destino, origen)    <span class="cm">// mover n-1 a destino</span></pre>
+        </div>
+        <div id="java-han" class="tab-pane">
+<pre><span class="kw">static void</span> <span class="fn">hanoi</span>(<span class="tp">int</span> n, <span class="tp">char</span> de, <span class="tp">char</span> a, <span class="tp">char</span> aux) {
+    <span class="kw">if</span> (n == <span class="num">1</span>) {
+        System.out.<span class="fn">printf</span>(<span class="str">"Disco 1: %c -> %c%n"</span>, de, a);
+        <span class="kw">return</span>;
+    }
+    <span class="fn">hanoi</span>(n - <span class="num">1</span>, de, aux, a);
+    System.out.<span class="fn">printf</span>(<span class="str">"Disco %d: %c -> %c%n"</span>, n, de, a);
+    <span class="fn">hanoi</span>(n - <span class="num">1</span>, aux, a, de);
+}
+<span class="cm">// hanoi(3, 'A', 'C', 'B');  -> 7 movimientos (2^3 - 1)</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EJ 6: Potencia rapida -->
+  <div class="example-block">
+    <div class="example-header">
+      <span class="ex-num">EJ 06</span>
+      <h3>Potencia Rápida (Fast Exponentiation)</h3>
+      <span class="ex-badge">Criptografia &middot; RSA &middot; TLS</span>
+    </div>
+    <div class="example-body">
+      <p>Calcula x&#8319; en O(log n) en lugar de O(n). Es el nucleo del algoritmo RSA y de sistemas de seguridad como TLS/HTTPS para cifrado modular.</p>
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab(this,'pseudo-pow')">Pseudocodigo</button>
+          <button class="tab-btn" onclick="switchTab(this,'java-pow')">Java</button>
+        </div>
+        <div id="pseudo-pow" class="tab-pane active">
+<pre><span class="kw">funcion</span> <span class="fn">potencia</span>(x, n):
+    <span class="kw">si</span> n == 0: <span class="kw">retornar</span> <span class="num">1</span>             <span class="cm">// caso base</span>
+    mitad &larr; <span class="fn">potencia</span>(x, n / 2)       <span class="cm">// dividir</span>
+    <span class="kw">si</span> n es par:
+        <span class="kw">retornar</span> mitad * mitad         <span class="cm">// combinar par</span>
+    <span class="kw">sino</span>:
+        <span class="kw">retornar</span> x * mitad * mitad     <span class="cm">// combinar impar</span></pre>
+        </div>
+        <div id="java-pow" class="tab-pane">
+<pre><span class="kw">static double</span> <span class="fn">fastPow</span>(<span class="tp">double</span> x, <span class="tp">int</span> n) {
+    <span class="kw">if</span> (n == <span class="num">0</span>) <span class="kw">return</span> <span class="num">1.0</span>;
+    <span class="kw">if</span> (n &lt; <span class="num">0</span>)  <span class="kw">return</span> <span class="fn">fastPow</span>(<span class="num">1.0</span> / x, -n);
+    <span class="tp">double</span> half = <span class="fn">fastPow</span>(x, n / <span class="num">2</span>);
+    <span class="kw">return</span> (n % <span class="num">2</span> == <span class="num">0</span>) ? half * half : x * half * half;
+}
+<span class="cm">// fastPow(2, 10) -> 1024.0  (solo 4 multiplicaciones)</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 8. EJERCICIOS ─────────────────────────────────────────────── -->
+<section id="ejercicios">
+  <div class="section-label">08 &mdash; Practica</div>
+  <h2>10 ejercicios propuestos</h2>
+  <p style="margin-bottom:1.5rem">Implementa cada ejercicio en Java aplicando los principios de recursion y, donde aplique, la estrategia dividir y vencer. Para cada ejercicio: identifica el caso base, formula la recurrencia, traza la pila para n=3 y determina la complejidad.</p>
+
+  <div style="border:1px solid var(--rule)">
+    <ol class="exercises">
+      <li>
+        <strong>Suma de digitos <span class="ex-tag tag-easy">FACIL</span></strong>
+        Escribe una funcion recursiva que reciba un entero positivo y retorne la suma de sus digitos. Ejemplo: <code>sumaDigitos(1234)</code> &rarr; 10. Analiza su complejidad en funcion del numero de digitos d = floor(log10 n) + 1.
+      </li>
+      <li>
+        <strong>Palindromo recursivo <span class="ex-tag tag-easy">FACIL</span></strong>
+        Determina si una cadena es palindromo usando recursion pura (sin bucles ni <code>reverse()</code>). Caso base: cadenas de 0 o 1 caracteres. Aplica al validar placas, codigos o identificadores en sistemas legacy.
+      </li>
+      <li>
+        <strong>Potencia modular <span class="ex-tag tag-med">MEDIO</span></strong>
+        Implementa <code>powMod(base, exp, mod)</code> que calcule (base<sup>exp</sup>) % mod eficientemente con fast exponentiation. Aplicacion directa: verificacion de firmas digitales en RSA.
+      </li>
+      <li>
+        <strong>Contador de ocurrencias en arbol <span class="ex-tag tag-med">MEDIO</span></strong>
+        Dado un arbol binario, escribe una funcion recursiva que cuente cuantas veces aparece un valor dado. Considera valores duplicados. Complejidad O(n) donde n es el numero de nodos.
+      </li>
+      <li>
+        <strong>Flatten de lista anidada <span class="ex-tag tag-med">MEDIO</span></strong>
+        Dada una <code>List&lt;Object&gt;</code> donde cada elemento puede ser un <code>Integer</code> u otra <code>List&lt;Object&gt;</code>, aplana recursivamente a una lista plana. Uso real: parseo de JSON anidado en APIs REST.
+      </li>
+      <li>
+        <strong>Numero de caminos en grilla <span class="ex-tag tag-med">MEDIO</span></strong>
+        Cuenta cuantos caminos existen desde la esquina superior-izquierda hasta la inferior-derecha de una grilla M&times;N moviendose solo abajo o a la derecha. Implementa con y sin memoizacion; compara tiempos para M=N=20.
+      </li>
+      <li>
+        <strong>Merge Sort en lista enlazada <span class="ex-tag tag-med">MEDIO</span></strong>
+        Implementa Merge Sort sobre una lista enlazada simple (no un arreglo). Este es el algoritmo usado internamente por Java para <code>LinkedList.sort()</code>. Atencion especial al paso de combinar.
+      </li>
+      <li>
+        <strong>Evaluador de expresiones aritmeticas <span class="ex-tag tag-hard">DIFICIL</span></strong>
+        Construye un evaluador recursivo para expresiones completamente parentizadas: <code>((3 + 5) * (2 - 1))</code>. Es el nucleo de parsers en calculadoras, hojas de calculo y lenguajes de programacion.
+      </li>
+      <li>
+        <strong>Permutaciones de una cadena <span class="ex-tag tag-hard">DIFICIL</span></strong>
+        Genera todas las permutaciones de una cadena de n caracteres usando recursion con backtracking. Aplicacion: generacion de contrasenas, anagramas en motores de busqueda y problemas de optimizacion combinatoria.
+      </li>
+      <li>
+        <strong>Algoritmo de Karatsuba <span class="ex-tag tag-hard">DIFICIL</span></strong>
+        Implementa la multiplicacion de enteros grandes con el algoritmo de Karatsuba (divide y vencer, O(n<sup>1.585</sup>) vs O(n&sup2;) del metodo escolar). Usado en criptografia y aritmetica de precision arbitraria; <code>BigInteger</code> en Java usa una variante.
+      </li>
+    </ol>
+  </div>
+
+  <div class="callout" style="margin-top:1.5rem">
+    <strong>Metodologia sugerida:</strong> (1) Identifica el caso base. (2) Formula la relacion de recurrencia T(n). (3) Escribe el codigo. (4) Traza la pila para n=3 o n=4 a mano. (5) Resuelve T(n) con arbol de recursion o Teorema Maestro. (6) Compara con la version iterativa en tiempo y espacio.
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Algoritmos &middot; Recursion &amp; Divide and Conquer &middot; Ingenieria de Sistemas
+</footer>
+
+<script>
+function switchTab(btn, paneId) {
+  var tabs = btn.closest('.code-tabs');
+  tabs.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  tabs.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById(paneId).classList.add('active');
+}
+</script>
+</body>
+</html>
