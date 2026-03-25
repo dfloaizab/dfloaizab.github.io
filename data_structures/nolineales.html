@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Árboles y Estructuras de datos no lineales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:     #1a1814;
+    --ink2:    #3d3a35;
+    --ink3:    #6b6760;
+    --paper:   #f5f2ed;
+    --paper2:  #ede9e2;
+    --paper3:  #e4dfd6;
+    --rule:    #d4cfc6;
+    --accent:  #2d5a8e;
+    --accent2: #1a3a5c;
+    --accent3: #c0d6ef;
+    --red:     #8b2c2c;
+    --green:   #2c6b3a;
+    --amber:   #7a5c1a;
+    --teal:    #1e6b6b;
+    --mono:    'DM Mono', monospace;
+    --serif:   'DM Serif Display', serif;
+    --sans:    'DM Sans', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); font-size: 15px; line-height: 1.7; }
+
+  header {
+    background: var(--ink); color: var(--paper);
+    padding: 4rem 2rem 3rem; position: relative; overflow: hidden;
+  }
+  header::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(255,255,255,0.03) 31px, rgba(255,255,255,0.03) 32px);
+  }
+  .header-inner { max-width: 900px; margin: 0 auto; position: relative; }
+  .header-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; color: var(--accent3); text-transform: uppercase; margin-bottom: 1rem; }
+  header h1 { font-family: var(--serif); font-size: clamp(2.8rem, 6vw, 4.5rem); line-height: 1.05; color: #fff; margin-bottom: 1.25rem; }
+  header h1 em { color: var(--accent3); font-style: italic; }
+  .header-desc { font-size: 15px; color: #a09890; max-width: 560px; line-height: 1.75; }
+
+  nav { background: var(--paper2); border-bottom: 1px solid var(--rule); position: sticky; top: 0; z-index: 100; }
+  .nav-inner { max-width: 900px; margin: 0 auto; padding: 0 2rem; display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
+  .nav-inner::-webkit-scrollbar { display: none; }
+  nav a { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--ink3); text-decoration: none; padding: 0.85rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
+  nav a:hover { color: var(--ink); border-bottom-color: var(--accent); }
+
+  main { max-width: 900px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+  section { margin-bottom: 4rem; }
+
+  .section-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; color: var(--ink3); text-transform: uppercase; margin-bottom: 0.5rem; }
+  h2 { font-family: var(--serif); font-size: clamp(1.6rem, 3vw, 2.2rem); color: var(--ink); margin-bottom: 1.25rem; line-height: 1.2; }
+  h3 { font-family: var(--sans); font-size: 1rem; font-weight: 500; color: var(--ink2); margin-bottom: 0.5rem; margin-top: 1.5rem; }
+  p { color: var(--ink2); margin-bottom: 0.85rem; }
+  p:last-child { margin-bottom: 0; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent3); transition: border-color 0.15s; }
+  a:hover { border-bottom-color: var(--accent); }
+
+  .divider { height: 1px; background: var(--rule); margin: 3.5rem 0; }
+
+  .cards { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .cards-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .cards-3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .card { background: var(--paper); padding: 1.5rem; }
+  .card-accent-top   { border-top: 3px solid var(--accent); }
+  .card-accent-red   { border-top: 3px solid var(--red); }
+  .card-accent-green { border-top: 3px solid var(--green); }
+  .card-accent-teal  { border-top: 3px solid var(--teal); }
+  .card-accent-amber { border-top: 3px solid var(--amber); }
+  .card h3 { margin-top: 0; }
+  .card p  { font-size: 14px; }
+
+  .def-box { border-left: 3px solid var(--accent); background: var(--paper2); padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+  .def-box p { font-size: 15px; font-weight: 300; font-style: italic; color: var(--ink); margin: 0; }
+
+  .code-tabs { margin: 1.5rem 0; }
+  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--rule); }
+  .tab-btn { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; background: none; border: none; padding: 0.55rem 1rem; color: var(--ink3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.12s; }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  pre { background: var(--ink); color: #d4d0c8; font-family: var(--mono); font-size: 12.5px; line-height: 1.65; padding: 1.25rem 1.5rem; overflow-x: auto; }
+  .kw  { color: #7eb8f7; }
+  .fn  { color: #f7c97e; }
+  .cm  { color: #7a7570; font-style: italic; }
+  .str { color: #a8d8a8; }
+  .num { color: #f7a87e; }
+  .tp  { color: #c8a8f7; }
+
+  .table-wrap { overflow-x: auto; margin: 1.25rem 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; font-weight: 400; padding: 0.65rem 1rem; text-align: left; }
+  td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--rule); color: var(--ink2); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: var(--paper2); }
+  td code, p code { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+
+  .svg-wrap { background: var(--paper2); border: 1px solid var(--rule); padding: 1.5rem; margin: 1.5rem 0; overflow-x: auto; }
+  .svg-wrap svg { display: block; margin: 0 auto; max-width: 100%; }
+
+  .callout { background: var(--paper2); border: 1px solid var(--rule); border-left: 3px solid var(--amber); padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: 14px; color: var(--ink2); }
+  .callout strong { color: var(--ink); }
+
+  .callout-teal { border-left-color: var(--teal); }
+  .callout-green { border-left-color: var(--green); }
+
+  .parts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 1.25rem 0; }
+  .part { background: var(--paper); padding: 1.25rem; }
+  .part-num { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 0.35rem; }
+  .part h4 { font-family: var(--sans); font-size: 14px; font-weight: 500; margin-bottom: 0.4rem; }
+  .part p  { font-size: 13px; color: var(--ink3); margin: 0; }
+
+  .example-block { border: 1px solid var(--rule); margin: 2rem 0; }
+  .example-header { background: var(--paper3); padding: 0.75rem 1.25rem; display: flex; align-items: baseline; gap: 0.75rem; border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+  .example-header .ex-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; color: var(--ink3); }
+  .example-header h3 { font-size: 14px; font-weight: 500; color: var(--ink); margin: 0; }
+  .example-header .ex-badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; background: var(--accent3); color: var(--accent2); margin-left: auto; white-space: nowrap; }
+  .example-header .ex-badge-green { background: #c8e8d0; color: #1a4028; }
+  .example-header .ex-badge-amber { background: #f0e4c0; color: #4a3400; }
+  .example-body { padding: 1.25rem; }
+  .example-body p { font-size: 14px; margin-bottom: 0.75rem; }
+
+  .term-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 1.25rem 0; }
+  .term { background: var(--paper); padding: 1rem 1.25rem; }
+  .term-name { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 0.06em; margin-bottom: 0.25rem; font-weight: 500; }
+  .term p { font-size: 13px; color: var(--ink2); margin: 0; }
+
+  .resources { border: 1px solid var(--rule); }
+  .resource-item { padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--rule); display: flex; align-items: baseline; gap: 0.75rem; font-size: 14px; }
+  .resource-item:last-child { border-bottom: none; }
+  .resource-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; padding: 2px 7px; border: 1px solid var(--rule); color: var(--ink3); white-space: nowrap; flex-shrink: 0; }
+  .resource-item a { color: var(--accent); }
+
+  .freq-bar { display: flex; align-items: center; gap: 8px; margin: 4px 0; font-size: 13px; }
+  .freq-bar-fill { height: 8px; background: var(--accent); opacity: 0.7; border-radius: 2px; }
+
+  footer { background: var(--ink); color: var(--ink3); text-align: center; padding: 2rem; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; }
+
+  @media (max-width: 600px) {
+    main { padding: 2rem 1rem 4rem; }
+    header { padding: 2.5rem 1rem 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-label">Estructuras de Datos &middot; Unidad II: Estructuras de Datos no Lineales</div>
+    <h1>Árboles y <em>Estructuras de Datos no Lineales</em></h1>
+    <p class="header-desc">Terminología, características y operaciones de árboles binarios, árboles de búsqueda (BST) y árboles de Huffman, con gráficas vectoriales y ejemplos en Java.</p>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#no-lineales">No lineales</a>
+    <a href="#terminologia">Terminología</a>
+    <a href="#operaciones">Operaciones</a>
+    <a href="#bst">BST</a>
+    <a href="#huffman">Huffman</a>
+    <a href="#recursos">Recursos</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ── 1. ESTRUCTURAS NO LINEALES ──────────────────────────────── -->
+<section id="no-lineales">
+  <div class="section-label">01 &mdash; Concepto fundamental</div>
+  <h2>Estructuras de datos no lineales</h2>
+  <p>Una <strong>estructura de datos no lineal</strong> es aquella en la que los elementos no se organizan secuencialmente uno tras otro, sino en relaciones jerárquicas o en red, donde un elemento puede estar conectado a múltiples elementos. Esto contrasta con las estructuras lineales (arreglos, listas enlazadas, pilas, colas), donde cada elemento tiene exactamente un predecesor y un sucesor.</p>
+
+  <div class="def-box">
+    <p>"En una estructura no lineal, los datos se organizan en niveles o redes, permitiendo representar relaciones complejas como jerarquías, dependencias y conexiones múltiples que son imposibles de expresar eficientemente en forma lineal."</p>
+  </div>
+
+  <div class="cards cards-2" style="margin:1.5rem 0">
+    <div class="card card-accent-top">
+      <h3>Árboles</h3>
+      <p>Estructura jerárquica acíclica con un nodo raíz. Cada nodo puede tener cero o más nodos hijos. Usados en sistemas de archivos, compiladores, bases de datos y compresión de datos.</p>
+      <p style="font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:0.5rem">Ejemplos: BST, AVL, Heap, Trie, B-Tree</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--teal)">
+      <h3>Grafos</h3>
+      <p>Conjunto de vértices y aristas. Pueden ser dirigidos o no, cíclicos o acíclicos. Los árboles son un caso especial de grafo dirigido acíclico (DAG) con un único nodo raíz.</p>
+      <p style="font-family:var(--mono);font-size:11px;color:var(--teal);margin-top:0.5rem">Ejemplos: Redes, mapas, dependencias</p>
+    </div>
+  </div>
+
+  <!-- SVG comparación lineal vs no lineal -->
+  <div class="svg-wrap">
+    <svg width="640" height="220" viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Mono',monospace">
+      <defs>
+        <marker id="arr" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+          <path d="M1 1 L6 3.5 L1 6" fill="none" stroke="#9ba8b8" stroke-width="1"/>
+        </marker>
+        <marker id="arr2" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+          <path d="M1 1 L6 3.5 L1 6" fill="none" stroke="#2d5a8e" stroke-width="1"/>
+        </marker>
+      </defs>
+
+      <!-- Título izq -->
+      <text x="155" y="18" text-anchor="middle" font-size="10" fill="#6b6760" letter-spacing="2">LINEAL (Lista)</text>
+      <!-- Nodos lista -->
+      <rect x="20"  y="30" width="42" height="32" rx="3" fill="#2d5a8e" fill-opacity="0.12" stroke="#2d5a8e" stroke-width="1"/>
+      <rect x="82"  y="30" width="42" height="32" rx="3" fill="#2d5a8e" fill-opacity="0.12" stroke="#2d5a8e" stroke-width="1"/>
+      <rect x="144" y="30" width="42" height="32" rx="3" fill="#2d5a8e" fill-opacity="0.12" stroke="#2d5a8e" stroke-width="1"/>
+      <rect x="206" y="30" width="42" height="32" rx="3" fill="#2d5a8e" fill-opacity="0.12" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="41"  y="50" text-anchor="middle" font-size="12" fill="#1a1814">A</text>
+      <text x="103" y="50" text-anchor="middle" font-size="12" fill="#1a1814">B</text>
+      <text x="165" y="50" text-anchor="middle" font-size="12" fill="#1a1814">C</text>
+      <text x="227" y="50" text-anchor="middle" font-size="12" fill="#1a1814">D</text>
+      <line x1="62"  y1="46" x2="80"  y2="46" stroke="#9ba8b8" stroke-width="1.2" marker-end="url(#arr)"/>
+      <line x1="124" y1="46" x2="142" y2="46" stroke="#9ba8b8" stroke-width="1.2" marker-end="url(#arr)"/>
+      <line x1="186" y1="46" x2="204" y2="46" stroke="#9ba8b8" stroke-width="1.2" marker-end="url(#arr)"/>
+      <text x="155" y="82" text-anchor="middle" font-size="10" fill="#6b6760">1 predecesor → 1 sucesor</text>
+
+      <!-- Separador vertical -->
+      <line x1="310" y1="15" x2="310" y2="205" stroke="#d4cfc6" stroke-width="1" stroke-dasharray="4 3"/>
+
+      <!-- Título der -->
+      <text x="475" y="18" text-anchor="middle" font-size="10" fill="#6b6760" letter-spacing="2">NO LINEAL (Árbol)</text>
+
+      <!-- Raíz -->
+      <circle cx="475" cy="52" r="18" fill="#2d5a8e" fill-opacity="0.18" stroke="#2d5a8e" stroke-width="1.2"/>
+      <text x="475" y="57" text-anchor="middle" font-size="12" fill="#1a3a5c" font-weight="500">A</text>
+
+      <!-- Nivel 1 -->
+      <circle cx="400" cy="108" r="16" fill="#2d5a8e" fill-opacity="0.12" stroke="#2d5a8e" stroke-width="1"/>
+      <circle cx="550" cy="108" r="16" fill="#2d5a8e" fill-opacity="0.12" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="400" y="113" text-anchor="middle" font-size="12" fill="#1a1814">B</text>
+      <text x="550" y="113" text-anchor="middle" font-size="12" fill="#1a1814">C</text>
+      <line x1="460" y1="67" x2="415" y2="93" stroke="#9ba8b8" stroke-width="1.2" marker-end="url(#arr)"/>
+      <line x1="490" y1="67" x2="535" y2="93" stroke="#9ba8b8" stroke-width="1.2" marker-end="url(#arr)"/>
+
+      <!-- Nivel 2 -->
+      <circle cx="360" cy="162" r="14" fill="#2d5a8e" fill-opacity="0.08" stroke="#2d5a8e" stroke-width="1"/>
+      <circle cx="440" cy="162" r="14" fill="#2d5a8e" fill-opacity="0.08" stroke="#2d5a8e" stroke-width="1"/>
+      <circle cx="520" cy="162" r="14" fill="#2d5a8e" fill-opacity="0.08" stroke="#2d5a8e" stroke-width="1"/>
+      <circle cx="590" cy="162" r="14" fill="#2d5a8e" fill-opacity="0.08" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="360" y="167" text-anchor="middle" font-size="11" fill="#1a1814">D</text>
+      <text x="440" y="167" text-anchor="middle" font-size="11" fill="#1a1814">E</text>
+      <text x="520" y="167" text-anchor="middle" font-size="11" fill="#1a1814">F</text>
+      <text x="590" y="167" text-anchor="middle" font-size="11" fill="#1a1814">G</text>
+      <line x1="387" y1="121" x2="372" y2="149" stroke="#9ba8b8" stroke-width="1" marker-end="url(#arr)"/>
+      <line x1="413" y1="121" x2="428" y2="149" stroke="#9ba8b8" stroke-width="1" marker-end="url(#arr)"/>
+      <line x1="537" y1="121" x2="527" y2="149" stroke="#9ba8b8" stroke-width="1" marker-end="url(#arr)"/>
+      <line x1="563" y1="121" x2="578" y2="149" stroke="#9ba8b8" stroke-width="1" marker-end="url(#arr)"/>
+
+      <text x="475" y="200" text-anchor="middle" font-size="10" fill="#6b6760">1 padre → N hijos (relación jerárquica)</text>
+    </svg>
+  </div>
+
+  <div class="callout">
+    <strong>¿Por qué importan?</strong> Los árboles permiten búsquedas en O(log n) frente a O(n) de una lista. Los grafos modelan redes de transporte, sociales e Internet. Ninguna estructura lineal puede representar estas relaciones de forma eficiente.
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 2. TERMINOLOGÍA ─────────────────────────────────────────── -->
+<section id="terminologia">
+  <div class="section-label">02 &mdash; Vocabulario esencial</div>
+  <h2>Terminología de árboles binarios</h2>
+  <p>Un <strong>árbol binario</strong> es una estructura en la que cada nodo tiene <em>como máximo dos hijos</em>, denominados hijo izquierdo e hijo derecho. Comprender su vocabulario es indispensable para leer y escribir algoritmos sobre árboles.</p>
+
+  <!-- SVG árbol con etiquetas -->
+  <div class="svg-wrap">
+    <svg width="640" height="310" viewBox="0 0 640 310" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Mono',monospace">
+      <defs>
+        <marker id="a3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M1 1 L5 3 L1 5" fill="none" stroke="#b0aaa4" stroke-width="1"/>
+        </marker>
+      </defs>
+
+      <!-- Aristas -->
+      <line x1="320" y1="56"  x2="200" y2="112" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="320" y1="56"  x2="440" y2="112" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="200" y1="136" x2="130" y2="188" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="200" y1="136" x2="268" y2="188" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="440" y1="136" x2="380" y2="188" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="440" y1="136" x2="510" y2="188" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="130" y1="212" x2="98"  y2="258" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="130" y1="212" x2="160" y2="258" stroke="#c8c3bc" stroke-width="1.5"/>
+
+      <!-- Nodo raíz -->
+      <circle cx="320" cy="44"  r="22" fill="#2d5a8e" stroke="#1a3a5c" stroke-width="1.5"/>
+      <text x="320" y="49" text-anchor="middle" font-size="13" fill="#fff" font-weight="500">50</text>
+
+      <!-- Nivel 1 -->
+      <circle cx="200" cy="124" r="20" fill="#2d5a8e" fill-opacity="0.22" stroke="#2d5a8e" stroke-width="1.2"/>
+      <circle cx="440" cy="124" r="20" fill="#2d5a8e" fill-opacity="0.22" stroke="#2d5a8e" stroke-width="1.2"/>
+      <text x="200" y="129" text-anchor="middle" font-size="13" fill="#1a3a5c">30</text>
+      <text x="440" y="129" text-anchor="middle" font-size="13" fill="#1a3a5c">70</text>
+
+      <!-- Nivel 2 -->
+      <circle cx="130" cy="200" r="18" fill="#2d5a8e" fill-opacity="0.14" stroke="#2d5a8e" stroke-width="1"/>
+      <circle cx="268" cy="200" r="18" fill="#2d5a8e" fill-opacity="0.14" stroke="#2d5a8e" stroke-width="1"/>
+      <circle cx="380" cy="200" r="18" fill="#2d5a8e" fill-opacity="0.14" stroke="#2d5a8e" stroke-width="1"/>
+      <circle cx="510" cy="200" r="18" fill="#2d5a8e" fill-opacity="0.14" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="130" y="205" text-anchor="middle" font-size="12" fill="#1a1814">20</text>
+      <text x="268" y="205" text-anchor="middle" font-size="12" fill="#1a1814">40</text>
+      <text x="380" y="205" text-anchor="middle" font-size="12" fill="#1a1814">60</text>
+      <text x="510" y="205" text-anchor="middle" font-size="12" fill="#1a1814">80</text>
+
+      <!-- Nivel 3 (hojas) -->
+      <circle cx="98"  cy="270" r="16" fill="#2d5a8e" fill-opacity="0.08" stroke="#2d5a8e" stroke-width="1"/>
+      <circle cx="160" cy="270" r="16" fill="#2d5a8e" fill-opacity="0.08" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="98"  y="275" text-anchor="middle" font-size="11" fill="#3d3a35">10</text>
+      <text x="160" y="275" text-anchor="middle" font-size="11" fill="#3d3a35">25</text>
+
+      <!-- Etiquetas -->
+      <line x1="355" y1="30" x2="420" y2="12" stroke="#b0aaa4" stroke-width="0.8" stroke-dasharray="3 2"/>
+      <text x="425" y="10" font-size="10" fill="#6b6760">Raíz (root)</text>
+
+      <line x1="180" y1="112" x2="100" y2="90" stroke="#b0aaa4" stroke-width="0.8" stroke-dasharray="3 2"/>
+      <text x="35" y="88" font-size="10" fill="#6b6760">Nodo interno</text>
+
+      <line x1="510" y1="182" x2="570" y2="162" stroke="#b0aaa4" stroke-width="0.8" stroke-dasharray="3 2"/>
+      <text x="575" y="160" font-size="10" fill="#6b6760">Subárbol der.</text>
+
+      <line x1="160" y1="258" x2="220" y2="242" stroke="#b0aaa4" stroke-width="0.8" stroke-dasharray="3 2"/>
+      <text x="225" y="240" font-size="10" fill="#6b6760">Hoja (leaf)</text>
+
+      <!-- Altura / nivel -->
+      <line x1="38" y1="44" x2="38" y2="270" stroke="#d4cfc6" stroke-width="1" stroke-dasharray="2 2"/>
+      <line x1="34" y1="44"  x2="42" y2="44"  stroke="#d4cfc6" stroke-width="1"/>
+      <line x1="34" y1="124" x2="42" y2="124" stroke="#d4cfc6" stroke-width="1"/>
+      <line x1="34" y1="200" x2="42" y2="200" stroke="#d4cfc6" stroke-width="1"/>
+      <line x1="34" y1="270" x2="42" y2="270" stroke="#d4cfc6" stroke-width="1"/>
+      <text x="28" y="48"  text-anchor="end" font-size="9" fill="#9ba8b8">Nivel 0</text>
+      <text x="28" y="128" text-anchor="end" font-size="9" fill="#9ba8b8">Nivel 1</text>
+      <text x="28" y="204" text-anchor="end" font-size="9" fill="#9ba8b8">Nivel 2</text>
+      <text x="28" y="274" text-anchor="end" font-size="9" fill="#9ba8b8">Nivel 3</text>
+
+      <!-- Pie -->
+      <text x="320" y="300" text-anchor="middle" font-size="10" fill="#6b6760">Altura = 3 &nbsp;|&nbsp; 9 nodos &nbsp;|&nbsp; 2 hojas en nivel 3</text>
+    </svg>
+  </div>
+
+  <div class="term-grid">
+    <div class="term">
+      <div class="term-name">RAÍZ (root)</div>
+      <p>Nodo superior del árbol, sin padre. Único punto de entrada. En el ejemplo: nodo 50.</p>
+    </div>
+    <div class="term">
+      <div class="term-name">NODO</div>
+      <p>Unidad básica de almacenamiento. Contiene un dato y referencias a sus hijos izquierdo y derecho.</p>
+    </div>
+    <div class="term">
+      <div class="term-name">HOJA (leaf)</div>
+      <p>Nodo sin hijos. Sus referencias izquierda y derecha son <code>null</code>. Ejemplos: 10, 25, 40, 60, 80.</p>
+    </div>
+    <div class="term">
+      <div class="term-name">PADRE / HIJO</div>
+      <p>El nodo que apunta a otro es el padre; el apuntado es el hijo. El nodo 30 es padre de 20 y 40.</p>
+    </div>
+    <div class="term">
+      <div class="term-name">NIVEL (depth)</div>
+      <p>Distancia en aristas desde la raíz. La raíz está en nivel 0; sus hijos en nivel 1, etc.</p>
+    </div>
+    <div class="term">
+      <div class="term-name">ALTURA (height)</div>
+      <p>Longitud del camino más largo desde la raíz hasta una hoja. En el ejemplo: altura = 3.</p>
+    </div>
+    <div class="term">
+      <div class="term-name">SUBÁRBOL</div>
+      <p>Cualquier nodo y todos sus descendientes forman un subárbol. Cada hijo de la raíz encabeza un subárbol.</p>
+    </div>
+    <div class="term">
+      <div class="term-name">GRADO</div>
+      <p>Número de hijos de un nodo. En un árbol binario, el grado máximo es 2. Las hojas tienen grado 0.</p>
+    </div>
+    <div class="term">
+      <div class="term-name">HERMANOS</div>
+      <p>Nodos con el mismo padre. Los nodos 20 y 40 son hermanos; 60 y 80 también lo son.</p>
+    </div>
+    <div class="term">
+      <div class="term-name">ÁRBOL COMPLETO</div>
+      <p>Todos los niveles están llenos excepto posiblemente el último, que se llena de izquierda a derecha.</p>
+    </div>
+    <div class="term">
+      <div class="term-name">ÁRBOL PERFECTO</div>
+      <p>Todos los nodos internos tienen 2 hijos y todas las hojas están en el mismo nivel. Tiene 2^(h+1) − 1 nodos.</p>
+    </div>
+    <div class="term">
+      <div class="term-name">ÁRBOL DEGENERADO</div>
+      <p>Cada nodo tiene como máximo un hijo. Degenera en una lista enlazada. Caso peor para BST.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 3. OPERACIONES Y CARACTERÍSTICAS ──────────────────────── -->
+<section id="operaciones">
+  <div class="section-label">03 &mdash; Estructura y operaciones</div>
+  <h2>Operaciones y características esenciales</h2>
+  <p>Los árboles binarios definen tres recorridos clásicos que determinan el orden en que se procesan los nodos. Cada recorrido produce un orden distinto y tiene aplicaciones específicas.</p>
+
+  <div class="parts-grid">
+    <div class="part">
+      <div class="part-num">PREORDEN</div>
+      <h4>Raíz → Izq → Der</h4>
+      <p>Útil para copiar o serializar un árbol. Los compiladores usan preorden al evaluar árboles de expresión.</p>
+    </div>
+    <div class="part">
+      <div class="part-num">INORDEN</div>
+      <h4>Izq → Raíz → Der</h4>
+      <p>En un BST produce los elementos en orden ascendente. Base de los índices de bases de datos.</p>
+    </div>
+    <div class="part">
+      <div class="part-num">POSTORDEN</div>
+      <h4>Izq → Der → Raíz</h4>
+      <p>Útil para eliminar un árbol o evaluar expresiones. El nodo padre se procesa cuando los hijos ya terminaron.</p>
+    </div>
+    <div class="part">
+      <div class="part-num">POR NIVELES</div>
+      <h4>BFS con cola</h4>
+      <p>Recorre nivel a nivel, de izquierda a derecha. Usa una <code>Queue</code> auxiliar. Aplicación: transmisión de datos de árbol.</p>
+    </div>
+  </div>
+
+  <!-- SVG recorridos -->
+  <div class="svg-wrap">
+    <svg width="640" height="250" viewBox="0 0 640 250" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Mono',monospace">
+      <defs>
+        <marker id="ap" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+          <path d="M1 1 L6 3.5 L1 6" fill="none" stroke="#2d5a8e" stroke-width="1.2"/>
+        </marker>
+      </defs>
+
+      <!-- Título -->
+      <text x="320" y="15" text-anchor="middle" font-size="10" fill="#6b6760" letter-spacing="2">RESULTADO DE LOS RECORRIDOS — árbol del ejemplo</text>
+
+      <!-- Árbol pequeño para referencia -->
+      <line x1="130" y1="52" x2="90"  y2="94" stroke="#c8c3bc" stroke-width="1.2"/>
+      <line x1="130" y1="52" x2="170" y2="94" stroke="#c8c3bc" stroke-width="1.2"/>
+      <line x1="90"  y1="110" x2="70" y2="148" stroke="#c8c3bc" stroke-width="1.2"/>
+      <line x1="90"  y1="110" x2="110" y2="148" stroke="#c8c3bc" stroke-width="1.2"/>
+      <circle cx="130" cy="42"  r="16" fill="#2d5a8e" stroke="#1a3a5c" stroke-width="1.2"/>
+      <circle cx="90"  cy="102" r="14" fill="#2d5a8e" fill-opacity="0.22" stroke="#2d5a8e" stroke-width="1"/>
+      <circle cx="170" cy="102" r="14" fill="#2d5a8e" fill-opacity="0.22" stroke="#2d5a8e" stroke-width="1"/>
+      <circle cx="70"  cy="158" r="12" fill="#2d5a8e" fill-opacity="0.1" stroke="#2d5a8e" stroke-width="1"/>
+      <circle cx="110" cy="158" r="12" fill="#2d5a8e" fill-opacity="0.1" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="130" y="47" text-anchor="middle" font-size="11" fill="#fff">4</text>
+      <text x="90"  y="107" text-anchor="middle" font-size="11" fill="#1a3a5c">2</text>
+      <text x="170" y="107" text-anchor="middle" font-size="11" fill="#1a3a5c">6</text>
+      <text x="70"  y="163" text-anchor="middle" font-size="10" fill="#3d3a35">1</text>
+      <text x="110" y="163" text-anchor="middle" font-size="10" fill="#3d3a35">3</text>
+      <text x="130" y="192" text-anchor="middle" font-size="9" fill="#9ba8b8">árbol de ejemplo</text>
+
+      <!-- Resultados -->
+      <rect x="270" y="30" width="330" height="190" rx="3" fill="none" stroke="#d4cfc6" stroke-width="1"/>
+
+      <!-- Preorden -->
+      <text x="285" y="55" font-size="10" fill="#6b6760" letter-spacing="1">PREORDEN (raíz→izq→der)</text>
+      <rect x="285" y="62" width="298" height="26" rx="2" fill="#2d5a8e" fill-opacity="0.12" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="434" y="79" text-anchor="middle" font-size="12" fill="#1a3a5c" font-weight="500">4, 2, 1, 3, 6</text>
+
+      <!-- Inorden -->
+      <text x="285" y="108" font-size="10" fill="#6b6760" letter-spacing="1">INORDEN (izq→raíz→der)</text>
+      <rect x="285" y="115" width="298" height="26" rx="2" fill="#2c6b3a" fill-opacity="0.12" stroke="#2c6b3a" stroke-width="1"/>
+      <text x="434" y="132" text-anchor="middle" font-size="12" fill="#1a4028" font-weight="500">1, 2, 3, 4, 6  ← ordenado</text>
+
+      <!-- Postorden -->
+      <text x="285" y="160" font-size="10" fill="#6b6760" letter-spacing="1">POSTORDEN (izq→der→raíz)</text>
+      <rect x="285" y="167" width="298" height="26" rx="2" fill="#7a5c1a" fill-opacity="0.10" stroke="#7a5c1a" stroke-width="1"/>
+      <text x="434" y="184" text-anchor="middle" font-size="12" fill="#4a3400" font-weight="500">1, 3, 2, 6, 4</text>
+
+      <!-- Niveles -->
+      <text x="285" y="212" font-size="10" fill="#6b6760" letter-spacing="1">POR NIVELES (BFS)</text>
+      <rect x="285" y="0" width="0" height="0"/>
+    </svg>
+  </div>
+
+  <h3>Representación en Java</h3>
+  <div class="code-tabs">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab(this,'java-node')">Nodo y clase árbol</button>
+      <button class="tab-btn" onclick="switchTab(this,'java-recorridos')">Recorridos</button>
+      <button class="tab-btn" onclick="switchTab(this,'java-bfs')">Por niveles (BFS)</button>
+    </div>
+    <div id="java-node" class="tab-pane active">
+<pre><span class="kw">class</span> <span class="tp">Nodo</span>&lt;<span class="tp">T</span>&gt; {
+    <span class="tp">T</span> dato;
+    <span class="tp">Nodo</span>&lt;<span class="tp">T</span>&gt; izq, der;
+
+    <span class="fn">Nodo</span>(<span class="tp">T</span> dato) {
+        <span class="kw">this</span>.dato = dato;
+        <span class="kw">this</span>.izq = <span class="kw">this</span>.der = <span class="kw">null</span>;
+    }
+}
+
+<span class="kw">class</span> <span class="tp">ArbolBinario</span>&lt;<span class="tp">T</span>&gt; {
+    <span class="tp">Nodo</span>&lt;<span class="tp">T</span>&gt; raiz;
+
+    <span class="cm">// altura del árbol</span>
+    <span class="kw">static int</span> <span class="fn">altura</span>(<span class="tp">Nodo</span>&lt;?&gt; n) {
+        <span class="kw">if</span> (n == <span class="kw">null</span>) <span class="kw">return</span> -<span class="num">1</span>;
+        <span class="kw">return</span> <span class="num">1</span> + Math.<span class="fn">max</span>(<span class="fn">altura</span>(n.izq), <span class="fn">altura</span>(n.der));
+    }
+
+    <span class="cm">// número de nodos</span>
+    <span class="kw">static int</span> <span class="fn">contar</span>(<span class="tp">Nodo</span>&lt;?&gt; n) {
+        <span class="kw">if</span> (n == <span class="kw">null</span>) <span class="kw">return</span> <span class="num">0</span>;
+        <span class="kw">return</span> <span class="num">1</span> + <span class="fn">contar</span>(n.izq) + <span class="fn">contar</span>(n.der);
+    }
+}</pre>
+    </div>
+    <div id="java-recorridos" class="tab-pane">
+<pre><span class="kw">static void</span> <span class="fn">preorden</span>(<span class="tp">Nodo</span>&lt;?&gt; n) {
+    <span class="kw">if</span> (n == <span class="kw">null</span>) <span class="kw">return</span>;
+    System.out.<span class="fn">print</span>(n.dato + <span class="str">" "</span>); <span class="cm">// raíz primero</span>
+    <span class="fn">preorden</span>(n.izq);
+    <span class="fn">preorden</span>(n.der);
+}
+
+<span class="kw">static void</span> <span class="fn">inorden</span>(<span class="tp">Nodo</span>&lt;?&gt; n) {
+    <span class="kw">if</span> (n == <span class="kw">null</span>) <span class="kw">return</span>;
+    <span class="fn">inorden</span>(n.izq);
+    System.out.<span class="fn">print</span>(n.dato + <span class="str">" "</span>); <span class="cm">// raíz en medio</span>
+    <span class="fn">inorden</span>(n.der);
+}
+
+<span class="kw">static void</span> <span class="fn">postorden</span>(<span class="tp">Nodo</span>&lt;?&gt; n) {
+    <span class="kw">if</span> (n == <span class="kw">null</span>) <span class="kw">return</span>;
+    <span class="fn">postorden</span>(n.izq);
+    <span class="fn">postorden</span>(n.der);
+    System.out.<span class="fn">print</span>(n.dato + <span class="str">" "</span>); <span class="cm">// raíz al final</span>
+}</pre>
+    </div>
+    <div id="java-bfs" class="tab-pane">
+<pre><span class="kw">static void</span> <span class="fn">porNiveles</span>(<span class="tp">Nodo</span>&lt;?&gt; raiz) {
+    <span class="kw">if</span> (raiz == <span class="kw">null</span>) <span class="kw">return</span>;
+    <span class="tp">Queue</span>&lt;<span class="tp">Nodo</span>&lt;?&gt;&gt; cola = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;&gt;();
+    cola.<span class="fn">offer</span>(raiz);
+    <span class="kw">while</span> (!cola.<span class="fn">isEmpty</span>()) {
+        <span class="tp">Nodo</span>&lt;?&gt; n = cola.<span class="fn">poll</span>();
+        System.out.<span class="fn">print</span>(n.dato + <span class="str">" "</span>);
+        <span class="kw">if</span> (n.izq != <span class="kw">null</span>) cola.<span class="fn">offer</span>(n.izq);
+        <span class="kw">if</span> (n.der != <span class="kw">null</span>) cola.<span class="fn">offer</span>(n.der);
+    }
+}
+<span class="cm">// Resultado para el árbol de ejemplo: 4 2 6 1 3</span></pre>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Operación</th>
+          <th>Árbol binario simple</th>
+          <th>BST balanceado</th>
+          <th>Notas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Búsqueda</td><td><code>O(n)</code></td><td><code>O(log n)</code></td><td>BST ordena para aprovechar el árbol</td></tr>
+        <tr><td>Inserción</td><td><code>O(1)</code> (raíz)</td><td><code>O(log n)</code></td><td>BST mantiene propiedad de orden</td></tr>
+        <tr><td>Eliminación</td><td><code>O(n)</code></td><td><code>O(log n)</code></td><td>Requiere reequilibrio en AVL/RB</td></tr>
+        <tr><td>Recorrido</td><td><code>O(n)</code></td><td><code>O(n)</code></td><td>Siempre visita todos los nodos</td></tr>
+        <tr><td>Altura</td><td><code>O(n)</code></td><td><code>O(log n)</code></td><td>Clave para el rendimiento general</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 4. BST ───────────────────────────────────────────────────── -->
+<section id="bst">
+  <div class="section-label">04 &mdash; Árbol de búsqueda binaria</div>
+  <h2>Árboles binarios de búsqueda (BST)</h2>
+  <p>Un <strong>Binary Search Tree (BST)</strong> es un árbol binario con una propiedad de orden: para cada nodo, todos los valores de su subárbol izquierdo son <em>menores</em> y todos los del subárbol derecho son <em>mayores</em>. Esta propiedad permite búsqueda eficiente en O(log n) cuando el árbol está balanceado.</p>
+
+  <div class="def-box">
+    <p>"Para todo nodo N en un BST: max(subárbol_izquierdo) &lt; N.clave &lt; min(subárbol_derecho)."</p>
+  </div>
+
+  <h3>Características</h3>
+  <div class="cards cards-3" style="margin:1rem 0 1.5rem">
+    <div class="card card-accent-top">
+      <h3>Propiedad de orden</h3>
+      <p>La clave de cada nodo es mayor que todas las claves de su subárbol izquierdo y menor que todas las del derecho.</p>
+    </div>
+    <div class="card card-accent-top" style="border-top-color:var(--green)">
+      <h3>Inorden = ordenado</h3>
+      <p>El recorrido inorden de un BST siempre produce las claves en orden ascendente. Propiedad fundamental para iteradores.</p>
+    </div>
+    <div class="card card-accent-top" style="border-top-color:var(--amber)">
+      <h3>Dependencia del balance</h3>
+      <p>El rendimiento depende del balance. Un árbol degenerado (insertar en orden) da O(n). AVL y Rojo-Negro garantizan O(log n).</p>
+    </div>
+  </div>
+
+  <!-- SVG operaciones BST: inserción -->
+  <div class="svg-wrap">
+    <svg width="640" height="270" viewBox="0 0 640 270" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Mono',monospace">
+      <defs>
+        <marker id="ab" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+          <path d="M1 1 L6 3.5 L1 6" fill="none" stroke="#9ba8b8" stroke-width="1"/>
+        </marker>
+        <marker id="ar" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+          <path d="M1 1 L6 3.5 L1 6" fill="none" stroke="#8b2c2c" stroke-width="1.2"/>
+        </marker>
+      </defs>
+
+      <text x="320" y="15" text-anchor="middle" font-size="10" fill="#6b6760" letter-spacing="2">BÚSQUEDA EN BST — buscar 35</text>
+
+      <!-- Árbol BST -->
+      <line x1="320" y1="56"  x2="195" y2="110" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="320" y1="56"  x2="445" y2="110" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="195" y1="128" x2="130" y2="175" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="195" y1="128" x2="258" y2="175" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="445" y1="128" x2="390" y2="175" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="445" y1="128" x2="510" y2="175" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="258" y1="193" x2="232" y2="228" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="258" y1="193" x2="284" y2="228" stroke="#c8c3bc" stroke-width="1.5"/>
+
+      <!-- Nodo raíz 50 -->
+      <circle cx="320" cy="44"  r="22" fill="#2d5a8e" stroke="#1a3a5c" stroke-width="1.5"/>
+      <text x="320" y="49" text-anchor="middle" font-size="13" fill="#fff" font-weight="500">50</text>
+
+      <!-- Nivel 1: 25, 75 — camino izquierdo resaltado -->
+      <circle cx="195" cy="119" r="20" fill="#8b2c2c" fill-opacity="0.18" stroke="#8b2c2c" stroke-width="1.8"/>
+      <circle cx="445" cy="119" r="20" fill="#2d5a8e" fill-opacity="0.14" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="195" y="124" text-anchor="middle" font-size="13" fill="#8b2c2c" font-weight="500">25</text>
+      <text x="445" y="124" text-anchor="middle" font-size="13" fill="#1a3a5c">75</text>
+
+      <!-- Nivel 2 -->
+      <circle cx="130" cy="184" r="18" fill="#2d5a8e" fill-opacity="0.10" stroke="#2d5a8e" stroke-width="1"/>
+      <circle cx="258" cy="184" r="18" fill="#8b2c2c" fill-opacity="0.18" stroke="#8b2c2c" stroke-width="1.8"/>
+      <circle cx="390" cy="184" r="18" fill="#2d5a8e" fill-opacity="0.10" stroke="#2d5a8e" stroke-width="1"/>
+      <circle cx="510" cy="184" r="18" fill="#2d5a8e" fill-opacity="0.10" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="130" y="189" text-anchor="middle" font-size="12" fill="#3d3a35">10</text>
+      <text x="258" y="189" text-anchor="middle" font-size="12" fill="#8b2c2c" font-weight="500">40</text>
+      <text x="390" y="189" text-anchor="middle" font-size="12" fill="#3d3a35">60</text>
+      <text x="510" y="189" text-anchor="middle" font-size="12" fill="#3d3a35">80</text>
+
+      <!-- Nivel 3: 35, 45 -->
+      <circle cx="232" cy="238" r="16" fill="#2c6b3a" fill-opacity="0.25" stroke="#2c6b3a" stroke-width="2"/>
+      <circle cx="284" cy="238" r="16" fill="#2d5a8e" fill-opacity="0.08" stroke="#2d5a8e" stroke-width="1"/>
+      <text x="232" y="243" text-anchor="middle" font-size="12" fill="#1a4028" font-weight="500">35</text>
+      <text x="284" y="243" text-anchor="middle" font-size="12" fill="#3d3a35">45</text>
+
+      <!-- Flecha de búsqueda -->
+      <path d="M 595 44 Q 610 44 610 119 Q 610 158 580 175" fill="none" stroke="#8b2c2c" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#ar)"/>
+      <text x="620" y="70"  text-anchor="middle" font-size="9" fill="#8b2c2c">35 &lt; 50</text>
+      <text x="620" y="85"  text-anchor="middle" font-size="9" fill="#8b2c2c">→ izq</text>
+      <text x="620" y="140" text-anchor="middle" font-size="9" fill="#8b2c2c">35 &gt; 25</text>
+      <text x="620" y="155" text-anchor="middle" font-size="9" fill="#8b2c2c">→ der</text>
+
+      <!-- Encontrado -->
+      <text x="232" y="265" text-anchor="middle" font-size="10" fill="#2c6b3a" font-weight="500">✓ Encontrado</text>
+      <text x="320" y="260" text-anchor="middle" font-size="9.5" fill="#6b6760">3 comparaciones vs. hasta 8 en búsqueda lineal</text>
+    </svg>
+  </div>
+
+  <h3>Aplicaciones en producción</h3>
+  <div class="cards cards-2" style="margin:1rem 0">
+    <div class="card">
+      <h3>Bases de datos — índices B-Tree</h3>
+      <p>MySQL, PostgreSQL y SQLite usan variantes de BST (B-Tree y B+Tree) para todos sus índices. Una consulta <code>WHERE id = 12345</code> sobre millones de registros tarda microsegundos gracias al orden BST.</p>
+    </div>
+    <div class="card">
+      <h3>Mapas y conjuntos ordenados</h3>
+      <p><code>TreeMap</code> y <code>TreeSet</code> de Java están implementados con árboles Rojo-Negro (un BST autobalanceado). Garantizan O(log n) para inserción, búsqueda y eliminación.</p>
+    </div>
+    <div class="card">
+      <h3>Sistemas de archivos</h3>
+      <p>HFS+ (macOS) y ext4 (Linux) usan B-Trees para organizar archivos en directorios. La búsqueda de un archivo entre millones es O(log n).</p>
+    </div>
+    <div class="card">
+      <h3>Autocompletado y diccionarios</h3>
+      <p>Los motores de búsqueda y correctores ortográficos usan BSTs o Tries (árboles de prefijos) para sugerir palabras en tiempo real con millones de entradas.</p>
+    </div>
+  </div>
+
+  <!-- Ejemplos de código BST -->
+  <div class="example-block">
+    <div class="example-header">
+      <span class="ex-num">BST 01</span>
+      <h3>Inserción y búsqueda en BST</h3>
+      <span class="ex-badge">Producción &middot; TreeMap interno</span>
+    </div>
+    <div class="example-body">
+      <p>La inserción compara repetidamente con el nodo actual y desciende por el hijo izquierdo (si es menor) o derecho (si es mayor) hasta encontrar un espacio vacío.</p>
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab(this,'pseudo-bst-ins')">Pseudocódigo</button>
+          <button class="tab-btn" onclick="switchTab(this,'java-bst-ins')">Java</button>
+        </div>
+        <div id="pseudo-bst-ins" class="tab-pane active">
+<pre><span class="kw">funcion</span> <span class="fn">insertar</span>(nodo, clave):
+    <span class="kw">si</span> nodo es nulo:
+        <span class="kw">retornar</span> <span class="fn">NuevoNodo</span>(clave)        <span class="cm">// caso base</span>
+    <span class="kw">si</span> clave &lt; nodo.clave:
+        nodo.izq &larr; <span class="fn">insertar</span>(nodo.izq, clave)
+    <span class="kw">sino si</span> clave &gt; nodo.clave:
+        nodo.der &larr; <span class="fn">insertar</span>(nodo.der, clave)
+    <span class="cm">// si clave == nodo.clave: ignorar (sin duplicados)</span>
+    <span class="kw">retornar</span> nodo
+
+<span class="kw">funcion</span> <span class="fn">buscar</span>(nodo, clave):
+    <span class="kw">si</span> nodo es nulo <span class="kw">o</span> nodo.clave == clave:
+        <span class="kw">retornar</span> nodo
+    <span class="kw">si</span> clave &lt; nodo.clave:
+        <span class="kw">retornar</span> <span class="fn">buscar</span>(nodo.izq, clave)
+    <span class="kw">retornar</span> <span class="fn">buscar</span>(nodo.der, clave)</pre>
+        </div>
+        <div id="java-bst-ins" class="tab-pane">
+<pre><span class="kw">static</span> <span class="tp">Nodo</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">insertar</span>(<span class="tp">Nodo</span>&lt;<span class="tp">Integer</span>&gt; n, <span class="tp">int</span> k) {
+    <span class="kw">if</span> (n == <span class="kw">null</span>) <span class="kw">return new</span> <span class="tp">Nodo</span>&lt;&gt;(k);
+    <span class="kw">if</span> (k &lt; n.dato) n.izq = <span class="fn">insertar</span>(n.izq, k);
+    <span class="kw">else if</span> (k &gt; n.dato) n.der = <span class="fn">insertar</span>(n.der, k);
+    <span class="kw">return</span> n;
+}
+
+<span class="kw">static</span> <span class="tp">Nodo</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">buscar</span>(<span class="tp">Nodo</span>&lt;<span class="tp">Integer</span>&gt; n, <span class="tp">int</span> k) {
+    <span class="kw">if</span> (n == <span class="kw">null</span> || n.dato == k) <span class="kw">return</span> n;
+    <span class="kw">return</span> k &lt; n.dato ? <span class="fn">buscar</span>(n.izq, k) : <span class="fn">buscar</span>(n.der, k);
+}
+<span class="cm">// uso: raiz = insertar(raiz, 35);</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="example-block">
+    <div class="example-header">
+      <span class="ex-num">BST 02</span>
+      <h3>Eliminación en BST</h3>
+      <span class="ex-badge">3 casos distintos</span>
+    </div>
+    <div class="example-body">
+      <p>La eliminación es la operación más compleja del BST. Tiene tres casos: nodo hoja (simplemente eliminar), nodo con un hijo (reemplazar con el hijo) y nodo con dos hijos (reemplazar con el sucesor inorden —mínimo del subárbol derecho—).</p>
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab(this,'pseudo-bst-del')">Pseudocódigo</button>
+          <button class="tab-btn" onclick="switchTab(this,'java-bst-del')">Java</button>
+        </div>
+        <div id="pseudo-bst-del" class="tab-pane active">
+<pre><span class="kw">funcion</span> <span class="fn">eliminar</span>(nodo, clave):
+    <span class="kw">si</span> nodo es nulo: <span class="kw">retornar</span> nulo
+    <span class="kw">si</span> clave &lt; nodo.clave:
+        nodo.izq &larr; <span class="fn">eliminar</span>(nodo.izq, clave)
+    <span class="kw">sino si</span> clave &gt; nodo.clave:
+        nodo.der &larr; <span class="fn">eliminar</span>(nodo.der, clave)
+    <span class="kw">sino</span>:                          <span class="cm">// nodo encontrado</span>
+        <span class="kw">si</span> nodo.izq es nulo: <span class="kw">retornar</span> nodo.der   <span class="cm">// caso 1 y 2</span>
+        <span class="kw">si</span> nodo.der es nulo: <span class="kw">retornar</span> nodo.izq   <span class="cm">// caso 2</span>
+        sucesor &larr; <span class="fn">minimo</span>(nodo.der)              <span class="cm">// caso 3</span>
+        nodo.clave &larr; sucesor.clave
+        nodo.der &larr; <span class="fn">eliminar</span>(nodo.der, sucesor.clave)
+    <span class="kw">retornar</span> nodo</pre>
+        </div>
+        <div id="java-bst-del" class="tab-pane">
+<pre><span class="kw">static</span> <span class="tp">Nodo</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">eliminar</span>(<span class="tp">Nodo</span>&lt;<span class="tp">Integer</span>&gt; n, <span class="tp">int</span> k) {
+    <span class="kw">if</span> (n == <span class="kw">null</span>) <span class="kw">return null</span>;
+    <span class="kw">if</span>      (k &lt; n.dato) n.izq = <span class="fn">eliminar</span>(n.izq, k);
+    <span class="kw">else if</span> (k &gt; n.dato) n.der = <span class="fn">eliminar</span>(n.der, k);
+    <span class="kw">else</span> {
+        <span class="kw">if</span> (n.izq == <span class="kw">null</span>) <span class="kw">return</span> n.der; <span class="cm">// caso 1 y 2a</span>
+        <span class="kw">if</span> (n.der == <span class="kw">null</span>) <span class="kw">return</span> n.izq; <span class="cm">// caso 2b</span>
+        <span class="tp">Nodo</span>&lt;<span class="tp">Integer</span>&gt; suc = <span class="fn">minimo</span>(n.der); <span class="cm">// caso 3</span>
+        n.dato = suc.dato;
+        n.der = <span class="fn">eliminar</span>(n.der, suc.dato);
+    }
+    <span class="kw">return</span> n;
+}
+<span class="kw">static</span> <span class="tp">Nodo</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">minimo</span>(<span class="tp">Nodo</span>&lt;<span class="tp">Integer</span>&gt; n) {
+    <span class="kw">while</span> (n.izq != <span class="kw">null</span>) n = n.izq;
+    <span class="kw">return</span> n;
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-teal">
+    <strong>BST → AVL y Rojo-Negro:</strong> El BST simple puede degradarse a O(n) si los datos llegan ordenados. Los árboles AVL y Rojo-Negro añaden rotaciones automáticas para mantener el balance y garantizar O(log n) siempre. <code>java.util.TreeMap</code> usa un árbol Rojo-Negro.
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 5. HUFFMAN ──────────────────────────────────────────────── -->
+<section id="huffman">
+  <div class="section-label">05 &mdash; Árbol de Huffman</div>
+  <h2>Árboles de Huffman</h2>
+  <p>El <strong>árbol de Huffman</strong> es un árbol binario construido para lograr <em>compresión de datos sin pérdida</em>. Asigna códigos binarios de longitud variable a los símbolos: los símbolos más frecuentes reciben códigos más cortos. Fue propuesto por David A. Huffman en 1952.</p>
+
+  <div class="def-box">
+    <p>"La codificación de Huffman produce el código libre de prefijo óptimo para un conjunto de símbolos con frecuencias conocidas, minimizando el número esperado de bits por símbolo."</p>
+  </div>
+
+  <h3>Características esenciales</h3>
+  <div class="cards cards-2" style="margin:1rem 0 1.5rem">
+    <div class="card card-accent-teal">
+      <h3>Código prefijo</h3>
+      <p>Ningún código de un símbolo es prefijo del código de otro. Esto permite decodificación unívoca sin delimitadores. Las hojas del árbol representan los símbolos.</p>
+    </div>
+    <div class="card card-accent-teal">
+      <h3>Óptimo en su clase</h3>
+      <p>Para frecuencias conocidas, Huffman produce el código de longitud variable óptimo (demostrado por el teorema de Huffman). Mejora hasta 60% sobre ASCII fijo de 8 bits en textos típicos.</p>
+    </div>
+    <div class="card card-accent-teal">
+      <h3>Construcción greedy</h3>
+      <p>Se construye con una cola de prioridad (min-heap): siempre combinar los dos nodos de menor frecuencia. Este enfoque voraz produce el árbol globalmente óptimo.</p>
+    </div>
+    <div class="card card-accent-teal">
+      <h3>Tabla de frecuencias</h3>
+      <p>Requiere conocer todas las frecuencias de antemano (compresión en dos pasadas). La tabla de códigos debe transmitirse junto con los datos comprimidos para permitir la decodificación.</p>
+    </div>
+  </div>
+
+  <!-- SVG construcción de árbol Huffman -->
+  <div class="svg-wrap">
+    <svg width="640" height="320" viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Mono',monospace">
+      <defs>
+        <marker id="ah" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+          <path d="M1 1 L6 3.5 L1 6" fill="none" stroke="#9ba8b8" stroke-width="1"/>
+        </marker>
+      </defs>
+
+      <text x="320" y="14" text-anchor="middle" font-size="10" fill="#6b6760" letter-spacing="2">ÁRBOL DE HUFFMAN — texto "ABRACADABRA"</text>
+      <text x="320" y="27" text-anchor="middle" font-size="10" fill="#9ba8b8">A:5  B:2  R:2  C:1  D:1</text>
+
+      <!-- Raíz: 11 -->
+      <circle cx="320" cy="60"  r="24" fill="#1e6b6b" fill-opacity="0.18" stroke="#1e6b6b" stroke-width="1.8"/>
+      <text x="320" y="56" text-anchor="middle" font-size="10" fill="#1e6b6b">11</text>
+      <text x="320" y="70" text-anchor="middle" font-size="11" fill="#1e6b6b" font-weight="500">raíz</text>
+
+      <!-- Nivel 1 -->
+      <line x1="300" y1="82"  x2="200" y2="122" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="340" y1="82"  x2="430" y2="122" stroke="#c8c3bc" stroke-width="1.5"/>
+
+      <!-- A: 5 (hoja) -->
+      <circle cx="430" cy="138" r="22" fill="#2c6b3a" fill-opacity="0.20" stroke="#2c6b3a" stroke-width="1.5"/>
+      <text x="430" y="133" text-anchor="middle" font-size="10" fill="#2c6b3a">f=5</text>
+      <text x="430" y="147" text-anchor="middle" font-size="13" fill="#1a4028" font-weight="500">A</text>
+
+      <!-- Nodo interno: 6 -->
+      <circle cx="200" cy="138" r="22" fill="#1e6b6b" fill-opacity="0.15" stroke="#1e6b6b" stroke-width="1.5"/>
+      <text x="200" y="133" text-anchor="middle" font-size="10" fill="#1e6b6b">f=6</text>
+      <text x="200" y="148" text-anchor="middle" font-size="11" fill="#1e6b6b">•</text>
+
+      <!-- Nivel 2 -->
+      <line x1="182" y1="158" x2="120" y2="196" stroke="#c8c3bc" stroke-width="1.5"/>
+      <line x1="218" y1="158" x2="280" y2="196" stroke="#c8c3bc" stroke-width="1.5"/>
+
+      <!-- B:2, R:2 nodo interno -->
+      <circle cx="120" cy="212" r="20" fill="#1e6b6b" fill-opacity="0.12" stroke="#1e6b6b" stroke-width="1.2"/>
+      <text x="120" y="207" text-anchor="middle" font-size="10" fill="#1e6b6b">f=4</text>
+      <text x="120" y="220" text-anchor="middle" font-size="11" fill="#1e6b6b">•</text>
+
+      <!-- C+D nodo interno -->
+      <circle cx="280" cy="212" r="20" fill="#1e6b6b" fill-opacity="0.12" stroke="#1e6b6b" stroke-width="1.2"/>
+      <text x="280" y="207" text-anchor="middle" font-size="10" fill="#1e6b6b">f=2</text>
+      <text x="280" y="220" text-anchor="middle" font-size="11" fill="#1e6b6b">•</text>
+
+      <!-- Nivel 3 -->
+      <line x1="104" y1="230" x2="72"  y2="264" stroke="#c8c3bc" stroke-width="1.2"/>
+      <line x1="136" y1="230" x2="168" y2="264" stroke="#c8c3bc" stroke-width="1.2"/>
+      <line x1="264" y1="230" x2="240" y2="264" stroke="#c8c3bc" stroke-width="1.2"/>
+      <line x1="296" y1="230" x2="316" y2="264" stroke="#c8c3bc" stroke-width="1.2"/>
+
+      <!-- Hojas B, R, C, D -->
+      <circle cx="72"  cy="278" r="17" fill="#2c6b3a" fill-opacity="0.18" stroke="#2c6b3a" stroke-width="1.2"/>
+      <circle cx="168" cy="278" r="17" fill="#2c6b3a" fill-opacity="0.18" stroke="#2c6b3a" stroke-width="1.2"/>
+      <circle cx="240" cy="278" r="17" fill="#2c6b3a" fill-opacity="0.18" stroke="#2c6b3a" stroke-width="1.2"/>
+      <circle cx="316" cy="278" r="17" fill="#2c6b3a" fill-opacity="0.18" stroke="#2c6b3a" stroke-width="1.2"/>
+      <text x="72"  y="273" text-anchor="middle" font-size="9" fill="#2c6b3a">f=2</text>
+      <text x="168" y="273" text-anchor="middle" font-size="9" fill="#2c6b3a">f=2</text>
+      <text x="240" y="273" text-anchor="middle" font-size="9" fill="#2c6b3a">f=1</text>
+      <text x="316" y="273" text-anchor="middle" font-size="9" fill="#2c6b3a">f=1</text>
+      <text x="72"  y="286" text-anchor="middle" font-size="12" fill="#1a4028" font-weight="500">B</text>
+      <text x="168" y="286" text-anchor="middle" font-size="12" fill="#1a4028" font-weight="500">R</text>
+      <text x="240" y="286" text-anchor="middle" font-size="12" fill="#1a4028" font-weight="500">C</text>
+      <text x="316" y="286" text-anchor="middle" font-size="12" fill="#1a4028" font-weight="500">D</text>
+
+      <!-- Etiquetas 0/1 en aristas -->
+      <text x="242" y="108" font-size="10" fill="#2d5a8e" font-weight="500">0</text>
+      <text x="390" y="108" font-size="10" fill="#2d5a8e" font-weight="500">1</text>
+      <text x="148" y="178" font-size="10" fill="#2d5a8e" font-weight="500">0</text>
+      <text x="254" y="178" font-size="10" fill="#2d5a8e" font-weight="500">1</text>
+      <text x="84"  y="251" font-size="10" fill="#2d5a8e" font-weight="500">0</text>
+      <text x="154" y="251" font-size="10" fill="#2d5a8e" font-weight="500">1</text>
+      <text x="248" y="251" font-size="10" fill="#2d5a8e" font-weight="500">0</text>
+      <text x="305" y="251" font-size="10" fill="#2d5a8e" font-weight="500">1</text>
+
+      <!-- Tabla de códigos -->
+      <rect x="480" y="110" width="148" height="155" rx="3" fill="var(--paper)" stroke="#d4cfc6" stroke-width="1"/>
+      <text x="554" y="128" text-anchor="middle" font-size="10" fill="#6b6760" letter-spacing="1">CÓDIGOS</text>
+      <text x="500" y="148" font-size="11" fill="#1a4028" font-weight="500">A</text>
+      <text x="560" y="148" font-size="11" fill="#1a3a5c" font-family="'DM Mono'">→  1</text>
+      <text x="500" y="168" font-size="11" fill="#1a4028" font-weight="500">B</text>
+      <text x="560" y="168" font-size="11" fill="#1a3a5c" font-family="'DM Mono'">→  000</text>
+      <text x="500" y="188" font-size="11" fill="#1a4028" font-weight="500">R</text>
+      <text x="560" y="188" font-size="11" fill="#1a3a5c" font-family="'DM Mono'">→  001</text>
+      <text x="500" y="208" font-size="11" fill="#1a4028" font-weight="500">C</text>
+      <text x="560" y="208" font-size="11" fill="#1a3a5c" font-family="'DM Mono'">→  010</text>
+      <text x="500" y="228" font-size="11" fill="#1a4028" font-weight="500">D</text>
+      <text x="560" y="228" font-size="11" fill="#1a3a5c" font-family="'DM Mono'">→  011</text>
+      <line x1="490" y1="236" x2="618" y2="236" stroke="#d4cfc6" stroke-width="0.8"/>
+      <text x="500" y="252" font-size="9.5" fill="#6b6760">A usa 1 bit (más frec.)</text>
+      <text x="500" y="264" font-size="9.5" fill="#6b6760">B/R/C/D: 3 bits</text>
+    </svg>
+  </div>
+
+  <h3>Algoritmo de construcción</h3>
+  <div class="parts-grid">
+    <div class="part">
+      <div class="part-num">PASO 01</div>
+      <h4>Contar frecuencias</h4>
+      <p>Recorrer el texto y contar cuántas veces aparece cada símbolo. Construir un nodo hoja por símbolo con su frecuencia como clave de prioridad.</p>
+    </div>
+    <div class="part">
+      <div class="part-num">PASO 02</div>
+      <h4>Insertar en min-heap</h4>
+      <p>Insertar todos los nodos en una cola de prioridad mínima (PriorityQueue en Java), ordenada por frecuencia ascendente.</p>
+    </div>
+    <div class="part">
+      <div class="part-num">PASO 03</div>
+      <h4>Combinar (greedy)</h4>
+      <p>Mientras queden más de un nodo: extraer los dos de menor frecuencia, crear un nodo interno con frecuencia = suma de ambos, y reinsertar.</p>
+    </div>
+    <div class="part">
+      <div class="part-num">PASO 04</div>
+      <h4>Generar códigos</h4>
+      <p>El nodo restante es la raíz. Recorrer el árbol asignando "0" al ir a la izquierda y "1" al ir a la derecha. Las hojas contienen los códigos finales.</p>
+    </div>
+  </div>
+
+  <!-- Código Huffman -->
+  <div class="example-block">
+    <div class="example-header">
+      <span class="ex-num">HUFF 01</span>
+      <h3>Construcción del árbol de Huffman en Java</h3>
+      <span class="ex-badge ex-badge-green">Compresión &middot; GZIP &middot; DEFLATE</span>
+    </div>
+    <div class="example-body">
+      <p>El algoritmo usa una <code>PriorityQueue</code> con un <code>Comparator</code> que ordena por frecuencia. La complejidad de construcción es O(n log n) donde n es el número de símbolos distintos.</p>
+      <div class="code-tabs">
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab(this,'pseudo-huff')">Pseudocódigo</button>
+          <button class="tab-btn" onclick="switchTab(this,'java-huff')">Java</button>
+        </div>
+        <div id="pseudo-huff" class="tab-pane active">
+<pre><span class="kw">funcion</span> <span class="fn">construirHuffman</span>(frecuencias[]):
+    heap &larr; <span class="fn">MinHeap</span>()
+    <span class="kw">para cada</span> (símbolo, freq) <span class="kw">en</span> frecuencias:
+        heap.<span class="fn">insertar</span>( NodoHoja(símbolo, freq) )
+
+    <span class="kw">mientras</span> heap.tamaño > 1:
+        menor1 &larr; heap.<span class="fn">extraerMin</span>()
+        menor2 &larr; heap.<span class="fn">extraerMin</span>()
+        interno &larr; NodoInterno(menor1.freq + menor2.freq)
+        interno.izq &larr; menor1
+        interno.der &larr; menor2
+        heap.<span class="fn">insertar</span>(interno)
+
+    <span class="kw">retornar</span> heap.<span class="fn">extraerMin</span>()   <span class="cm">// raíz del árbol</span>
+
+<span class="kw">funcion</span> <span class="fn">generarCodigos</span>(nodo, prefijo, tabla):
+    <span class="kw">si</span> nodo es hoja:
+        tabla[nodo.símbolo] &larr; prefijo
+        <span class="kw">retornar</span>
+    <span class="fn">generarCodigos</span>(nodo.izq, prefijo + <span class="str">"0"</span>, tabla)
+    <span class="fn">generarCodigos</span>(nodo.der, prefijo + <span class="str">"1"</span>, tabla)</pre>
+        </div>
+        <div id="java-huff" class="tab-pane">
+<pre><span class="kw">class</span> <span class="tp">NodoH</span> {
+    <span class="tp">char</span> simbolo; <span class="tp">int</span> freq;
+    <span class="tp">NodoH</span> izq, der;
+    <span class="kw">boolean</span> <span class="fn">esHoja</span>() { <span class="kw">return</span> izq == <span class="kw">null</span> &amp;&amp; der == <span class="kw">null</span>; }
+}
+
+<span class="kw">static</span> <span class="tp">NodoH</span> <span class="fn">construir</span>(<span class="tp">Map</span>&lt;<span class="tp">Character</span>,<span class="tp">Integer</span>&gt; frec) {
+    <span class="tp">PriorityQueue</span>&lt;<span class="tp">NodoH</span>&gt; pq =
+        <span class="kw">new</span> <span class="tp">PriorityQueue</span>&lt;&gt;(<span class="tp">Comparator</span>.<span class="fn">comparingInt</span>(n -> n.freq));
+    frec.<span class="fn">forEach</span>((c, f) -> {
+        <span class="tp">NodoH</span> h = <span class="kw">new</span> <span class="tp">NodoH</span>(); h.simbolo = c; h.freq = f;
+        pq.<span class="fn">offer</span>(h);
+    });
+    <span class="kw">while</span> (pq.<span class="fn">size</span>() > <span class="num">1</span>) {
+        <span class="tp">NodoH</span> a = pq.<span class="fn">poll</span>(), b = pq.<span class="fn">poll</span>();
+        <span class="tp">NodoH</span> p = <span class="kw">new</span> <span class="tp">NodoH</span>();
+        p.freq = a.freq + b.freq; p.izq = a; p.der = b;
+        pq.<span class="fn">offer</span>(p);
+    }
+    <span class="kw">return</span> pq.<span class="fn">poll</span>();
+}
+
+<span class="kw">static void</span> <span class="fn">codigos</span>(<span class="tp">NodoH</span> n, <span class="tp">String</span> pref, <span class="tp">Map</span>&lt;<span class="tp">Character</span>,<span class="tp">String</span>&gt; t) {
+    <span class="kw">if</span> (n.<span class="fn">esHoja</span>()) { t.<span class="fn">put</span>(n.simbolo, pref); <span class="kw">return</span>; }
+    <span class="fn">codigos</span>(n.izq, pref + <span class="str">"0"</span>, t);
+    <span class="fn">codigos</span>(n.der, pref + <span class="str">"1"</span>, t);
+}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Aplicaciones en producción</h3>
+  <div class="cards cards-3" style="margin:1rem 0">
+    <div class="card card-accent-teal">
+      <h3>GZIP / DEFLATE</h3>
+      <p>El formato DEFLATE (usado en .zip, .gz, HTTP/1.1) combina LZ77 y Huffman. Es el algoritmo detrás de la compresión de respuestas HTTP en todos los servidores web modernos.</p>
+    </div>
+    <div class="card card-accent-teal">
+      <h3>JPEG / PNG / MP3</h3>
+      <p>JPEG usa Huffman para comprimir los coeficientes DCT. PNG usa DEFLATE. MP3 usa una variante de Huffman para comprimir los coeficientes de frecuencia de audio.</p>
+    </div>
+    <div class="card card-accent-teal">
+      <h3>Transmisión de datos</h3>
+      <p>Códigos Morse, telegrafía y protocolos de redes de sensores (MQTT, Zigbee) usan principios de codificación Huffman para optimizar el ancho de banda.</p>
+    </div>
+  </div>
+
+  <!-- SVG comparación compresión -->
+  <div class="svg-wrap">
+    <svg width="640" height="180" viewBox="0 0 640 180" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Mono',monospace">
+      <text x="320" y="16" text-anchor="middle" font-size="10" fill="#6b6760" letter-spacing="2">COMPARACIÓN — "ABRACADABRA" (11 chars)</text>
+
+      <!-- ASCII (fijo 8 bits) -->
+      <text x="30" y="42" font-size="11" fill="#6b6760">ASCII (8 bits fijo)</text>
+      <rect x="30" y="50" width="528" height="22" rx="2" fill="#8b2c2c" fill-opacity="0.15" stroke="#8b2c2c" stroke-width="1"/>
+      <text x="35" y="65" font-size="10" fill="#8b2c2c">88 bits  (11 × 8 bits)</text>
+      <text x="566" y="65" font-size="10" fill="#8b2c2c" text-anchor="start">88b</text>
+
+      <!-- Huffman -->
+      <text x="30" y="98" font-size="11" fill="#6b6760">Huffman (variable)</text>
+      <!-- A(1)×5 + B(3)×2 + R(3)×2 + C(3)×1 + D(3)×1 = 5+6+6+3+3 = 23 -->
+      <rect x="30" y="106" width="174" height="22" rx="2" fill="#1e6b6b" fill-opacity="0.20" stroke="#1e6b6b" stroke-width="1"/>
+      <text x="35" y="121" font-size="10" fill="#1e6b6b">23 bits  (A=1bit, B/R/C/D=3bits)</text>
+      <text x="212" y="121" font-size="10" fill="#1e6b6b" text-anchor="start">23b</text>
+
+      <!-- Ahorro -->
+      <rect x="30" y="148" width="440" height="18" rx="2" fill="#2c6b3a" fill-opacity="0.12" stroke="#2c6b3a" stroke-width="1"/>
+      <text x="250" y="161" text-anchor="middle" font-size="11" fill="#1a4028" font-weight="500">Ahorro: 65 bits → reducción del 73.9%</text>
+    </svg>
+  </div>
+
+  <div class="callout callout-green">
+    <strong>Limitación:</strong> Huffman requiere conocer las frecuencias de antemano. Para flujos de datos en tiempo real se usa <strong>Huffman adaptativo</strong> o <strong>codificación aritmética</strong>, que ofrecen mejor compresión a costa de mayor complejidad computacional.
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── 6. RECURSOS ─────────────────────────────────────────────── -->
+<section id="recursos">
+  <div class="section-label">06 &mdash; Para profundizar</div>
+  <h2>Recursos en línea recomendados</h2>
+  <p style="margin-bottom:1.5rem">Materiales seleccionados para complementar el estudio de árboles y estructuras no lineales, ordenados por tipo.</p>
+
+  <h3>Visualizadores interactivos</h3>
+  <div class="resources" style="margin-bottom:1.5rem">
+    <div class="resource-item">
+      <span class="resource-tag">VISUAL</span>
+      <a href="https://visualgo.net/en/bst" target="_blank">VisuAlgo — BST, AVL, Segment Tree</a>
+      <span style="color:var(--ink3);font-size:13px">— Animaciones paso a paso de inserción, búsqueda y eliminación en BST y variantes balanceadas.</span>
+    </div>
+    <div class="resource-item">
+      <span class="resource-tag">VISUAL</span>
+      <a href="https://www.cs.usfca.edu/~galles/visualization/Algorithms.html" target="_blank">USFCA Data Structure Visualizations</a>
+      <span style="color:var(--ink3);font-size:13px">— Visualizador de árboles binarios, BST, AVL, B-Tree, Heap y más. Universidad de San Francisco.</span>
+    </div>
+    <div class="resource-item">
+      <span class="resource-tag">VISUAL</span>
+      <a href="https://huffman.ooz.ie/" target="_blank">Huffman Coding Visualizer</a>
+      <span style="color:var(--ink3);font-size:13px">— Introduce cualquier texto y ve cómo se construye el árbol de Huffman y los códigos generados en tiempo real.</span>
+    </div>
+    <div class="resource-item">
+      <span class="resource-tag">VISUAL</span>
+      <a href="https://www.redblobgames.com/pathfinding/a-star/introduction.html" target="_blank">Red Blob Games — Pathfinding (grafos/árboles)</a>
+      <span style="color:var(--ink3);font-size:13px">— Excelente introducción visual a BFS, DFS y A* sobre grafos y árboles. Muy didáctico.</span>
+    </div>
+  </div>
+
+  <h3>Lecturas y referencia</h3>
+  <div class="resources" style="margin-bottom:1.5rem">
+    <div class="resource-item">
+      <span class="resource-tag">DOCS</span>
+      <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/TreeMap.html" target="_blank">Java TreeMap — Documentación oficial (JDK 21)</a>
+      <span style="color:var(--ink3);font-size:13px">— Implementación de Rojo-Negro en Java. Ver también <code>TreeSet</code>, <code>PriorityQueue</code>.</span>
+    </div>
+    <div class="resource-item">
+      <span class="resource-tag">TEXTO</span>
+      <a href="https://cp-algorithms.com/data_structures/segment_tree.html" target="_blank">CP-Algorithms — Estructuras de árboles avanzadas</a>
+      <span style="color:var(--ink3);font-size:13px">— Segment Tree, Fenwick Tree, Trie. Referencia para programación competitiva y sistemas de producción.</span>
+    </div>
+    <div class="resource-item">
+      <span class="resource-tag">ARTÍCULO</span>
+      <a href="https://en.wikipedia.org/wiki/Huffman_coding" target="_blank">Wikipedia — Huffman Coding</a>
+      <span style="color:var(--ink3);font-size:13px">— Artículo completo con demostración de optimalidad, variantes y comparación con codificación aritmética.</span>
+    </div>
+    <div class="resource-item">
+      <span class="resource-tag">ARTÍCULO</span>
+      <a href="https://en.wikipedia.org/wiki/Self-balancing_binary_search_tree" target="_blank">Wikipedia — Self-balancing BST</a>
+      <span style="color:var(--ink3);font-size:13px">— Comparativa de AVL, Rojo-Negro, Splay, Treap y B-Tree. Tabla de complejidades.</span>
+    </div>
+  </div>
+
+  <h3>Cursos y videos</h3>
+  <div class="resources" style="margin-bottom:1.5rem">
+    <div class="resource-item">
+      <span class="resource-tag">VIDEO</span>
+      <a href="https://www.youtube.com/watch?v=oSWTXtMglKE" target="_blank">CS50 — Trees (Harvard, YouTube)</a>
+      <span style="color:var(--ink3);font-size:13px">— Introducción clara a árboles binarios y BST. Subtítulos en español disponibles.</span>
+    </div>
+    <div class="resource-item">
+      <span class="resource-tag">CURSO</span>
+      <a href="https://www.coursera.org/learn/data-structures" target="_blank">Coursera — Data Structures (UC San Diego)</a>
+      <span style="color:var(--ink3);font-size:13px">— Módulos sobre árboles, heaps y grafos. Auditoría gratuita disponible. Certificado de pago opcional.</span>
+    </div>
+    <div class="resource-item">
+      <span class="resource-tag">CURSO</span>
+      <a href="https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/" target="_blank">MIT OpenCourseWare — 6.006 Introduction to Algorithms</a>
+      <span style="color:var(--ink3);font-size:13px">— Notas de clase, videos y problemas sobre árboles AVL, heaps, grafos y algoritmos sobre árboles. Gratuito.</span>
+    </div>
+    <div class="resource-item">
+      <span class="resource-tag">INTERAC</span>
+      <a href="https://leetcode.com/tag/tree/" target="_blank">LeetCode — Problemas de árboles (>250)</a>
+      <span style="color:var(--ink3);font-size:13px">— Práctica con BST, recorridos, LCA, serialización y más. Filtra por dificultad. Esencial para entrevistas.</span>
+    </div>
+  </div>
+
+  <h3>Libros de referencia</h3>
+  <div class="resources">
+    <div class="resource-item">
+      <span class="resource-tag">LIBRO</span>
+      <a href="https://mitpress.mit.edu/9780262046305/introduction-to-algorithms/" target="_blank">CLRS — Introduction to Algorithms (4.ª ed.)</a>
+      <span style="color:var(--ink3);font-size:13px">— Capítulos 12 (BST), 13 (Rojo-Negro), 15 (Huffman), 16 (Greedy). La biblia de los algoritmos.</span>
+    </div>
+    <div class="resource-item">
+      <span class="resource-tag">LIBRO</span>
+      <a href="https://algs4.cs.princeton.edu/home/" target="_blank">Sedgewick — Algorithms (Princeton, 4.ª ed.)</a>
+      <span style="color:var(--ink3);font-size:13px">— Implementaciones Java de BST, árboles rojo-negro, tries y compresión de datos. Código fuente libre.</span>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Algoritmos &middot; Árboles &amp; Estructuras No Lineales &middot; Ingeniería de Sistemas
+</footer>
+
+<script>
+function switchTab(btn, paneId) {
+  var tabs = btn.closest('.code-tabs');
+  tabs.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  tabs.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById(paneId).classList.add('active');
+}
+</script>
+</body>
+</html>
