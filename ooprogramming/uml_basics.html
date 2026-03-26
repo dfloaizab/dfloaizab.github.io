@@ -1,1 +1,840 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Modelado Orientado a Objetos con UML</title>
+<style>
 
+body {
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  background: #eef2f7;
+  color: #1c1c1c;
+  line-height: 1.65;
+}
+
+header {
+  background: linear-gradient(120deg, #1a3a4a, #2e6b8a);
+  color: white;
+  padding: 40px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0 0 10px 0;
+  font-weight: 600;
+  font-size: 2rem;
+}
+
+header p {
+  margin: 0;
+  opacity: 0.85;
+}
+
+nav {
+  background: #1e4f6b;
+  padding: 12px 30px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+nav a {
+  color: #a8d8f0;
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+nav a:hover {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+
+main {
+  max-width: 1000px;
+  margin: auto;
+  padding: 30px;
+}
+
+section {
+  background: white;
+  padding: 30px;
+  margin-bottom: 35px;
+  border-radius: 10px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+
+h2 {
+  color: #1a3a4a;
+  margin-top: 0;
+  border-bottom: 2px solid #e6e6e6;
+  padding-bottom: 10px;
+}
+
+h3 {
+  color: #2e6b8a;
+}
+
+pre {
+  background: #1f2933;
+  color: #e6edf3;
+  padding: 16px;
+  border-radius: 6px;
+  overflow: auto;
+  font-size: 0.92rem;
+}
+
+code {
+  font-family: Consolas, monospace;
+}
+
+.diagram {
+  text-align: center;
+  margin: 25px 0;
+}
+
+svg {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.example {
+  background: #f0f7fb;
+  border-left: 4px solid #2e6b8a;
+  padding: 14px;
+  margin: 15px 0;
+  border-radius: 0 6px 6px 0;
+}
+
+.badge {
+  display: inline-block;
+  background: #2e6b8a;
+  color: white;
+  font-size: 0.75rem;
+  padding: 2px 10px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge.green  { background: #2e7d5e; }
+.badge.orange { background: #b45309; }
+.badge.purple { background: #5b3fa6; }
+.badge.red    { background: #9b2335; }
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media(max-width: 650px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+.rel-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  font-size: 0.93rem;
+}
+
+.rel-table th {
+  background: #1a3a4a;
+  color: white;
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.rel-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+
+.rel-table tr:last-child td { border-bottom: none; }
+.rel-table tr:nth-child(even) td { background: #f6f9fc; }
+
+.principle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.principle-card {
+  background: #f0f7fb;
+  border-radius: 8px;
+  padding: 16px;
+  border-top: 3px solid #2e6b8a;
+}
+
+.principle-card h4 {
+  margin: 0 0 8px 0;
+  color: #1a3a4a;
+  font-size: 0.97rem;
+}
+
+.principle-card p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #444;
+}
+
+footer {
+  background: #1a3a4a;
+  color: #b0c9d6;
+  padding: 30px 40px;
+  margin-top: 20px;
+}
+
+footer h3 {
+  color: #a8d8f0;
+  margin-top: 0;
+  font-size: 1rem;
+  border-bottom: 1px solid #2e6b8a;
+  padding-bottom: 8px;
+}
+
+footer ol {
+  margin: 0;
+  padding-left: 20px;
+  line-height: 2;
+  font-size: 0.9rem;
+}
+
+footer a {
+  color: #7ec8e3;
+}
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Modelado Orientado a Objetos con UML</h1>
+  <p>Principios fundamentales, características del lenguaje UML, tipos de relaciones y ejemplos prácticos en Java</p>
+</header>
+
+<nav>
+  <a href="#principios">Principios</a>
+  <a href="#uml">¿Qué es UML?</a>
+  <a href="#caracteristicas">Características</a>
+  <a href="#diagramas">Diagramas</a>
+  <a href="#relaciones">Tipos de relaciones</a>
+  <a href="#ejemplos">Ejemplos en Java</a>
+  <a href="#bibliografia">Bibliografía</a>
+</nav>
+
+<main>
+
+<!-- ───── PRINCIPIOS ───── -->
+<section id="principios">
+  <h2>Principios del Modelado Orientado a Objetos</h2>
+  <p>
+    El modelado orientado a objetos (MOO) es un enfoque para analizar y diseñar sistemas de software representando
+    el problema mediante objetos que interactúan entre sí. Sus principios guían la construcción de modelos
+    robustos, mantenibles y comprensibles.
+  </p>
+
+  <div class="principle-grid">
+    <div class="principle-card">
+      <h4>🔵 Abstracción</h4>
+      <p>Representar solo las características esenciales de una entidad, ignorando detalles irrelevantes para el contexto.</p>
+    </div>
+    <div class="principle-card">
+      <h4>🔒 Encapsulamiento</h4>
+      <p>Ocultar el estado interno de un objeto y exponer solo una interfaz controlada de acceso.</p>
+    </div>
+    <div class="principle-card">
+      <h4>🧬 Herencia</h4>
+      <p>Permitir que una clase reutilice atributos y métodos de otra, promoviendo la reutilización del código.</p>
+    </div>
+    <div class="principle-card">
+      <h4>🔀 Polimorfismo</h4>
+      <p>Permitir que distintos objetos respondan de forma diferente a una misma operación o mensaje.</p>
+    </div>
+    <div class="principle-card">
+      <h4>🔗 Modularidad</h4>
+      <p>Dividir el sistema en componentes independientes que puedan desarrollarse y probarse por separado.</p>
+    </div>
+    <div class="principle-card">
+      <h4>🏗️ Jerarquía</h4>
+      <p>Organizar las clases en estructuras jerárquicas que reflejen relaciones de generalización y especialización.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ───── ¿QUÉ ES UML? ───── -->
+<section id="uml">
+  <h2>¿Qué es UML?</h2>
+  <p>
+    El <strong>Lenguaje Unificado de Modelado</strong> (UML, por sus siglas en inglés: <em>Unified Modeling Language</em>)
+    es un lenguaje visual estandarizado para especificar, visualizar, construir y documentar los artefactos de un sistema de software.
+    Fue adoptado por el Object Management Group (OMG) como estándar en 1997 y actualmente se encuentra en su versión 2.x.
+  </p>
+  <div class="example">
+    UML no es un lenguaje de programación ni una metodología de desarrollo. Es un <strong>lenguaje de modelado</strong>:
+    una notación gráfica y textual que permite comunicar decisiones de diseño entre los miembros de un equipo,
+    independientemente del lenguaje de programación que se vaya a utilizar.
+  </div>
+  <p>
+    Sus creadores originales fueron <strong>Grady Booch</strong>, <strong>Ivar Jacobson</strong> y <strong>James Rumbaugh</strong>,
+    conocidos como "los tres amigos", quienes unificaron sus metodologías de diseño orientado a objetos en un único lenguaje durante los años 90.
+  </p>
+</section>
+
+<!-- ───── CARACTERÍSTICAS ───── -->
+<section id="caracteristicas">
+  <h2>Características de UML</h2>
+
+  <div class="grid-2">
+    <div>
+      <span class="badge">Estándar</span>
+      <h3>Notación universal</h3>
+      <p>UML es reconocido internacionalmente como el estándar para modelado de software orientado a objetos, lo que facilita la comunicación entre equipos de diferentes países y empresas.</p>
+    </div>
+    <div>
+      <span class="badge green">Visual</span>
+      <h3>Representación gráfica</h3>
+      <p>Utiliza diagramas con íconos, cajas y flechas estandarizados para representar clases, objetos, relaciones, flujos y comportamientos de manera intuitiva.</p>
+    </div>
+    <div>
+      <span class="badge orange">Independiente</span>
+      <h3>Independiente del lenguaje</h3>
+      <p>Los modelos UML pueden implementarse en cualquier lenguaje orientado a objetos: Java, C++, Python, C#, entre otros, sin modificar el diagrama.</p>
+    </div>
+    <div>
+      <span class="badge purple">Escalable</span>
+      <h3>Aplicable a cualquier escala</h3>
+      <p>Puede modelar desde una pequeña clase hasta arquitecturas empresariales complejas con múltiples subsistemas y miles de componentes.</p>
+    </div>
+    <div>
+      <span class="badge red">Completo</span>
+      <h3>Modela estructura y comportamiento</h3>
+      <p>No solo describe la estructura estática del sistema (clases, atributos) sino también su comportamiento dinámico (secuencias, estados, actividades).</p>
+    </div>
+    <div>
+      <span class="badge">Formal</span>
+      <h3>Semántica bien definida</h3>
+      <p>Cada elemento del lenguaje tiene una semántica precisa, lo que reduce la ambigüedad en la interpretación de los modelos por parte del equipo de desarrollo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ───── DIAGRAMAS ───── -->
+<section id="diagramas">
+  <h2>Principales tipos de diagramas UML</h2>
+  <p>UML 2.x define 14 tipos de diagramas agrupados en dos categorías:</p>
+
+  <div class="grid-2">
+    <div>
+      <h3>Diagramas estructurales</h3>
+      <div class="example">
+        <strong>Diagrama de clases</strong> — el más utilizado. Muestra clases, atributos, métodos y sus relaciones.<br><br>
+        <strong>Diagrama de objetos</strong> — muestra instancias concretas de clases en un momento dado.<br><br>
+        <strong>Diagrama de componentes</strong> — organización de los componentes físicos del sistema.<br><br>
+        <strong>Diagrama de paquetes</strong> — agrupa clases en paquetes lógicos.<br><br>
+        <strong>Diagrama de despliegue</strong> — distribución del sistema en hardware.
+      </div>
+    </div>
+    <div>
+      <h3>Diagramas de comportamiento</h3>
+      <div class="example">
+        <strong>Diagrama de casos de uso</strong> — interacción entre actores y el sistema.<br><br>
+        <strong>Diagrama de secuencia</strong> — mensajes entre objetos en el tiempo.<br><br>
+        <strong>Diagrama de estados</strong> — ciclo de vida de un objeto.<br><br>
+        <strong>Diagrama de actividades</strong> — flujo de control y trabajo.<br><br>
+        <strong>Diagrama de comunicación</strong> — colaboración entre objetos.
+      </div>
+    </div>
+  </div>
+
+  <!-- Diagrama de clases SVG de ejemplo -->
+  <h3>Ejemplo visual: Diagrama de clases básico</h3>
+  <div class="diagram">
+    <svg width="700" height="320" xmlns="http://www.w3.org/2000/svg" style="font-family: 'Segoe UI', sans-serif;">
+
+      <!-- Clase Persona -->
+      <rect x="30" y="60" width="180" height="130" fill="#f0f7fb" stroke="#2e6b8a" stroke-width="1.5" rx="4"/>
+      <rect x="30" y="60" width="180" height="36" fill="#2e6b8a" rx="4"/>
+      <rect x="30" y="92" width="180" height="4" fill="#2e6b8a"/>
+      <line x1="30" y1="130" x2="210" y2="130" stroke="#2e6b8a" stroke-width="1"/>
+      <text x="120" y="83" text-anchor="middle" fill="white" font-size="14" font-weight="600">Persona</text>
+      <text x="42" y="115" fill="#1a3a4a" font-size="12">- nombre: String</text>
+      <text x="42" y="150" fill="#1a3a4a" font-size="12">+ getNombre(): String</text>
+      <text x="42" y="168" fill="#1a3a4a" font-size="12">+ setNombre(s: String)</text>
+      <text x="42" y="185" fill="#1a3a4a" font-size="12">+ saludar(): void</text>
+
+      <!-- Clase Estudiante -->
+      <rect x="270" y="60" width="200" height="130" fill="#f0f7fb" stroke="#2e7d5e" stroke-width="1.5" rx="4"/>
+      <rect x="270" y="60" width="200" height="36" fill="#2e7d5e" rx="4"/>
+      <line x1="270" y1="130" x2="470" y2="130" stroke="#2e7d5e" stroke-width="1"/>
+      <text x="370" y="83" text-anchor="middle" fill="white" font-size="14" font-weight="600">Estudiante</text>
+      <text x="282" y="115" fill="#1a3a4a" font-size="12">- carrera: String</text>
+      <text x="282" y="133" fill="#1a3a4a" font-size="12">- promedio: double</text>
+      <text x="282" y="155" fill="#1a3a4a" font-size="12">+ estudiar(): void</text>
+      <text x="282" y="175" fill="#1a3a4a" font-size="12">+ getPromedio(): double</text>
+
+      <!-- Clase Universidad -->
+      <rect x="510" y="60" width="170" height="110" fill="#f0f7fb" stroke="#5b3fa6" stroke-width="1.5" rx="4"/>
+      <rect x="510" y="60" width="170" height="36" fill="#5b3fa6" rx="4"/>
+      <line x1="510" y1="130" x2="680" y2="130" stroke="#5b3fa6" stroke-width="1"/>
+      <text x="595" y="83" text-anchor="middle" fill="white" font-size="14" font-weight="600">Universidad</text>
+      <text x="522" y="115" fill="#1a3a4a" font-size="12">- nombre: String</text>
+      <text x="522" y="133" fill="#1a3a4a" font-size="12">- ciudad: String</text>
+      <text x="522" y="155" fill="#1a3a4a" font-size="12">+ inscribir(): void</text>
+
+      <!-- Flecha herencia: Estudiante → Persona (triángulo vacío) -->
+      <line x1="270" y1="125" x2="215" y2="125" stroke="#1a3a4a" stroke-width="1.5" stroke-dasharray="0"/>
+      <polygon points="215,118 215,132 200,125" fill="white" stroke="#1a3a4a" stroke-width="1.5"/>
+      <text x="234" y="117" fill="#888" font-size="10">extends</text>
+
+      <!-- Flecha asociación: Estudiante → Universidad -->
+      <line x1="470" y1="125" x2="507" y2="125" stroke="#1a3a4a" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <polygon points="507,119 507,131 520,125" fill="#1a3a4a"/>
+      <text x="476" y="117" fill="#888" font-size="10">asiste a</text>
+
+      <!-- Leyenda -->
+      <rect x="30" y="230" width="640" height="70" fill="#f6f9fc" stroke="#ddd" rx="6"/>
+      <text x="50" y="252" fill="#444" font-size="12" font-weight="600">Leyenda:</text>
+      <line x1="110" y1="249" x2="160" y2="249" stroke="#1a3a4a" stroke-width="1.5"/>
+      <polygon points="158,244 158,254 170,249" fill="white" stroke="#1a3a4a" stroke-width="1.5"/>
+      <text x="175" y="253" fill="#444" font-size="11">Herencia (extends)</text>
+      <line x1="330" y1="249" x2="380" y2="249" stroke="#1a3a4a" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <polygon points="378,244 378,254 390,249" fill="#1a3a4a"/>
+      <text x="395" y="253" fill="#444" font-size="11">Asociación</text>
+      <rect x="50" y="268" width="14" height="14" fill="#2e6b8a" rx="2"/>
+      <text x="70" y="280" fill="#444" font-size="11">Clase base</text>
+      <rect x="200" y="268" width="14" height="14" fill="#2e7d5e" rx="2"/>
+      <text x="220" y="280" fill="#444" font-size="11">Clase derivada</text>
+      <rect x="350" y="268" width="14" height="14" fill="#5b3fa6" rx="2"/>
+      <text x="370" y="280" fill="#444" font-size="11">Clase independiente</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ───── RELACIONES ───── -->
+<section id="relaciones">
+  <h2>Tipos de relaciones en UML</h2>
+  <p>Las relaciones entre clases son el núcleo del diagrama de clases. UML define los siguientes tipos fundamentales:</p>
+
+  <table class="rel-table">
+    <thead>
+      <tr>
+        <th>Relación</th>
+        <th>Notación UML</th>
+        <th>Significado</th>
+        <th>Ejemplo real</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Asociación</strong></td>
+        <td>Línea sólida con flecha →</td>
+        <td>Un objeto conoce o usa a otro. Relación general entre clases.</td>
+        <td>Estudiante → Universidad</td>
+      </tr>
+      <tr>
+        <td><strong>Herencia (Generalización)</strong></td>
+        <td>Línea sólida con triángulo vacío △</td>
+        <td>Una clase hija extiende una clase padre. Relación "es un".</td>
+        <td>Perro △ Animal</td>
+      </tr>
+      <tr>
+        <td><strong>Realización (Implementación)</strong></td>
+        <td>Línea punteada con triángulo vacío △</td>
+        <td>Una clase implementa los métodos definidos en una interfaz.</td>
+        <td>Circulo implements Figura</td>
+      </tr>
+      <tr>
+        <td><strong>Dependencia</strong></td>
+        <td>Línea punteada con flecha --→</td>
+        <td>Un objeto usa temporalmente a otro (parámetros o variables locales).</td>
+        <td>Pedido --→ Descuento</td>
+      </tr>
+      <tr>
+        <td><strong>Agregación</strong></td>
+        <td>Línea sólida con rombo vacío ◇</td>
+        <td>Un objeto contiene a otros, pero estos pueden existir de forma independiente. Relación "tiene un".</td>
+        <td>Universidad ◇ Departamento</td>
+      </tr>
+      <tr>
+        <td><strong>Composición</strong></td>
+        <td>Línea sólida con rombo relleno ◆</td>
+        <td>Un objeto contiene a otros y éstos no pueden existir sin él. Relación "está compuesto de".</td>
+        <td>Casa ◆ Habitación</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SVG relaciones -->
+  <div class="diagram" style="margin-top:25px;">
+    <svg width="680" height="190" xmlns="http://www.w3.org/2000/svg" style="font-family:'Segoe UI',sans-serif; font-size:12px;">
+      <text x="10" y="20" fill="#1a3a4a" font-weight="600" font-size="13">Notaciones de relaciones UML</text>
+
+      <!-- Asociación -->
+      <line x1="10" y1="55" x2="100" y2="55" stroke="#333" stroke-width="1.5"/>
+      <polygon points="98,49 98,61 112,55" fill="#333"/>
+      <text x="20" y="75" fill="#555">Asociación</text>
+
+      <!-- Herencia -->
+      <line x1="140" y1="55" x2="230" y2="55" stroke="#333" stroke-width="1.5"/>
+      <polygon points="228,47 228,63 244,55" fill="white" stroke="#333" stroke-width="1.5"/>
+      <text x="152" y="75" fill="#555">Herencia</text>
+
+      <!-- Realización -->
+      <line x1="270" y1="55" x2="360" y2="55" stroke="#333" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <polygon points="358,47 358,63 374,55" fill="white" stroke="#333" stroke-width="1.5"/>
+      <text x="278" y="75" fill="#555">Realización</text>
+
+      <!-- Dependencia -->
+      <line x1="400" y1="55" x2="490" y2="55" stroke="#333" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <polygon points="488,49 488,61 502,55" fill="#333"/>
+      <text x="408" y="75" fill="#555">Dependencia</text>
+
+      <!-- Agregación -->
+      <line x1="10" y1="130" x2="100" y2="130" stroke="#333" stroke-width="1.5"/>
+      <polygon points="12,122 12,138 -4,130" fill="white" stroke="#333" stroke-width="1.5"/>
+      <text x="20" y="152" fill="#555">Agregación</text>
+
+      <!-- Composición -->
+      <line x1="160" y1="130" x2="250" y2="130" stroke="#333" stroke-width="1.5"/>
+      <polygon points="162,122 162,138 146,130" fill="#333" stroke="#333" stroke-width="1.5"/>
+      <text x="170" y="152" fill="#555">Composición</text>
+
+      <!-- Multiplicidad -->
+      <rect x="330" y="110" width="330" height="65" fill="#f0f7fb" stroke="#2e6b8a" rx="6"/>
+      <text x="345" y="130" fill="#1a3a4a" font-weight="600">Multiplicidad</text>
+      <text x="345" y="148" fill="#555">1 — exactamente uno</text>
+      <text x="345" y="163" fill="#555">0..* ó * — cero o más</text>
+      <text x="500" y="148" fill="#555">1..* — uno o más</text>
+      <text x="500" y="163" fill="#555">0..1 — cero o uno</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ───── EJEMPLOS ───── -->
+<section id="ejemplos">
+  <h2>Ejemplos prácticos con código Java</h2>
+
+  <!-- Ejemplo 1: Asociación -->
+  <h3>Ejemplo 1 — Asociación: Estudiante y Universidad</h3>
+  <div class="example">
+    Un <code>Estudiante</code> conoce a una <code>Universidad</code>. El estudiante tiene una referencia al objeto
+    universidad, pero ambos pueden existir de forma independiente. Esta es la relación más básica entre clases.
+  </div>
+  <div class="diagram">
+    <svg width="480" height="90" xmlns="http://www.w3.org/2000/svg" style="font-family:'Segoe UI',sans-serif;font-size:12px;">
+      <rect x="10" y="20" width="140" height="50" fill="#f0f7fb" stroke="#2e6b8a" stroke-width="1.5" rx="4"/>
+      <text x="80" y="40" text-anchor="middle" fill="#1a3a4a" font-weight="600">Estudiante</text>
+      <line x1="10" y1="48" x2="150" y2="48" stroke="#2e6b8a"/>
+      <text x="20" y="65" fill="#1a3a4a">- universidad</text>
+      <line x1="150" y1="45" x2="310" y2="45" stroke="#555" stroke-width="1.5"/>
+      <polygon points="308,39 308,51 322,45" fill="#555"/>
+      <text x="200" y="38" fill="#888">asiste a</text>
+      <text x="155" y="40" fill="#888">1</text>
+      <text x="295" y="40" fill="#888">1</text>
+      <rect x="322" y="20" width="150" height="50" fill="#f0f7fb" stroke="#5b3fa6" stroke-width="1.5" rx="4"/>
+      <text x="397" y="40" text-anchor="middle" fill="#1a3a4a" font-weight="600">Universidad</text>
+      <line x1="322" y1="48" x2="472" y2="48" stroke="#5b3fa6"/>
+      <text x="332" y="65" fill="#1a3a4a">- nombre</text>
+    </svg>
+  </div>
+<pre>
+class Universidad {
+    String nombre;
+    String ciudad;
+
+    Universidad(String nombre, String ciudad) {
+        this.nombre = nombre;
+        this.ciudad = ciudad;
+    }
+}
+
+class Estudiante {
+    String nombre;
+    Universidad universidad; // asociación
+
+    Estudiante(String nombre, Universidad universidad) {
+        this.nombre = nombre;
+        this.universidad = universidad;
+    }
+
+    void presentarse() {
+        System.out.println("Soy " + nombre +
+            " y estudio en " + universidad.nombre);
+    }
+}
+
+// Uso:
+// Universidad u = new Universidad("UNIVALLE", "Cali");
+// Estudiante e = new Estudiante("Ana", u);
+// e.presentarse();
+</pre>
+
+  <!-- Ejemplo 2: Herencia -->
+  <h3>Ejemplo 2 — Herencia: Animal, Perro y Gato</h3>
+  <div class="example">
+    <code>Perro</code> y <code>Gato</code> son tipos específicos de <code>Animal</code>. Heredan el método
+    <code>respirar()</code> y sobrescriben <code>hacerSonido()</code> con su propio comportamiento (polimorfismo).
+  </div>
+  <div class="diagram">
+    <svg width="480" height="130" xmlns="http://www.w3.org/2000/svg" style="font-family:'Segoe UI',sans-serif;font-size:12px;">
+      <rect x="165" y="5" width="150" height="50" fill="#f0f7fb" stroke="#2e6b8a" stroke-width="1.5" rx="4"/>
+      <text x="240" y="25" text-anchor="middle" fill="#1a3a4a" font-weight="600">Animal</text>
+      <line x1="165" y1="33" x2="315" y2="33" stroke="#2e6b8a"/>
+      <text x="175" y="50" fill="#1a3a4a">+ hacerSonido(): void</text>
+      <line x1="240" y1="55" x2="240" y2="75" stroke="#555" stroke-width="1.5"/>
+      <line x1="100" y1="75" x2="380" y2="75" stroke="#555" stroke-width="1.5"/>
+      <line x1="100" y1="75" x2="100" y2="95" stroke="#555" stroke-width="1.5"/>
+      <line x1="380" y1="75" x2="380" y2="95" stroke="#555" stroke-width="1.5"/>
+      <polygon points="234,57 246,57 240,68" fill="white" stroke="#555" stroke-width="1.5"/>
+      <rect x="30" y="95" width="140" height="30" fill="#f0f7fb" stroke="#2e7d5e" stroke-width="1.5" rx="4"/>
+      <text x="100" y="115" text-anchor="middle" fill="#1a3a4a" font-weight="600">Perro</text>
+      <rect x="310" y="95" width="140" height="30" fill="#f0f7fb" stroke="#9b2335" stroke-width="1.5" rx="4"/>
+      <text x="380" y="115" text-anchor="middle" fill="#1a3a4a" font-weight="600">Gato</text>
+    </svg>
+  </div>
+<pre>
+class Animal {
+    String nombre;
+
+    Animal(String nombre) {
+        this.nombre = nombre;
+    }
+
+    void respirar() {
+        System.out.println(nombre + " está respirando");
+    }
+
+    void hacerSonido() {
+        System.out.println("Sonido genérico");
+    }
+}
+
+class Perro extends Animal {
+    Perro(String nombre) { super(nombre); }
+
+    @Override
+    void hacerSonido() {
+        System.out.println(nombre + " dice: ¡Guau!");
+    }
+}
+
+class Gato extends Animal {
+    Gato(String nombre) { super(nombre); }
+
+    @Override
+    void hacerSonido() {
+        System.out.println(nombre + " dice: ¡Miau!");
+    }
+}
+
+// Uso (polimorfismo):
+// Animal[] animales = { new Perro("Rex"), new Gato("Luna") };
+// for (Animal a : animales) a.hacerSonido();
+</pre>
+
+  <!-- Ejemplo 3: Realización -->
+  <h3>Ejemplo 3 — Realización: Interfaz Figura</h3>
+  <div class="example">
+    La interfaz <code>Figura</code> define un contrato con el método abstracto <code>calcularArea()</code>.
+    Las clases <code>Circulo</code> y <code>Rectangulo</code> <em>realizan</em> ese contrato implementando
+    el método con su propia fórmula.
+  </div>
+<pre>
+interface Figura {
+    double calcularArea();
+    double calcularPerimetro();
+}
+
+class Circulo implements Figura {
+    double radio;
+
+    Circulo(double radio) { this.radio = radio; }
+
+    @Override
+    public double calcularArea() {
+        return Math.PI * radio * radio;
+    }
+
+    @Override
+    public double calcularPerimetro() {
+        return 2 * Math.PI * radio;
+    }
+}
+
+class Rectangulo implements Figura {
+    double base, altura;
+
+    Rectangulo(double base, double altura) {
+        this.base = base;
+        this.altura = altura;
+    }
+
+    @Override
+    public double calcularArea() { return base * altura; }
+
+    @Override
+    public double calcularPerimetro() { return 2 * (base + altura); }
+}
+
+// Uso:
+// Figura f1 = new Circulo(5);
+// Figura f2 = new Rectangulo(4, 6);
+// System.out.println(f1.calcularArea());   // 78.53...
+// System.out.println(f2.calcularArea());   // 24.0
+</pre>
+
+  <!-- Ejemplo 4: Agregación -->
+  <h3>Ejemplo 4 — Agregación: Universidad y Departamento</h3>
+  <div class="example">
+    Una <code>Universidad</code> tiene varios <code>Departamento</code>s. Si la universidad cerrara,
+    los departamentos podrían reorganizarse en otra institución: sus objetos existen de forma independiente.
+    Esto caracteriza la <strong>agregación</strong> (rombo vacío ◇).
+  </div>
+<pre>
+import java.util.ArrayList;
+import java.util.List;
+
+class Departamento {
+    String nombre;
+    String jefe;
+
+    Departamento(String nombre, String jefe) {
+        this.nombre = nombre;
+        this.jefe   = jefe;
+    }
+
+    void mostrarInfo() {
+        System.out.println("Depto: " + nombre + " | Jefe: " + jefe);
+    }
+}
+
+class Universidad {
+    String nombre;
+    List&lt;Departamento&gt; departamentos; // agregación
+
+    Universidad(String nombre) {
+        this.nombre        = nombre;
+        this.departamentos = new ArrayList&lt;&gt;();
+    }
+
+    void agregarDepartamento(Departamento d) {
+        departamentos.add(d);
+    }
+
+    void listarDepartamentos() {
+        System.out.println("Departamentos de " + nombre + ":");
+        for (Departamento d : departamentos) d.mostrarInfo();
+    }
+}
+
+// Uso:
+// Departamento d1 = new Departamento("Sistemas", "Dr. Pérez");
+// Departamento d2 = new Departamento("Matemáticas", "Dra. López");
+// Universidad u = new Universidad("UNIVALLE");
+// u.agregarDepartamento(d1);
+// u.agregarDepartamento(d2);
+// u.listarDepartamentos();
+</pre>
+
+  <!-- Ejemplo 5: Composición -->
+  <h3>Ejemplo 5 — Composición: Casa y Habitaciones</h3>
+  <div class="example">
+    Una <code>Casa</code> está compuesta de <code>Habitacion</code>es. Si la casa es destruida,
+    sus habitaciones dejan de existir con ella. Esto caracteriza la <strong>composición</strong>
+    (rombo relleno ◆): el ciclo de vida de las partes depende del todo.
+  </div>
+<pre>
+import java.util.ArrayList;
+import java.util.List;
+
+class Habitacion {
+    String tipo;     // "Sala", "Cocina", "Dormitorio", etc.
+    double metrosCuadrados;
+
+    // El constructor es privado de paquete: solo Casa puede crear habitaciones
+    Habitacion(String tipo, double metrosCuadrados) {
+        this.tipo             = tipo;
+        this.metrosCuadrados  = metrosCuadrados;
+    }
+
+    void describir() {
+        System.out.println(tipo + " (" + metrosCuadrados + " m²)");
+    }
+}
+
+class Casa {
+    String direccion;
+    private List&lt;Habitacion&gt; habitaciones; // composición
+
+    Casa(String direccion) {
+        this.direccion   = direccion;
+        this.habitaciones = new ArrayList&lt;&gt;();
+        // Las habitaciones se crean dentro de la casa
+        habitaciones.add(new Habitacion("Sala",       25.0));
+        habitaciones.add(new Habitacion("Cocina",     15.0));
+        habitaciones.add(new Habitacion("Dormitorio", 20.0));
+    }
+
+    void mostrarPlano() {
+        System.out.println("Casa en: " + direccion);
+        for (Habitacion h : habitaciones) h.describir();
+    }
+}
+
+// Uso:
+// Casa c = new Casa("Calle 5 # 12-34, Cali");
+// c.mostrarPlano();
+</pre>
+
+</section>
+
+</main>
+
+<!-- ───── BIBLIOGRAFÍA ───── -->
+<footer id="bibliografia">
+  <h3>📚 Bibliografía</h3>
+  <ol>
+    <li>
+      Booch, G., Rumbaugh, J., &amp; Jacobson, I. (2005).
+      <em>The Unified Modeling Language User Guide</em> (2.ª ed.). Addison-Wesley Professional.
+    </li>
+    <li>
+      Rumbaugh, J., Jacobson, I., &amp; Booch, G. (2004).
+      <em>The Unified Modeling Language Reference Manual</em> (2.ª ed.). Addison-Wesley Professional.
+    </li>
+    <li>
+      Larman, C. (2004).
+      <em>Applying UML and Patterns: An Introduction to Object-Oriented Analysis and Design and Iterative Development</em> (3.ª ed.). Prentice Hall.
+    </li>
+    <li>
+      Fowler, M. (2003).
+      <em>UML Distilled: A Brief Guide to the Standard Object Modeling Language</em> (3.ª ed.). Addison-Wesley Professional.
+    </li>
+    <li>
+      Object Management Group (OMG). (2017).
+      <em>OMG® Unified Modeling Language® Specification, Version 2.5.1</em>.
+      <a href="https://www.omg.org/spec/UML/2.5.1/" target="_blank">https://www.omg.org/spec/UML/2.5.1/</a>
+    </li>
+    <li>
+      Bloch, J. (2018).
+      <em>Effective Java</em> (3.ª ed.). Addison-Wesley Professional.
+    </li>
+    <li>
+      Gamma, E., Helm, R., Johnson, R., &amp; Vlissides, J. (1994).
+      <em>Design Patterns: Elements of Reusable Object-Oriented Software</em>. Addison-Wesley Professional.
+    </li>
+  </ol>
+</footer>
+
+</body>
+</html>
