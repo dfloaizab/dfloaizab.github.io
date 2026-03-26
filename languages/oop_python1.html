@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POO y SOLID en Python</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #171a23;
+    --bg3: #1e2130;
+    --card: #1a1d2e;
+    --border: #2a2d3e;
+    --border2: #353850;
+    --text: #e8e6f0;
+    --muted: #8b899a;
+    --accent: #7c6af7;
+    --accent2: #a78bfa;
+    --teal: #2dd4bf;
+    --coral: #f87171;
+    --amber: #fbbf24;
+    --green: #34d399;
+    --pink: #f472b6;
+    --code-bg: #12141f;
+    --code-border: #2a2d3e;
+    --tag-bg: #1e1a3a;
+    --tag-text: #a78bfa;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.75;
+  }
+
+  /* ── Layout ── */
+  .shell { display: flex; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 0 24px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .sidebar-logo h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--accent2);
+    line-height: 1.3;
+  }
+  .sidebar-logo p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .nav-section {
+    padding: 8px 24px 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 24px;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .nav-item:hover { color: var(--text); background: var(--bg3); }
+  .nav-item.active {
+    color: var(--accent2);
+    border-left-color: var(--accent);
+    background: var(--tag-bg);
+  }
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Main ── */
+  .main { flex: 1; padding: 52px 56px; max-width: 900px; }
+
+  /* ── Section ── */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── Hero ── */
+  .hero-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .hero-title {
+    font-family: 'Fraunces', serif;
+    font-size: 42px;
+    font-weight: 600;
+    line-height: 1.15;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-lead {
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 580px;
+    line-height: 1.7;
+    font-style: italic;
+  }
+
+  /* ── Section title ── */
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .section-title { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 600; line-height: 1.2; }
+  .section-subtitle { font-size: 15px; color: var(--muted); margin-top: 6px; font-style: italic; }
+
+  /* ── Concept card ── */
+  .concept-def {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 32px;
+  }
+  .concept-def h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--accent2);
+  }
+  .concept-def p { color: var(--muted); font-size: 16px; }
+
+  /* ── Advantages ── */
+  .advantages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+  .adv-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .adv-card .icon { font-size: 20px; margin-bottom: 8px; }
+  .adv-card h4 { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--teal); margin-bottom: 6px; }
+  .adv-card p { font-size: 14px; color: var(--muted); line-height: 1.5; font-family: 'IBM Plex Mono', monospace; }
+
+  /* ── Block titles ── */
+  .block-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--amber);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .block-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Code block ── */
+  .code-wrap {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+  }
+  .code-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--accent2);
+  }
+  .code-lang {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--tag-bg);
+    padding: 2px 10px;
+    border-radius: 20px;
+  }
+  pre {
+    padding: 22px 24px;
+    overflow-x: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: #c9c2e8;
+  }
+  /* Syntax colors */
+  .kw  { color: #a78bfa; }  /* keywords: class, def, return, etc */
+  .fn  { color: #2dd4bf; }  /* function names */
+  .cl  { color: #fbbf24; }  /* class names */
+  .st  { color: #34d399; }  /* strings */
+  .cm  { color: #556070; font-style: italic; }  /* comments */
+  .nb  { color: #f472b6; }  /* numbers, booleans */
+  .dp  { color: #f87171; }  /* dunder/decorators */
+  .at  { color: #93c5fd; }  /* attributes, self.x */
+
+  /* ── Exercise ── */
+  .exercise {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .exercise-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--coral);
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .exercise h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .exercise p { font-size: 15px; color: var(--muted); margin-bottom: 12px; line-height: 1.6; }
+  .exercise ul { padding-left: 20px; }
+  .exercise ul li { font-size: 15px; color: var(--muted); margin-bottom: 6px; font-family: 'IBM Plex Mono', monospace; }
+  .exercise ul li::marker { color: var(--accent2); }
+  .exercise .hint {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: var(--tag-bg);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--accent2);
+  }
+  .hint-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* ── Divider ── */
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+
+  /* ── Comparison table ── */
+  .compare {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 32px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+  }
+  .compare th {
+    background: var(--bg3);
+    color: var(--accent2);
+    padding: 12px 18px;
+    text-align: left;
+    border-bottom: 2px solid var(--border2);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+  }
+  .compare td {
+    padding: 11px 18px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    vertical-align: top;
+  }
+  .compare tr:hover td { background: var(--bg3); }
+  .compare td:first-child { color: var(--text); font-weight: 600; }
+
+  /* ── SOLID pill ── */
+  .solid-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--tag-bg);
+    border: 1px solid var(--accent);
+    border-radius: 30px;
+    padding: 4px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--accent2);
+    margin-bottom: 16px;
+  }
+  .solid-letter {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--amber);
+  }
+
+  /* ── Note box ── */
+  .note {
+    background: #1a1a0f;
+    border: 1px solid #3a3010;
+    border-left: 4px solid var(--amber);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 24px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    color: #c8b96e;
+    line-height: 1.6;
+  }
+  .note strong { color: var(--amber); }
+
+  /* ── Bad vs Good ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  .bad-card { border-top: 3px solid var(--coral); }
+  .good-card { border-top: 3px solid var(--green); }
+  .col-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 8px 18px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+  }
+  .bad-card .col-label { color: var(--coral); }
+  .good-card .col-label { color: var(--green); }
+
+  /* ── Progress ── */
+  .progress-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+  .progress-step {
+    height: 4px;
+    flex: 1;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.3s;
+    cursor: pointer;
+    min-width: 30px;
+  }
+  .progress-step.done { background: var(--accent); }
+
+  /* ── Tags ── */
+  .tag {
+    display: inline-block;
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    border: 1px solid var(--border2);
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  @media (max-width: 800px) {
+    .sidebar { display: none; }
+    .main { padding: 28px 20px; }
+    .hero-title { font-size: 28px; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ── Sidebar ── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <h1>POO & SOLID</h1>
+    <p>Python · Guía práctica</p>
+  </div>
+  <div class="nav-section">Pilares POO</div>
+  <a class="nav-item active" onclick="show('abstraccion')">
+    <span class="nav-dot" style="background:#7c6af7"></span>Abstracción
+  </a>
+  <a class="nav-item" onclick="show('encapsulamiento')">
+    <span class="nav-dot" style="background:#2dd4bf"></span>Encapsulamiento
+  </a>
+  <a class="nav-item" onclick="show('herencia')">
+    <span class="nav-dot" style="background:#fbbf24"></span>Herencia
+  </a>
+  <a class="nav-item" onclick="show('polimorfismo')">
+    <span class="nav-dot" style="background:#f472b6"></span>Polimorfismo
+  </a>
+  <div class="nav-section" style="margin-top:12px">Principios SOLID</div>
+  <a class="nav-item" onclick="show('srp')">
+    <span class="nav-dot" style="background:#34d399"></span>S — Responsabilidad única
+  </a>
+  <a class="nav-item" onclick="show('ocp')">
+    <span class="nav-dot" style="background:#60a5fa"></span>O — Abierto/Cerrado
+  </a>
+  <a class="nav-item" onclick="show('lsp')">
+    <span class="nav-dot" style="background:#f87171"></span>L — Sustitución Liskov
+  </a>
+  <a class="nav-item" onclick="show('isp')">
+    <span class="nav-dot" style="background:#a78bfa"></span>I — Segregación interfaces
+  </a>
+  <a class="nav-item" onclick="show('dip')">
+    <span class="nav-dot" style="background:#fbbf24"></span>D — Inversión dependencias
+  </a>
+</nav>
+
+<!-- ── Main content ── -->
+<main class="main">
+
+<!-- ═══════════════════════════════════════
+     ABSTRACCIÓN
+════════════════════════════════════════ -->
+<div id="sec-abstraccion" class="section active">
+
+  <div class="section-header">
+    <div class="section-icon" style="background:#1e1a3a">🧩</div>
+    <div>
+      <div class="section-title">Abstracción</div>
+      <div class="section-subtitle">Mostrar solo lo esencial, ocultar la complejidad interna</div>
+    </div>
+  </div>
+
+  <div class="concept-def">
+    <h3>¿Qué es?</h3>
+    <p>Abstracción es el arte de <strong style="color:var(--text)">definir qué hace algo sin revelar cómo lo hace</strong>. En Python se logra con clases abstractas: contrato que obliga a las subclases a implementar ciertos métodos, sin importar su lógica interna. Es como un contrato laboral: dice "debes saber cocinar" sin especificar la receta.</p>
+  </div>
+
+  <div class="advantages">
+    <div class="adv-card">
+      <div class="icon">📐</div>
+      <h4>Contrato claro</h4>
+      <p>Defines la interfaz una vez. Cualquier subclase debe cumplirla.</p>
+    </div>
+    <div class="adv-card">
+      <div class="icon">🔄</div>
+      <h4>Intercambiable</h4>
+      <p>Puedes cambiar la implementación sin romper el código que la usa.</p>
+    </div>
+    <div class="adv-card">
+      <div class="icon">🧠</div>
+      <h4>Reduce carga mental</h4>
+      <p>El usuario solo necesita saber qué métodos existen, no su interior.</p>
+    </div>
+    <div class="adv-card">
+      <div class="icon">🛡️</div>
+      <h4>Previene errores</h4>
+      <p>Python lanza error si olvidas implementar un método abstracto.</p>
+    </div>
+  </div>
+
+  <div class="block-title">Ejemplo 1 — Formas geométricas</div>
+  <div class="code-wrap">
+    <div class="code-header">
+      <span class="code-label">abstraccion_formas.py</span>
+      <span class="code-lang">Python 3</span>
+    </div>
+    <pre><span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
+<span class="kw">import</span> math
+
+<span class="cm"># Clase abstracta: define QUÉ deben poder hacer las formas</span>
+<span class="kw">class</span> <span class="cl">Forma</span>(ABC):
+
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">area</span>(<span class="at">self</span>) -> float:
+        <span class="st">"""Retorna el área de la forma."""</span>
+        ...
+
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">perimetro</span>(<span class="at">self</span>) -> float:
+        <span class="st">"""Retorna el perímetro de la forma."""</span>
+        ...
+
+    <span class="cm"># Método concreto: todos comparten esta lógica</span>
+    <span class="kw">def</span> <span class="fn">describir</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="kw">return</span> (<span class="st">f"<span class="kw">{</span><span class="cl">type</span>(<span class="at">self</span>).__name__<span class="kw">}</span>: "</span>
+                <span class="st">f"área=<span class="kw">{</span><span class="at">self</span>.area():.2f<span class="kw">}</span>, perímetro=<span class="kw">{</span><span class="at">self</span>.perimetro():.2f<span class="kw">}</span>"</span>)
+
+
+<span class="kw">class</span> <span class="cl">Circulo</span>(<span class="cl">Forma</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, radio: float):
+        <span class="at">self</span>.radio = radio
+
+    <span class="kw">def</span> <span class="fn">area</span>(<span class="at">self</span>) -> float:
+        <span class="kw">return</span> math.pi * <span class="at">self</span>.radio ** <span class="nb">2</span>
+
+    <span class="kw">def</span> <span class="fn">perimetro</span>(<span class="at">self</span>) -> float:
+        <span class="kw">return</span> <span class="nb">2</span> * math.pi * <span class="at">self</span>.radio
+
+
+<span class="kw">class</span> <span class="cl">Rectangulo</span>(<span class="cl">Forma</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, ancho: float, alto: float):
+        <span class="at">self</span>.ancho = ancho
+        <span class="at">self</span>.alto = alto
+
+    <span class="kw">def</span> <span class="fn">area</span>(<span class="at">self</span>) -> float:
+        <span class="kw">return</span> <span class="at">self</span>.ancho * <span class="at">self</span>.alto
+
+    <span class="kw">def</span> <span class="fn">perimetro</span>(<span class="at">self</span>) -> float:
+        <span class="kw">return</span> <span class="nb">2</span> * (<span class="at">self</span>.ancho + <span class="at">self</span>.alto)
+
+
+<span class="cm"># Uso: el código no necesita saber qué forma concreta es</span>
+formas: list[<span class="cl">Forma</span>] = [<span class="cl">Circulo</span>(<span class="nb">5</span>), <span class="cl">Rectangulo</span>(<span class="nb">4</span>, <span class="nb">6</span>), <span class="cl">Circulo</span>(<span class="nb">2.5</span>)]
+
+<span class="kw">for</span> f <span class="kw">in</span> formas:
+    <span class="fn">print</span>(f.describir())
+<span class="cm"># Circulo: área=78.54, perímetro=31.42</span>
+<span class="cm"># Rectangulo: área=24.00, perímetro=20.00</span>
+<span class="cm"># Circulo: área=19.63, perímetro=15.71</span></pre>
+  </div>
+
+  <div class="block-title">Ejemplo 2 — Notificaciones (email, SMS, push)</div>
+  <div class="code-wrap">
+    <div class="code-header">
+      <span class="code-label">abstraccion_notificaciones.py</span>
+      <span class="code-lang">Python 3</span>
+    </div>
+    <pre><span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
+<span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+
+<span class="dp">@dataclass</span>
+<span class="kw">class</span> <span class="cl">Mensaje</span>:
+    destinatario: <span class="cl">str</span>
+    asunto: <span class="cl">str</span>
+    cuerpo: <span class="cl">str</span>
+
+
+<span class="cm"># Contrato: todo canal de notificación debe poder enviar</span>
+<span class="kw">class</span> <span class="cl">CanalNotificacion</span>(ABC):
+
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">enviar</span>(<span class="at">self</span>, mensaje: <span class="cl">Mensaje</span>) -> bool:
+        <span class="st">"""Envía el mensaje. Retorna True si tuvo éxito."""</span>
+        ...
+
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">nombre_canal</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        ...
+
+    <span class="kw">def</span> <span class="fn">enviar_con_log</span>(<span class="at">self</span>, mensaje: <span class="cl">Mensaje</span>) -> <span class="kw">None</span>:
+        exito = <span class="at">self</span>.enviar(mensaje)
+        estado = <span class="st">"✓ enviado"</span> <span class="kw">if</span> exito <span class="kw">else</span> <span class="st">"✗ falló"</span>
+        <span class="fn">print</span>(<span class="st">f"[<span class="kw">{</span><span class="at">self</span>.nombre_canal()<span class="kw">}</span>] {estado} → <span class="kw">{</span>mensaje.destinatario<span class="kw">}</span>"</span>)
+
+
+<span class="kw">class</span> <span class="cl">NotificacionEmail</span>(<span class="cl">CanalNotificacion</span>):
+    <span class="kw">def</span> <span class="fn">enviar</span>(<span class="at">self</span>, mensaje: <span class="cl">Mensaje</span>) -> bool:
+        <span class="cm"># Aquí iría la integración real con SMTP</span>
+        <span class="fn">print</span>(<span class="st">f"  Enviando email a <span class="kw">{</span>mensaje.destinatario<span class="kw">}</span>: <span class="kw">{</span>mensaje.asunto<span class="kw">}</span>"</span>)
+        <span class="kw">return True</span>
+
+    <span class="kw">def</span> <span class="fn">nombre_canal</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="kw">return</span> <span class="st">"EMAIL"</span>
+
+
+<span class="kw">class</span> <span class="cl">NotificacionSMS</span>(<span class="cl">CanalNotificacion</span>):
+    <span class="kw">def</span> <span class="fn">enviar</span>(<span class="at">self</span>, mensaje: <span class="cl">Mensaje</span>) -> bool:
+        <span class="fn">print</span>(<span class="st">f"  SMS a <span class="kw">{</span>mensaje.destinatario<span class="kw">}</span>: <span class="kw">{</span>mensaje.cuerpo[:<span class="nb">160</span>]<span class="kw">}</span>"</span>)
+        <span class="kw">return True</span>
+
+    <span class="kw">def</span> <span class="fn">nombre_canal</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="kw">return</span> <span class="st">"SMS"</span>
+
+
+<span class="cm"># El sistema de alertas no importa qué canal usa</span>
+<span class="kw">class</span> <span class="cl">SistemaAlertas</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, canales: list[<span class="cl">CanalNotificacion</span>]):
+        <span class="at">self</span>.canales = canales
+
+    <span class="kw">def</span> <span class="fn">alertar</span>(<span class="at">self</span>, mensaje: <span class="cl">Mensaje</span>) -> <span class="kw">None</span>:
+        <span class="kw">for</span> canal <span class="kw">in</span> <span class="at">self</span>.canales:
+            canal.enviar_con_log(mensaje)
+
+
+sistema = <span class="cl">SistemaAlertas</span>([<span class="cl">NotificacionEmail</span>(), <span class="cl">NotificacionSMS</span>()])
+alerta = <span class="cl">Mensaje</span>(<span class="st">"usuario@mail.com"</span>, <span class="st">"Servidor caído"</span>, <span class="st">"El servidor web no responde."</span>)
+sistema.alertar(alerta)</pre>
+  </div>
+
+  <div class="block-title">Ejercicios</div>
+
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 01</div>
+    <h4>Procesador de pagos</h4>
+    <p>Crea una clase abstracta <code>ProcesadorPago</code> con los métodos abstractos <code>cobrar(monto)</code> y <code>reembolsar(monto)</code>. Luego implementa:</p>
+    <ul>
+      <li><code>PagoTarjeta</code> — simula cobro con tarjeta de crédito</li>
+      <li><code>PagoPayPal</code> — simula cobro via PayPal</li>
+      <li><code>PagoCripto</code> — simula cobro en criptomoneda</li>
+    </ul>
+    <p>Crea una función <code>procesar_orden(procesador, monto)</code> que funcione con cualquier procesador.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Usa <code>from abc import ABC, abstractmethod</code>. El método <code>procesar_orden</code> solo debe recibir un <code>ProcesadorPago</code>, nunca un tipo concreto.</div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 02</div>
+    <h4>Exportador de reportes</h4>
+    <p>Define una clase abstracta <code>Exportador</code> con métodos <code>exportar(datos: list)</code> y <code>extension() -> str</code>. Implementa:</p>
+    <ul>
+      <li><code>ExportadorCSV</code> — separa con comas</li>
+      <li><code>ExportadorJSON</code> — usa el módulo <code>json</code></li>
+      <li><code>ExportadorMarkdown</code> — genera una tabla Markdown</li>
+    </ul>
+    <div class="hint"><span class="hint-label">💡 Pista</span>El método abstracto <code>extension()</code> debería retornar <code>".csv"</code>, <code>".json"</code> etc. Agrega un método concreto <code>guardar(datos, nombre_archivo)</code> que llame a <code>exportar()</code> y use <code>extension()</code> para construir el nombre del archivo.</div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 03 — Desafío</div>
+    <h4>Motor de juego 2D</h4>
+    <p>Diseña una jerarquía de clases para un motor de juego simple. Define la clase abstracta <code>EntidadJuego</code> con métodos abstractos <code>actualizar(delta_tiempo)</code>, <code>dibujar()</code> y <code>colisiona_con(otra)</code>. Implementa al menos:</p>
+    <ul>
+      <li><code>Jugador</code> — tiene posición, salud y puede moverse</li>
+      <li><code>Enemigo</code> — persigue al jugador</li>
+      <li><code>Proyectil</code> — se mueve en línea recta</li>
+    </ul>
+    <p>Crea un loop de juego que itere sobre una lista de <code>EntidadJuego</code> y llame a <code>actualizar()</code> y <code>dibujar()</code> sin saber el tipo específico de cada entidad.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Para la colisión puedes usar una bounding box simple: dos rectángulos se solapan si sus rangos en X e Y se intersecan. Guarda <code>x, y, ancho, alto</code> en cada entidad.</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     ENCAPSULAMIENTO
+════════════════════════════════════════ -->
+<div id="sec-encapsulamiento" class="section">
+
+  <div class="section-header">
+    <div class="section-icon" style="background:#0f2a2a">🔒</div>
+    <div>
+      <div class="section-title">Encapsulamiento</div>
+      <div class="section-subtitle">Controlar qué se expone y qué se protege del exterior</div>
+    </div>
+  </div>
+
+  <div class="concept-def" style="border-left-color: var(--teal)">
+    <h3 style="color:var(--teal)">¿Qué es?</h3>
+    <p>Encapsulamiento significa que los datos internos de un objeto <strong style="color:var(--text)">no deben ser modificados libremente desde fuera</strong>. En Python no existe "privado" real como en Java, pero la convención <code>_atributo</code> indica "interno" y <code>__atributo</code> activa el name mangling. Los <code>@property</code> permiten lógica de validación al leer o escribir.</p>
+  </div>
+
+  <div class="note">
+    <strong>Convenciones en Python:</strong><br>
+    <code>nombre</code> → público, úsalo libremente<br>
+    <code>_nombre</code> → "privado por convención", evita usarlo desde fuera<br>
+    <code>__nombre</code> → name mangling: se renombra a <code>_Clase__nombre</code>, dificulta acceso externo<br>
+    <code>@property</code> → acceso controlado con lógica de validación
+  </div>
+
+  <div class="block-title">Ejemplo 1 — Cuenta bancaria con validaciones</div>
+  <div class="code-wrap">
+    <div class="code-header">
+      <span class="code-label">encapsulamiento_banco.py</span>
+      <span class="code-lang">Python 3</span>
+    </div>
+    <pre><span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+<span class="kw">class</span> <span class="cl">CuentaBancaria</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, titular: <span class="cl">str</span>, saldo_inicial: float = <span class="nb">0.0</span>):
+        <span class="at">self</span>._titular = titular
+        <span class="at">self</span>.__saldo = <span class="nb">0.0</span>          <span class="cm"># doble guion = name mangling</span>
+        <span class="at">self</span>.__historial: list = []
+        <span class="kw">if</span> saldo_inicial > <span class="nb">0</span>:
+            <span class="at">self</span>.__depositar_interno(saldo_inicial, <span class="st">"Depósito inicial"</span>)
+
+    <span class="cm"># ── Lectura controlada ──────────────────</span>
+    <span class="dp">@property</span>
+    <span class="kw">def</span> <span class="fn">saldo</span>(<span class="at">self</span>) -> float:
+        <span class="kw">return</span> <span class="at">self</span>.__saldo
+
+    <span class="dp">@property</span>
+    <span class="kw">def</span> <span class="fn">titular</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="kw">return</span> <span class="at">self</span>._titular
+
+    <span class="cm"># ── Operaciones públicas ────────────────</span>
+    <span class="kw">def</span> <span class="fn">depositar</span>(<span class="at">self</span>, monto: float) -> <span class="kw">None</span>:
+        <span class="kw">if</span> monto <= <span class="nb">0</span>:
+            <span class="kw">raise</span> <span class="cl">ValueError</span>(<span class="st">"El monto debe ser positivo"</span>)
+        <span class="at">self</span>.__depositar_interno(monto, <span class="st">"Depósito"</span>)
+
+    <span class="kw">def</span> <span class="fn">retirar</span>(<span class="at">self</span>, monto: float) -> <span class="kw">None</span>:
+        <span class="kw">if</span> monto <= <span class="nb">0</span>:
+            <span class="kw">raise</span> <span class="cl">ValueError</span>(<span class="st">"El monto debe ser positivo"</span>)
+        <span class="kw">if</span> monto > <span class="at">self</span>.__saldo:
+            <span class="kw">raise</span> <span class="cl">ValueError</span>(<span class="st">f"Saldo insuficiente (tienes {self.__saldo:.2f})"</span>)
+        <span class="at">self</span>.__saldo -= monto
+        <span class="at">self</span>.__registrar(<span class="st">f"Retiro: -${monto:.2f}"</span>)
+
+    <span class="kw">def</span> <span class="fn">extrato</span>(<span class="at">self</span>) -> <span class="kw">None</span>:
+        <span class="fn">print</span>(<span class="st">f"\n── Cuenta de {self._titular} ──"</span>)
+        <span class="kw">for</span> entrada <span class="kw">in</span> <span class="at">self</span>.__historial:
+            <span class="fn">print</span>(<span class="st">f"  {entrada}"</span>)
+        <span class="fn">print</span>(<span class="st">f"  Saldo actual: ${self.__saldo:.2f}\n"</span>)
+
+    <span class="cm"># ── Métodos internos (no usar desde fuera) ──</span>
+    <span class="kw">def</span> <span class="fn">__depositar_interno</span>(<span class="at">self</span>, monto: float, concepto: <span class="cl">str</span>) -> <span class="kw">None</span>:
+        <span class="at">self</span>.__saldo += monto
+        <span class="at">self</span>.__registrar(<span class="st">f"{concepto}: +${monto:.2f}"</span>)
+
+    <span class="kw">def</span> <span class="fn">__registrar</span>(<span class="at">self</span>, texto: <span class="cl">str</span>) -> <span class="kw">None</span>:
+        ts = datetime.now().strftime(<span class="st">"%H:%M:%S"</span>)
+        <span class="at">self</span>.__historial.append(<span class="st">f"[{ts}] {texto}"</span>)
+
+
+cuenta = <span class="cl">CuentaBancaria</span>(<span class="st">"Ana García"</span>, <span class="nb">1000.0</span>)
+cuenta.depositar(<span class="nb">500</span>)
+cuenta.retirar(<span class="nb">200</span>)
+cuenta.extrato()
+
+<span class="cm"># cuenta.__saldo = 999999  ← esto NO funciona (name mangling)</span>
+<span class="cm"># cuenta.saldo = 999999    ← AttributeError: no hay setter</span>
+<span class="fn">print</span>(cuenta.saldo)  <span class="cm"># lectura OK → 1300.0</span></pre>
+  </div>
+
+  <div class="block-title">Ejemplo 2 — Temperatura con validación</div>
+  <div class="code-wrap">
+    <div class="code-header">
+      <span class="code-label">encapsulamiento_temperatura.py</span>
+      <span class="code-lang">Python 3</span>
+    </div>
+    <pre><span class="kw">class</span> <span class="cl">Termostato</span>:
+    <span class="st">"""Controla temperatura entre límites físicos."""</span>
+    TEMP_MIN = <span class="nb">-273.15</span>  <span class="cm"># cero absoluto</span>
+    TEMP_MAX = <span class="nb">1000.0</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, temp_inicial: float = <span class="nb">20.0</span>):
+        <span class="at">self</span>.__temperatura = <span class="kw">None</span>
+        <span class="at">self</span>.temperatura = temp_inicial  <span class="cm"># usa el setter</span>
+
+    <span class="dp">@property</span>
+    <span class="kw">def</span> <span class="fn">temperatura</span>(<span class="at">self</span>) -> float:
+        <span class="kw">return</span> <span class="at">self</span>.__temperatura
+
+    <span class="dp">@temperatura.setter</span>
+    <span class="kw">def</span> <span class="fn">temperatura</span>(<span class="at">self</span>, valor: float) -> <span class="kw">None</span>:
+        <span class="kw">if</span> <span class="kw">not</span> (<span class="at">self</span>.TEMP_MIN <= valor <= <span class="at">self</span>.TEMP_MAX):
+            <span class="kw">raise</span> <span class="cl">ValueError</span>(
+                <span class="st">f"Temperatura fuera de rango: {valor}°C"</span>
+                <span class="st">f" (válido: {self.TEMP_MIN}–{self.TEMP_MAX})"</span>
+            )
+        <span class="at">self</span>.__temperatura = valor
+
+    <span class="dp">@property</span>
+    <span class="kw">def</span> <span class="fn">fahrenheit</span>(<span class="at">self</span>) -> float:
+        <span class="kw">return</span> <span class="at">self</span>.__temperatura * <span class="nb">9</span>/<span class="nb">5</span> + <span class="nb">32</span>
+
+    <span class="dp">@property</span>
+    <span class="kw">def</span> <span class="fn">estado</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        t = <span class="at">self</span>.__temperatura
+        <span class="kw">if</span> t < <span class="nb">0</span>:      <span class="kw">return</span> <span class="st">"🧊 congelado"</span>
+        <span class="kw">elif</span> t < <span class="nb">20</span>:   <span class="kw">return</span> <span class="st">"❄️  frío"</span>
+        <span class="kw">elif</span> t < <span class="nb">35</span>:   <span class="kw">return</span> <span class="st">"✅ confortable"</span>
+        <span class="kw">elif</span> t < <span class="nb">60</span>:   <span class="kw">return</span> <span class="st">"🔥 caliente"</span>
+        <span class="kw">else</span>:          <span class="kw">return</span> <span class="st">"💀 peligroso"</span>
+
+    <span class="kw">def</span> <span class="fn">__repr__</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="kw">return</span> (<span class="st">f"Termostato({self.__temperatura:.1f}°C / "</span>
+                <span class="st">f"{self.fahrenheit:.1f}°F) → {self.estado}"</span>)
+
+
+t = <span class="cl">Termostato</span>(<span class="nb">22.0</span>)
+<span class="fn">print</span>(t)                <span class="cm"># Termostato(22.0°C / 71.6°F) → ✅ confortable</span>
+t.temperatura = <span class="nb">37.5</span>
+<span class="fn">print</span>(t.estado)         <span class="cm"># 🔥 caliente</span>
+
+<span class="kw">try</span>:
+    t.temperatura = <span class="nb">-300</span>  <span class="cm"># lanza ValueError</span>
+<span class="kw">except</span> <span class="cl">ValueError</span> <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="st">f"Error: {e}"</span>)</pre>
+  </div>
+
+  <div class="block-title">Ejercicios</div>
+
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 01</div>
+    <h4>Usuario con contraseña segura</h4>
+    <p>Crea la clase <code>Usuario</code> con atributos <code>nombre</code> (público), <code>email</code> (propiedad con validación de formato) y <code>__password</code> (nunca accesible directamente). Implementa:</p>
+    <ul>
+      <li><code>cambiar_password(actual, nueva)</code> — verifica la contraseña actual antes de cambiarla</li>
+      <li><code>verificar_password(intento)</code> → bool</li>
+      <li>La contraseña debe tener mínimo 8 caracteres y al menos un número</li>
+    </ul>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Usa <code>import re</code> para validar email y contraseña. Para el email: <code>re.match(r"[^@]+@[^@]+\.[^@]+", email)</code></div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 02</div>
+    <h4>Inventario con stock mínimo</h4>
+    <p>Diseña la clase <code>ProductoInventario</code> que encapsule <code>nombre</code>, <code>_precio</code> (solo positivo), <code>__stock</code> (solo entero ≥ 0) y <code>__stock_minimo</code>. Implementa:</p>
+    <ul>
+      <li>Propiedad <code>precio</code> con setter que rechace valores negativos</li>
+      <li>Métodos <code>entrada(cantidad)</code> y <code>salida(cantidad)</code></li>
+      <li>Propiedad de solo lectura <code>bajo_stock</code> → bool</li>
+      <li><code>__repr__</code> que muestre nombre, precio y stock actual</li>
+    </ul>
+    <div class="hint"><span class="hint-label">💡 Pista</span><code>salida()</code> debe lanzar <code>ValueError</code> si la cantidad supera el stock disponible. El <code>@property</code> <code>bajo_stock</code> no necesita setter.</div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 03 — Desafío</div>
+    <h4>Configuración de aplicación</h4>
+    <p>Crea una clase <code>ConfigApp</code> que lea configuración de un diccionario inicial. Los valores se deben poder leer con <code>config["clave"]</code> (implementa <code>__getitem__</code>), pero solo modificar vía <code>config.set("clave", valor, tipo=str)</code> que valide el tipo. Agrega:</p>
+    <ul>
+      <li>Soporte para claves de solo lectura marcadas con <code>freeze("clave")</code></li>
+      <li>Historial de cambios accesible via <code>config.historial</code></li>
+      <li>Método <code>exportar()</code> que devuelva el dict actual (copia, no referencia)</li>
+    </ul>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Implementa <code>__getitem__</code>, <code>__setitem__</code> (que lance error indicando usar <code>.set()</code>), y guarda las claves congeladas en un <code>set</code> interno.</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     HERENCIA
+════════════════════════════════════════ -->
+<div id="sec-herencia" class="section">
+
+  <div class="section-header">
+    <div class="section-icon" style="background:#2a2000">🌳</div>
+    <div>
+      <div class="section-title">Herencia</div>
+      <div class="section-subtitle">Reutilizar y especializar comportamiento sin repetir código</div>
+    </div>
+  </div>
+
+  <div class="concept-def" style="border-left-color: var(--amber)">
+    <h3 style="color:var(--amber)">¿Qué es?</h3>
+    <p>Herencia permite que una clase <strong style="color:var(--text)">adquiera atributos y métodos de otra</strong>. La subclase puede usar todo lo heredado, sobreescribir lo que necesite con <code>super()</code>, y agregar comportamiento nuevo. Python soporta herencia múltiple, pero úsala con cuidado.</p>
+  </div>
+
+  <div class="advantages">
+    <div class="adv-card">
+      <div class="icon">♻️</div>
+      <h4>Reutilización</h4>
+      <p>Escribe la lógica una vez en la clase padre. Las hijas la heredan gratis.</p>
+    </div>
+    <div class="adv-card">
+      <div class="icon">🎯</div>
+      <h4>Especialización</h4>
+      <p>Sobreescribe solo lo que cambia. El resto se hereda sin cambios.</p>
+    </div>
+    <div class="adv-card">
+      <div class="icon">🏗️</div>
+      <h4>Jerarquía clara</h4>
+      <p>El árbol de clases documenta las relaciones "es un tipo de".</p>
+    </div>
+    <div class="adv-card">
+      <div class="icon">🔧</div>
+      <h4>super()</h4>
+      <p>Extiende el constructor padre sin duplicar código de inicialización.</p>
+    </div>
+  </div>
+
+  <div class="block-title">Ejemplo 1 — Empleados con jerarquía</div>
+  <div class="code-wrap">
+    <div class="code-header">
+      <span class="code-label">herencia_empleados.py</span>
+      <span class="code-lang">Python 3</span>
+    </div>
+    <pre><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass, field
+<span class="kw">from</span> datetime <span class="kw">import</span> date
+
+<span class="kw">class</span> <span class="cl">Empleado</span>:
+    <span class="st">"""Base: todo empleado tiene nombre, salario e ID."""</span>
+
+    _contador_ids: <span class="cl">int</span> = <span class="nb">0</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, nombre: <span class="cl">str</span>, salario_base: float):
+        <span class="cl">Empleado</span>._contador_ids += <span class="nb">1</span>
+        <span class="at">self</span>.id = <span class="cl">Empleado</span>._contador_ids
+        <span class="at">self</span>.nombre = nombre
+        <span class="at">self</span>._salario_base = salario_base
+        <span class="at">self</span>.fecha_ingreso = date.today()
+
+    <span class="kw">def</span> <span class="fn">calcular_salario</span>(<span class="at">self</span>) -> float:
+        <span class="kw">return</span> <span class="at">self</span>._salario_base
+
+    <span class="kw">def</span> <span class="fn">info</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="kw">return</span> (<span class="st">f"[{self.id}] {self.nombre} | "</span>
+                <span class="st">f"Salario: ${self.calcular_salario():,.0f}"</span>)
+
+    <span class="kw">def</span> <span class="fn">__repr__</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="kw">return</span> <span class="st">f"{type(self).__name__}({self.nombre!r})"</span>
+
+
+<span class="kw">class</span> <span class="cl">EmpleadoComision</span>(<span class="cl">Empleado</span>):
+    <span class="st">"""Empleado de ventas: salario base + comisión."""</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, nombre: <span class="cl">str</span>, salario_base: float, ventas: float, tasa_comision: float = <span class="nb">0.10</span>):
+        <span class="fn">super</span>().__init__(nombre, salario_base)  <span class="cm"># llama al padre</span>
+        <span class="at">self</span>.ventas = ventas
+        <span class="at">self</span>.tasa_comision = tasa_comision
+
+    <span class="kw">def</span> <span class="fn">calcular_salario</span>(<span class="at">self</span>) -> float:
+        <span class="cm"># Sobreescribe el método del padre y lo extiende</span>
+        <span class="kw">return</span> <span class="fn">super</span>().calcular_salario() + (<span class="at">self</span>.ventas * <span class="at">self</span>.tasa_comision)
+
+
+<span class="kw">class</span> <span class="cl">Gerente</span>(<span class="cl">Empleado</span>):
+    <span class="st">"""Gerente: salario base + bono + equipo a cargo."""</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, nombre: <span class="cl">str</span>, salario_base: float, bono: float):
+        <span class="fn">super</span>().__init__(nombre, salario_base)
+        <span class="at">self</span>.bono = bono
+        <span class="at">self</span>.equipo: list[<span class="cl">Empleado</span>] = []
+
+    <span class="kw">def</span> <span class="fn">contratar</span>(<span class="at">self</span>, empleado: <span class="cl">Empleado</span>) -> <span class="kw">None</span>:
+        <span class="at">self</span>.equipo.append(empleado)
+        <span class="fn">print</span>(<span class="st">f"  {empleado.nombre} fue contratado por {self.nombre}"</span>)
+
+    <span class="kw">def</span> <span class="fn">calcular_salario</span>(<span class="at">self</span>) -> float:
+        <span class="kw">return</span> <span class="fn">super</span>().calcular_salario() + <span class="at">self</span>.bono
+
+    <span class="kw">def</span> <span class="fn">info</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        base = <span class="fn">super</span>().info()  <span class="cm"># reutiliza el info del padre</span>
+        <span class="kw">return</span> <span class="st">f"{base} | Equipo: {len(self.equipo)} personas"</span>
+
+
+<span class="cm"># Uso</span>
+gerente = <span class="cl">Gerente</span>(<span class="st">"Laura Torres"</span>, <span class="nb">5000</span>, bono=<span class="nb">2000</span>)
+vendedor = <span class="cl">EmpleadoComision</span>(<span class="st">"Carlos Ríos"</span>, <span class="nb">1500</span>, ventas=<span class="nb">20000</span>)
+analista = <span class="cl">Empleado</span>(<span class="st">"María Pérez"</span>, <span class="nb">2500</span>)
+
+gerente.contratar(vendedor)
+gerente.contratar(analista)
+
+<span class="kw">for</span> emp <span class="kw">in</span> [gerente, vendedor, analista]:
+    <span class="fn">print</span>(emp.info())</pre>
+  </div>
+
+  <div class="block-title">Ejemplo 2 — Vehículos con herencia múltiple</div>
+  <div class="code-wrap">
+    <div class="code-header">
+      <span class="code-label">herencia_vehiculos.py</span>
+      <span class="code-lang">Python 3</span>
+    </div>
+    <pre><span class="kw">class</span> <span class="cl">Vehiculo</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, marca: <span class="cl">str</span>, modelo: <span class="cl">str</span>, anio: <span class="cl">int</span>):
+        <span class="at">self</span>.marca = marca
+        <span class="at">self</span>.modelo = modelo
+        <span class="at">self</span>.anio = anio
+        <span class="at">self</span>._encendido = <span class="kw">False</span>
+
+    <span class="kw">def</span> <span class="fn">encender</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="at">self</span>._encendido = <span class="kw">True</span>
+        <span class="kw">return</span> <span class="st">f"{self.marca} {self.modelo}: encendido 🟢"</span>
+
+    <span class="kw">def</span> <span class="fn">apagar</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="at">self</span>._encendido = <span class="kw">False</span>
+        <span class="kw">return</span> <span class="st">f"{self.marca} {self.modelo}: apagado 🔴"</span>
+
+    <span class="kw">def</span> <span class="fn">__str__</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="kw">return</span> <span class="st">f"{self.anio} {self.marca} {self.modelo}"</span>
+
+
+<span class="kw">class</span> <span class="cl">Electrico</span>:
+    <span class="st">"""Mixin: comportamiento de vehículo eléctrico."""</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, capacidad_bateria: float, **kwargs):
+        <span class="fn">super</span>().__init__(**kwargs)  <span class="cm"># MRO: pasa args al siguiente</span>
+        <span class="at">self</span>.capacidad_bateria = capacidad_bateria
+        <span class="at">self</span>._carga = <span class="nb">100.0</span>
+
+    <span class="kw">def</span> <span class="fn">cargar</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="at">self</span>._carga = <span class="nb">100.0</span>
+        <span class="kw">return</span> <span class="st">f"Batería cargada al 100% ({self.capacidad_bateria} kWh)"</span>
+
+    <span class="kw">def</span> <span class="fn">autonomia</span>(<span class="at">self</span>) -> float:
+        <span class="kw">return</span> <span class="at">self</span>.capacidad_bateria * <span class="at">self</span>._carga / <span class="nb">100</span> * <span class="nb">6</span>
+
+
+<span class="kw">class</span> <span class="cl">AutoElectrico</span>(<span class="cl">Electrico</span>, <span class="cl">Vehiculo</span>):
+    <span class="st">"""Herencia múltiple: es un Vehículo y es Eléctrico."""</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, marca, modelo, anio, capacidad_bateria, puertas=<span class="nb">4</span>):
+        <span class="fn">super</span>().__init__(
+            marca=marca, modelo=modelo, anio=anio,
+            capacidad_bateria=capacidad_bateria
+        )
+        <span class="at">self</span>.puertas = puertas
+
+    <span class="kw">def</span> <span class="fn">encender</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        base = <span class="fn">super</span>().encender()
+        <span class="kw">return</span> <span class="st">f"{base} | Silencioso ⚡"</span>
+
+
+tesla = <span class="cl">AutoElectrico</span>(<span class="st">"Tesla"</span>, <span class="st">"Model 3"</span>, <span class="nb">2024</span>, capacidad_bateria=<span class="nb">75</span>)
+<span class="fn">print</span>(tesla.encender())
+<span class="fn">print</span>(<span class="st">f"Autonomía: {tesla.autonomia():.0f} km"</span>)
+<span class="fn">print</span>(<span class="cl">AutoElectrico</span>.__mro__)  <span class="cm"># ver orden de resolución</span></pre>
+  </div>
+
+  <div class="block-title">Ejercicios</div>
+
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 01</div>
+    <h4>Jerarquía de animales</h4>
+    <p>Crea la clase base <code>Animal</code> con <code>nombre</code>, <code>edad</code>, y métodos <code>comer()</code>, <code>dormir()</code> y <code>hacer_sonido()</code> (abstracto). Implementa:</p>
+    <ul>
+      <li><code>Perro</code> — ladra, puede aprender trucos en una lista</li>
+      <li><code>Gato</code> — maúlla, tiene independencia (int 1-10)</li>
+      <li><code>PerroGuia(Perro)</code> — extiende Perro con <code>guiar_persona(nombre)</code></li>
+    </ul>
+    <div class="hint"><span class="hint-label">💡 Pista</span><code>PerroGuia</code> hereda de <code>Perro</code> que hereda de <code>Animal</code>. Úsalo para practicar cadenas de <code>super()</code> de dos niveles.</div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 02</div>
+    <h4>Sistema de usuarios y roles</h4>
+    <p>Define <code>Usuario</code> base con <code>nombre</code>, <code>email</code> y <code>permisos: list</code>. Crea subclases:</p>
+    <ul>
+      <li><code>UsuarioAdmin</code> — tiene todos los permisos, método <code>banear(usuario)</code></li>
+      <li><code>UsuarioModerador</code> — permisos parciales, método <code>editar_contenido(id)</code></li>
+      <li><code>UsuarioInvitado</code> — solo lectura, <code>solicitar_acceso()</code></li>
+    </ul>
+    <p>Implementa <code>puede_hacer(accion: str) -> bool</code> en la base. Cada subclase define sus permisos en el constructor via <code>super()</code>.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Los permisos pueden ser strings: <code>"leer"</code>, <code>"escribir"</code>, <code>"borrar"</code>, <code>"banear"</code>. <code>UsuarioAdmin</code> agrega todos en su <code>__init__</code> llamando a <code>super()</code> primero.</div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 03 — Desafío</div>
+    <h4>Framework de tests propio</h4>
+    <p>Crea un mini-framework de tests al estilo pytest/unittest. Define la clase base <code>CasoTest</code> con:</p>
+    <ul>
+      <li><code>setUp()</code> y <code>tearDown()</code> — hooks opcionales (no abstractos)</li>
+      <li><code>afirmar_igual(a, b)</code>, <code>afirmar_verdadero(x)</code>, <code>afirmar_lanza(excepcion, func)</code></li>
+      <li>Método <code>ejecutar()</code> que corre todos los métodos que empiecen con <code>test_</code></li>
+    </ul>
+    <p>Escribe dos subclases de prueba que hereden de <code>CasoTest</code> para probar una clase <code>Calculadora</code>.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Usa <code>dir(self)</code> y <code>callable(getattr(self, m))</code> para descubrir los métodos <code>test_*</code> dinámicamente.</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     POLIMORFISMO
+════════════════════════════════════════ -->
+<div id="sec-polimorfismo" class="section">
+
+  <div class="section-header">
+    <div class="section-icon" style="background:#2a0a2a">🎭</div>
+    <div>
+      <div class="section-title">Polimorfismo</div>
+      <div class="section-subtitle">El mismo mensaje, comportamientos distintos según quien lo recibe</div>
+    </div>
+  </div>
+
+  <div class="concept-def" style="border-left-color: var(--pink)">
+    <h3 style="color:var(--pink)">¿Qué es?</h3>
+    <p>Polimorfismo significa que <strong style="color:var(--text)">objetos de distintas clases responden al mismo mensaje de forma diferente</strong>. Python lo implementa de dos maneras: <em>polimorfismo por herencia</em> (sobreescribir métodos) y <em>duck typing</em> ("si camina como pato y grazna como pato, es un pato") — no hace falta heredar de la misma clase si implementan la misma interfaz.</p>
+  </div>
+
+  <table class="compare">
+    <tr>
+      <th>Tipo</th>
+      <th>Mecanismo</th>
+      <th>Cuándo usarlo</th>
+    </tr>
+    <tr>
+      <td>Por herencia</td>
+      <td>Sobreescribir métodos de clase padre</td>
+      <td>Jerarquías formales, clases abstractas</td>
+    </tr>
+    <tr>
+      <td>Duck typing</td>
+      <td>Cualquier objeto con el método correcto</td>
+      <td>Flexibilidad máxima, protocolos implícitos</td>
+    </tr>
+    <tr>
+      <td>Dunder methods</td>
+      <td><code>__len__</code>, <code>__add__</code>, <code>__str__</code>...</td>
+      <td>Integración con sintaxis Python nativa</td>
+    </tr>
+  </table>
+
+  <div class="block-title">Ejemplo 1 — Renderer de documentos</div>
+  <div class="code-wrap">
+    <div class="code-header">
+      <span class="code-label">polimorfismo_renderer.py</span>
+      <span class="code-lang">Python 3</span>
+    </div>
+    <pre><span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
+
+<span class="kw">class</span> <span class="cl">Elemento</span>(ABC):
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">renderizar</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        ...
+
+<span class="cm"># Cada elemento sabe cómo renderizarse</span>
+<span class="kw">class</span> <span class="cl">Titulo</span>(<span class="cl">Elemento</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, texto: <span class="cl">str</span>, nivel: <span class="cl">int</span> = <span class="nb">1</span>):
+        <span class="at">self</span>.texto = texto
+        <span class="at">self</span>.nivel = nivel
+    <span class="kw">def</span> <span class="fn">renderizar</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        prefijo = <span class="st">"#"</span> * <span class="at">self</span>.nivel
+        <span class="kw">return</span> <span class="st">f"{prefijo} {self.texto}"</span>
+
+<span class="kw">class</span> <span class="cl">Parrafo</span>(<span class="cl">Elemento</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, texto: <span class="cl">str</span>):
+        <span class="at">self</span>.texto = texto
+    <span class="kw">def</span> <span class="fn">renderizar</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="kw">return</span> <span class="at">self</span>.texto
+
+<span class="kw">class</span> <span class="cl">ListaElementos</span>(<span class="cl">Elemento</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, items: list[<span class="cl">str</span>], ordenada: bool = <span class="kw">False</span>):
+        <span class="at">self</span>.items = items
+        <span class="at">self</span>.ordenada = ordenada
+    <span class="kw">def</span> <span class="fn">renderizar</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="kw">if</span> <span class="at">self</span>.ordenada:
+            lineas = [<span class="st">f"  {i+1}. {item}"</span> <span class="kw">for</span> i, item <span class="kw">in</span> <span class="fn">enumerate</span>(<span class="at">self</span>.items)]
+        <span class="kw">else</span>:
+            lineas = [<span class="st">f"  • {item}"</span> <span class="kw">for</span> item <span class="kw">in</span> <span class="at">self</span>.items]
+        <span class="kw">return</span> <span class="st">"\n"</span>.join(lineas)
+
+<span class="kw">class</span> <span class="cl">Separador</span>(<span class="cl">Elemento</span>):
+    <span class="kw">def</span> <span class="fn">renderizar</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="kw">return</span> <span class="st">"─" * 40</span>
+
+<span class="cm"># El documento no sabe qué elementos tiene — solo los renderiza</span>
+<span class="kw">class</span> <span class="cl">Documento</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>):
+        <span class="at">self</span>.elementos: list[<span class="cl">Elemento</span>] = []
+
+    <span class="kw">def</span> <span class="fn">agregar</span>(<span class="at">self</span>, *elems: <span class="cl">Elemento</span>) -> <span class="st">"Documento"</span>:
+        <span class="at">self</span>.elementos.extend(elems)
+        <span class="kw">return</span> <span class="at">self</span>  <span class="cm"># permite encadenamiento</span>
+
+    <span class="kw">def</span> <span class="fn">renderizar</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="cm"># Polimorfismo: llamamos el mismo método en objetos distintos</span>
+        <span class="kw">return</span> <span class="st">"\n\n"</span>.join(e.renderizar() <span class="kw">for</span> e <span class="kw">in</span> <span class="at">self</span>.elementos)
+
+
+doc = (<span class="cl">Documento</span>()
+    .agregar(<span class="cl">Titulo</span>(<span class="st">"Mi Reporte"</span>))
+    .agregar(<span class="cl">Parrafo</span>(<span class="st">"Este es el resumen ejecutivo."</span>))
+    .agregar(<span class="cl">Separador</span>())
+    .agregar(<span class="cl">Titulo</span>(<span class="st">"Hallazgos"</span>, nivel=<span class="nb">2</span>))
+    .agregar(<span class="cl">ListaElementos</span>([<span class="st">"Aumento de ventas 30%"</span>, <span class="st">"Costos reducidos 15%"</span>]))
+)
+<span class="fn">print</span>(doc.renderizar())</pre>
+  </div>
+
+  <div class="block-title">Ejemplo 2 — Duck typing y operadores sobrecargados</div>
+  <div class="code-wrap">
+    <div class="code-header">
+      <span class="code-label">polimorfismo_duck_typing.py</span>
+      <span class="code-lang">Python 3</span>
+    </div>
+    <pre><span class="cm"># Duck typing: no necesitan heredar de la misma clase</span>
+<span class="kw">class</span> <span class="cl">Vector2D</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, x: float, y: float):
+        <span class="at">self</span>.x = x
+        <span class="at">self</span>.y = y
+
+    <span class="kw">def</span> <span class="fn">__add__</span>(<span class="at">self</span>, otro: <span class="st">"Vector2D"</span>) -> <span class="st">"Vector2D"</span>:
+        <span class="kw">return</span> <span class="cl">Vector2D</span>(<span class="at">self</span>.x + otro.x, <span class="at">self</span>.y + otro.y)
+
+    <span class="kw">def</span> <span class="fn">__mul__</span>(<span class="at">self</span>, escalar: float) -> <span class="st">"Vector2D"</span>:
+        <span class="kw">return</span> <span class="cl">Vector2D</span>(<span class="at">self</span>.x * escalar, <span class="at">self</span>.y * escalar)
+
+    <span class="kw">def</span> <span class="fn">__eq__</span>(<span class="at">self</span>, otro: object) -> bool:
+        <span class="kw">if not</span> <span class="fn">isinstance</span>(otro, <span class="cl">Vector2D</span>): <span class="kw">return</span> <span class="kw">NotImplemented</span>
+        <span class="kw">return</span> <span class="at">self</span>.x == otro.x <span class="kw">and</span> <span class="at">self</span>.y == otro.y
+
+    <span class="kw">def</span> <span class="fn">__abs__</span>(<span class="at">self</span>) -> float:
+        <span class="kw">return</span> (<span class="at">self</span>.x**<span class="nb">2</span> + <span class="at">self</span>.y**<span class="nb">2</span>) ** <span class="nb">0.5</span>
+
+    <span class="kw">def</span> <span class="fn">__repr__</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="kw">return</span> <span class="st">f"Vector2D({self.x}, {self.y})"</span>
+
+    <span class="kw">def</span> <span class="fn">__len__</span>(<span class="at">self</span>) -> <span class="cl">int</span>:
+        <span class="kw">return</span> <span class="nb">2</span>  <span class="cm"># dimensiones</span>
+
+
+v1 = <span class="cl">Vector2D</span>(<span class="nb">3</span>, <span class="nb">4</span>)
+v2 = <span class="cl">Vector2D</span>(<span class="nb">1</span>, <span class="nb">2</span>)
+
+<span class="fn">print</span>(v1 + v2)       <span class="cm"># Vector2D(4, 6)   — usa __add__</span>
+<span class="fn">print</span>(v1 * <span class="nb">2</span>)        <span class="cm"># Vector2D(6, 8)   — usa __mul__</span>
+<span class="fn">print</span>(<span class="fn">abs</span>(v1))       <span class="cm"># 5.0              — usa __abs__</span>
+<span class="fn">print</span>(<span class="fn">len</span>(v1))       <span class="cm"># 2                — usa __len__</span>
+<span class="fn">print</span>(v1 == v2)      <span class="cm"># False            — usa __eq__</span>
+
+<span class="cm"># Duck typing: esta función acepta CUALQUIER cosa con .renderizar()</span>
+<span class="kw">def</span> <span class="fn">imprimir_todo</span>(items) -> <span class="kw">None</span>:
+    <span class="kw">for</span> item <span class="kw">in</span> items:
+        <span class="fn">print</span>(item.renderizar())  <span class="cm"># no importa el tipo</span>
+
+<span class="cm"># Incluso puede mezclarse con clases sin relación de herencia</span>
+<span class="kw">class</span> <span class="cl">MensajeSimple</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, texto): <span class="at">self</span>.texto = texto
+    <span class="kw">def</span> <span class="fn">renderizar</span>(<span class="at">self</span>) -> <span class="cl">str</span>: <span class="kw">return</span> <span class="st">f">> {self.texto}"</span>
+
+imprimir_todo([<span class="cl">Titulo</span>(<span class="st">"Hola"</span>), <span class="cl">MensajeSimple</span>(<span class="st">"Sin herencia, funciona igual"</span>)])</pre>
+  </div>
+
+  <div class="block-title">Ejercicios</div>
+
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 01</div>
+    <h4>Calculadora polimórfica</h4>
+    <p>Define una clase abstracta <code>Operacion</code> con <code>ejecutar(a, b)</code> y <code>simbolo()</code>. Implementa <code>Suma</code>, <code>Resta</code>, <code>Multiplicacion</code>, <code>Division</code>, <code>Potencia</code>. Crea una función <code>calcular(operaciones: list, a, b)</code> que aplique todas y muestre los resultados.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>El output podría verse así: <code>3 + 4 = 7 | 3 - 4 = -1 | ...</code> Cada <code>Operacion</code> sabe su propio símbolo y cómo ejecutarse.</div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 02</div>
+    <h4>Colección inteligente con dunder methods</h4>
+    <p>Crea la clase <code>Bolsa</code> que represente una colección de ítems. Implementa:</p>
+    <ul>
+      <li><code>__len__</code> — número de ítems</li>
+      <li><code>__contains__</code> — soporte para <code>item in bolsa</code></li>
+      <li><code>__add__</code> — unir dos bolsas con <code>bolsa1 + bolsa2</code></li>
+      <li><code>__iter__</code> — iterar con <code>for item in bolsa</code></li>
+      <li><code>__getitem__</code> — acceso por índice <code>bolsa[0]</code></li>
+      <li><code>__str__</code> y <code>__repr__</code></li>
+    </ul>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Para <code>__iter__</code> puedes simplemente hacer <code>return iter(self._items)</code> donde <code>_items</code> es la lista interna.</div>
+  </div>
+
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 03 — Desafío</div>
+    <h4>Pipeline de transformaciones</h4>
+    <p>Crea un sistema de transformaciones de datos. Define la clase abstracta <code>Transformacion</code> con <code>aplicar(datos: list) -> list</code>. Implementa:</p>
+    <ul>
+      <li><code>Filtrar(condicion)</code> — filtra elementos</li>
+      <li><code>Mapear(funcion)</code> — transforma cada elemento</li>
+      <li><code>Ordenar(clave, reverso=False)</code></li>
+      <li><code>Limitar(n)</code> — toma solo los primeros n elementos</li>
+    </ul>
+    <p>Crea la clase <code>Pipeline</code> que encadene transformaciones con <code>__or__</code> para que puedas escribir: <code>datos | Filtrar(...) | Mapear(...) | Limitar(5)</code></p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Implementa <code>__ror__</code> en <code>Transformacion</code> para manejar <code>lista | Transformacion</code>. O crea una clase <code>Pipeline</code> que implemente <code>__or__</code> acumulando transformaciones.</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     SOLID — SRP
+════════════════════════════════════════ -->
+<div id="sec-srp" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:#0a2a1a">S</div>
+    <div>
+      <div class="section-title">S — Responsabilidad Única</div>
+      <div class="section-subtitle">Single Responsibility Principle</div>
+    </div>
+  </div>
+  <div class="solid-pill"><span class="solid-letter">S</span>ingle Responsibility Principle</div>
+  <div class="concept-def" style="border-left-color:var(--green)">
+    <h3 style="color:var(--green)">Regla</h3>
+    <p><strong style="color:var(--text)">Una clase debe tener una sola razón para cambiar.</strong> Si una clase hace demasiadas cosas, un cambio en una funcionalidad puede romper otra. El truco mental: si describes la clase con "y" en la mitad ("guarda datos Y envía emails"), la estás dividiendo.</p>
+  </div>
+  <div class="two-col">
+    <div class="code-wrap bad-card">
+      <div class="code-header"><span class="col-label">✗ Violación SRP</span></div>
+      <pre style="font-size:12.5px"><span class="kw">class</span> <span class="cl">Pedido</span>:
+    <span class="cm"># Hace TRES cosas: datos, DB y email</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, items):
+        <span class="at">self</span>.items = items
+
+    <span class="kw">def</span> <span class="fn">calcular_total</span>(<span class="at">self</span>): ...
+
+    <span class="kw">def</span> <span class="fn">guardar_en_db</span>(<span class="at">self</span>): ...
+
+    <span class="kw">def</span> <span class="fn">enviar_confirmacion</span>(<span class="at">self</span>): ...</pre>
+    </div>
+    <div class="code-wrap good-card">
+      <div class="code-header"><span class="col-label">✓ Aplicando SRP</span></div>
+      <pre style="font-size:12.5px"><span class="kw">class</span> <span class="cl">Pedido</span>:      <span class="cm"># solo datos</span>
+    <span class="kw">def</span> <span class="fn">calcular_total</span>(<span class="at">self</span>): ...
+
+<span class="kw">class</span> <span class="cl">RepositorioPedido</span>:  <span class="cm"># solo DB</span>
+    <span class="kw">def</span> <span class="fn">guardar</span>(<span class="at">self</span>, pedido): ...
+
+<span class="kw">class</span> <span class="cl">EmailPedido</span>:  <span class="cm"># solo email</span>
+    <span class="kw">def</span> <span class="fn">confirmar</span>(<span class="at">self</span>, pedido): ...</pre>
+    </div>
+  </div>
+
+  <div class="block-title">Ejemplo completo</div>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-label">srp_factura.py</span><span class="code-lang">Python 3</span></div>
+    <pre><span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass, field
+<span class="kw">from</span> typing <span class="kw">import</span> Protocol
+
+<span class="dp">@dataclass</span>
+<span class="kw">class</span> <span class="cl">LineaFactura</span>:
+    descripcion: <span class="cl">str</span>
+    cantidad: <span class="cl">int</span>
+    precio_unitario: float
+
+    <span class="dp">@property</span>
+    <span class="kw">def</span> <span class="fn">subtotal</span>(<span class="at">self</span>) -> float:
+        <span class="kw">return</span> <span class="at">self</span>.cantidad * <span class="at">self</span>.precio_unitario
+
+
+<span class="cm"># Clase 1: solo representa la factura y su lógica de negocio</span>
+<span class="dp">@dataclass</span>
+<span class="kw">class</span> <span class="cl">Factura</span>:
+    numero: <span class="cl">str</span>
+    cliente: <span class="cl">str</span>
+    lineas: list[<span class="cl">LineaFactura</span>] = field(default_factory=list)
+
+    <span class="kw">def</span> <span class="fn">total</span>(<span class="at">self</span>) -> float:
+        <span class="kw">return</span> <span class="fn">sum</span>(l.subtotal <span class="kw">for</span> l <span class="kw">in</span> <span class="at">self</span>.lineas)
+
+    <span class="kw">def</span> <span class="fn">agregar_linea</span>(<span class="at">self</span>, linea: <span class="cl">LineaFactura</span>) -> <span class="kw">None</span>:
+        <span class="at">self</span>.lineas.append(linea)
+
+
+<span class="cm"># Clase 2: solo se encarga de imprimir/formatear</span>
+<span class="kw">class</span> <span class="cl">ImpresoraFactura</span>:
+    <span class="kw">def</span> <span class="fn">imprimir</span>(<span class="at">self</span>, factura: <span class="cl">Factura</span>) -> <span class="cl">str</span>:
+        lineas = [<span class="st">f"FACTURA #{factura.numero}"</span>,
+                  <span class="st">f"Cliente: {factura.cliente}"</span>,
+                  <span class="st">"-" * 30</span>]
+        <span class="kw">for</span> l <span class="kw">in</span> factura.lineas:
+            lineas.append(<span class="st">f"  {l.descripcion:<span class="kw">{</span><span class="nb">20</span><span class="kw">}</span>} ${l.subtotal:>8.2f}"</span>)
+        lineas.append(<span class="st">f"  {'TOTAL':<span class="kw">{</span><span class="nb">20</span><span class="kw">}</span>} ${factura.total():>8.2f}"</span>)
+        <span class="kw">return</span> <span class="st">"\n"</span>.join(lineas)
+
+
+<span class="cm"># Clase 3: solo se encarga de persistencia</span>
+<span class="kw">class</span> <span class="cl">RepositorioFactura</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>):
+        <span class="at">self</span>._almacen: dict[<span class="cl">str</span>, <span class="cl">Factura</span>] = {}
+
+    <span class="kw">def</span> <span class="fn">guardar</span>(<span class="at">self</span>, factura: <span class="cl">Factura</span>) -> <span class="kw">None</span>:
+        <span class="at">self</span>._almacen[factura.numero] = factura
+
+    <span class="kw">def</span> <span class="fn">buscar</span>(<span class="at">self</span>, numero: <span class="cl">str</span>) -> <span class="cl">Factura</span> | <span class="kw">None</span>:
+        <span class="kw">return</span> <span class="at">self</span>._almacen.get(numero)
+
+
+<span class="cm"># Uso</span>
+factura = <span class="cl">Factura</span>(<span class="st">"F-001"</span>, <span class="st">"Tech Corp"</span>)
+factura.agregar_linea(<span class="cl">LineaFactura</span>(<span class="st">"Laptop Pro"</span>, <span class="nb">2</span>, <span class="nb">1500.00</span>))
+factura.agregar_linea(<span class="cl">LineaFactura</span>(<span class="st">"Mouse inalámbrico"</span>, <span class="nb">3</span>, <span class="nb">45.00</span>))
+
+repo = <span class="cl">RepositorioFactura</span>()
+repo.guardar(factura)
+
+impresora = <span class="cl">ImpresoraFactura</span>()
+<span class="fn">print</span>(impresora.imprimir(factura))</pre>
+  </div>
+
+  <div class="block-title">Ejercicios</div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 01</div>
+    <h4>Refactorizar clase Empleado</h4>
+    <p>Dada una clase <code>EmpleadoGod</code> que hace todo (calcular salario, generar recibo PDF, enviar email, guardar en DB, validar datos), refactorízala en clases con responsabilidades únicas.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Identifica los verbos: calcular → <code>CalculadoraSalario</code>, generar → <code>GeneradorRecibo</code>, enviar → <code>ServicioEmail</code>, guardar → <code>RepositorioEmpleado</code>, validar → <code>ValidadorEmpleado</code></div>
+  </div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 02</div>
+    <h4>Logger modular</h4>
+    <p>Crea un sistema de logging separando: <code>Mensaje</code> (dato), <code>Formateador</code> (texto plano, JSON, CSV), <code>Destino</code> (consola, archivo, memoria). Cada clase tiene una sola razón para cambiar.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>La clase <code>Logger</code> que los une recibe un <code>Formateador</code> y un <code>Destino</code> por inyección en su constructor.</div>
+  </div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 03</div>
+    <h4>Procesador de CSV</h4>
+    <p>Separa en clases distintas: leer el CSV, validar las filas, transformar los datos y escribir el resultado. Asegúrate de que cambiar el formato de salida no afecte a la lectura.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span><code>LectorCSV</code>, <code>ValidadorFilas</code>, <code>TransformadorDatos</code>, <code>EscritorResultado</code>. El pipeline las conecta.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SOLID — OCP
+════════════════════════════════════════ -->
+<div id="sec-ocp" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:#0a1a2a">O</div>
+    <div>
+      <div class="section-title">O — Abierto / Cerrado</div>
+      <div class="section-subtitle">Open/Closed Principle</div>
+    </div>
+  </div>
+  <div class="solid-pill"><span class="solid-letter">O</span>pen/Closed Principle</div>
+  <div class="concept-def" style="border-left-color:#60a5fa">
+    <h3 style="color:#60a5fa">Regla</h3>
+    <p><strong style="color:var(--text)">Abierto para extensión, cerrado para modificación.</strong> Agregar nueva funcionalidad no debe requerir editar código existente. Se logra con abstracciones y polimorfismo: defines el contrato una vez, añades nuevas implementaciones sin tocar las existentes.</p>
+  </div>
+  <div class="two-col">
+    <div class="code-wrap bad-card">
+      <div class="code-header"><span class="col-label">✗ Violación OCP — if/elif infinito</span></div>
+      <pre style="font-size:12.5px"><span class="kw">def</span> <span class="fn">calcular_descuento</span>(tipo, precio):
+    <span class="kw">if</span> tipo == <span class="st">"vip"</span>:
+        <span class="kw">return</span> precio * <span class="nb">0.8</span>
+    <span class="kw">elif</span> tipo == <span class="st">"estudiante"</span>:
+        <span class="kw">return</span> precio * <span class="nb">0.9</span>
+    <span class="kw">elif</span> tipo == <span class="st">"empleado"</span>:
+        <span class="kw">return</span> precio * <span class="nb">0.7</span>
+    <span class="cm"># Cada tipo nuevo = editar esta función</span></pre>
+    </div>
+    <div class="code-wrap good-card">
+      <div class="code-header"><span class="col-label">✓ Aplicando OCP</span></div>
+      <pre style="font-size:12.5px"><span class="kw">class</span> <span class="cl">Descuento</span>(ABC):
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">aplicar</span>(<span class="at">self</span>, precio) -> float: ...
+
+<span class="kw">class</span> <span class="cl">DescuentoVIP</span>(<span class="cl">Descuento</span>):
+    <span class="kw">def</span> <span class="fn">aplicar</span>(<span class="at">self</span>, precio): <span class="kw">return</span> precio * <span class="nb">0.8</span>
+
+<span class="cm"># Nuevo tipo = nueva clase, sin editar nada</span></pre>
+    </div>
+  </div>
+  <div class="block-title">Ejemplo completo — Exportadores extensibles</div>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-label">ocp_exportadores.py</span><span class="code-lang">Python 3</span></div>
+    <pre><span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
+<span class="kw">import</span> json
+
+<span class="kw">class</span> <span class="cl">Exportador</span>(ABC):
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">exportar</span>(<span class="at">self</span>, datos: list[dict]) -> <span class="cl">str</span>: ...
+
+<span class="kw">class</span> <span class="cl">ExportadorCSV</span>(<span class="cl">Exportador</span>):
+    <span class="kw">def</span> <span class="fn">exportar</span>(<span class="at">self</span>, datos: list[dict]) -> <span class="cl">str</span>:
+        <span class="kw">if not</span> datos: <span class="kw">return</span> <span class="st">""</span>
+        cabecera = <span class="st">","</span>.join(datos[<span class="nb">0</span>].keys())
+        filas = [<span class="st">","</span>.join(<span class="cl">str</span>(v) <span class="kw">for</span> v <span class="kw">in</span> d.values()) <span class="kw">for</span> d <span class="kw">in</span> datos]
+        <span class="kw">return</span> <span class="st">"\n"</span>.join([cabecera] + filas)
+
+<span class="kw">class</span> <span class="cl">ExportadorJSON</span>(<span class="cl">Exportador</span>):
+    <span class="kw">def</span> <span class="fn">exportar</span>(<span class="at">self</span>, datos: list[dict]) -> <span class="cl">str</span>:
+        <span class="kw">return</span> json.dumps(datos, ensure_ascii=<span class="kw">False</span>, indent=<span class="nb">2</span>)
+
+<span class="kw">class</span> <span class="cl">ExportadorMarkdown</span>(<span class="cl">Exportador</span>):
+    <span class="kw">def</span> <span class="fn">exportar</span>(<span class="at">self</span>, datos: list[dict]) -> <span class="cl">str</span>:
+        <span class="kw">if not</span> datos: <span class="kw">return</span> <span class="st">""</span>
+        cols = list(datos[<span class="nb">0</span>].keys())
+        sep = <span class="st">" | "</span>
+        cabecera = sep.join(cols)
+        divisor = sep.join([<span class="st">"---"</span>] * <span class="fn">len</span>(cols))
+        filas = [sep.join(<span class="cl">str</span>(d[c]) <span class="kw">for</span> c <span class="kw">in</span> cols) <span class="kw">for</span> d <span class="kw">in</span> datos]
+        <span class="kw">return</span> <span class="st">"\n"</span>.join([cabecera, divisor] + filas)
+
+<span class="cm"># Servicio de reportes: nunca cambia aunque agreguemos exportadores</span>
+<span class="kw">class</span> <span class="cl">ServicioReportes</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, exportador: <span class="cl">Exportador</span>):
+        <span class="at">self</span>.exportador = exportador
+
+    <span class="kw">def</span> <span class="fn">generar</span>(<span class="at">self</span>, datos: list[dict]) -> <span class="cl">str</span>:
+        <span class="kw">return</span> <span class="at">self</span>.exportador.exportar(datos)
+
+
+ventas = [
+    {<span class="st">"producto"</span>: <span class="st">"Laptop"</span>, <span class="st">"cantidad"</span>: <span class="nb">3</span>, <span class="st">"total"</span>: <span class="nb">4500</span>},
+    {<span class="st">"producto"</span>: <span class="st">"Mouse"</span>,  <span class="st">"cantidad"</span>: <span class="nb">8</span>, <span class="st">"total"</span>: <span class="nb">360</span>},
+]
+
+<span class="kw">for</span> exp <span class="kw">in</span> [<span class="cl">ExportadorCSV</span>(), <span class="cl">ExportadorJSON</span>(), <span class="cl">ExportadorMarkdown</span>()]:
+    reporte = <span class="cl">ServicioReportes</span>(exp)
+    <span class="fn">print</span>(<span class="st">f"\n── {type(exp).__name__} ──"</span>)
+    <span class="fn">print</span>(reporte.generar(ventas))</pre>
+  </div>
+  <div class="block-title">Ejercicios</div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 01</div>
+    <h4>Sistema de descuentos</h4>
+    <p>Refactoriza una función <code>aplicar_descuento(tipo, precio)</code> con cadena de if/elif en una jerarquía de clases <code>Descuento</code> que permita agregar nuevos tipos sin modificar el código existente.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Tipos a implementar: <code>DescuentoPorcentaje(pct)</code>, <code>DescuentoFijo(monto)</code>, <code>DescuentoAcumulado(lista_descuentos)</code>.</div>
+  </div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 02</div>
+    <h4>Validadores de formulario</h4>
+    <p>Diseña un sistema de validación donde cada regla sea una clase separada (<code>ValidadorLongitud</code>, <code>ValidadorEmail</code>, <code>ValidadorRegex</code>). El formulario acepta una lista de validadores sin necesidad de ser modificado.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Clase base <code>Validador</code> con método <code>validar(valor) -> tuple[bool, str]</code> (válido + mensaje de error).</div>
+  </div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 03 — Desafío</div>
+    <h4>Motor de reglas de negocio</h4>
+    <p>Crea un motor de reglas donde cada regla es un objeto que implementa <code>evaluar(pedido) -> bool</code> y <code>descripcion() -> str</code>. El motor aplica todas las reglas y genera un reporte de cuáles pasaron/fallaron, sin conocer las reglas específicas.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Implementa reglas como: <code>ReglaMontoMinimo(100)</code>, <code>ReglaStockDisponible()</code>, <code>ReglaClienteActivo()</code>. El motor recibe <code>list[Regla]</code>.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SOLID — LSP
+════════════════════════════════════════ -->
+<div id="sec-lsp" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:#2a0a0a">L</div>
+    <div>
+      <div class="section-title">L — Principio de Liskov</div>
+      <div class="section-subtitle">Liskov Substitution Principle</div>
+    </div>
+  </div>
+  <div class="solid-pill"><span class="solid-letter">L</span>iskov Substitution Principle</div>
+  <div class="concept-def" style="border-left-color:var(--coral)">
+    <h3 style="color:var(--coral)">Regla</h3>
+    <p><strong style="color:var(--text)">Una subclase debe poder reemplazar a su clase padre sin romper el programa.</strong> Si en algún punto tienes que preguntar "¿es un Perro o un Gato?" para comportarte diferente, algo está mal. El ejemplo clásico: un <code>Cuadrado</code> hereda de <code>Rectangulo</code> — parece lógico, pero viola LSP.</p>
+  </div>
+  <div class="block-title">Ejemplo — El problema del Cuadrado/Rectángulo y su solución</div>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-label">lsp_formas.py</span><span class="code-lang">Python 3</span></div>
+    <pre><span class="cm"># ✗ VIOLACIÓN: Cuadrado hereda de Rectángulo</span>
+<span class="kw">class</span> <span class="cl">RectanguloMalo</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, ancho, alto):
+        <span class="at">self</span>.ancho = ancho
+        <span class="at">self</span>.alto = alto
+
+<span class="kw">class</span> <span class="cl">CuadradoMalo</span>(<span class="cl">RectanguloMalo</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, lado):
+        <span class="fn">super</span>().__init__(lado, lado)
+
+    <span class="cm"># Problema: cambiar ancho obliga a cambiar alto</span>
+    <span class="dp">@RectanguloMalo</span>.ancho.setter
+    <span class="kw">def</span> <span class="fn">ancho</span>(<span class="at">self</span>, v): <span class="at">self</span>._ancho = <span class="at">self</span>._alto = v
+
+
+<span class="kw">def</span> <span class="fn">duplicar_ancho</span>(r: <span class="cl">RectanguloMalo</span>):
+    r.ancho *= <span class="nb">2</span>
+    <span class="fn">print</span>(<span class="st">f"Esperado alto=5, obtenido: {r.alto}"</span>)  <span class="cm"># ¡CuadradoMalo devuelve 10!</span>
+
+
+<span class="cm"># ✓ SOLUCIÓN: jerarquía correcta con abstracción compartida</span>
+<span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
+
+<span class="kw">class</span> <span class="cl">Forma</span>(ABC):
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">area</span>(<span class="at">self</span>) -> float: ...
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">perimetro</span>(<span class="at">self</span>) -> float: ...
+
+<span class="kw">class</span> <span class="cl">Rectangulo</span>(<span class="cl">Forma</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, ancho: float, alto: float):
+        <span class="at">self</span>.ancho = ancho
+        <span class="at">self</span>.alto = alto
+    <span class="kw">def</span> <span class="fn">area</span>(<span class="at">self</span>) -> float: <span class="kw">return</span> <span class="at">self</span>.ancho * <span class="at">self</span>.alto
+    <span class="kw">def</span> <span class="fn">perimetro</span>(<span class="at">self</span>) -> float: <span class="kw">return</span> <span class="nb">2</span> * (<span class="at">self</span>.ancho + <span class="at">self</span>.alto)
+
+<span class="kw">class</span> <span class="cl">Cuadrado</span>(<span class="cl">Forma</span>):  <span class="cm"># hermano de Rectangulo, no hijo</span>
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, lado: float):
+        <span class="at">self</span>.lado = lado
+    <span class="kw">def</span> <span class="fn">area</span>(<span class="at">self</span>) -> float: <span class="kw">return</span> <span class="at">self</span>.lado ** <span class="nb">2</span>
+    <span class="kw">def</span> <span class="fn">perimetro</span>(<span class="at">self</span>) -> float: <span class="kw">return</span> <span class="nb">4</span> * <span class="at">self</span>.lado
+
+<span class="cm"># Ahora sí — cualquier Forma puede sustituir a otra en esta función</span>
+<span class="kw">def</span> <span class="fn">describir_forma</span>(f: <span class="cl">Forma</span>) -> <span class="kw">None</span>:
+    <span class="fn">print</span>(<span class="st">f"{type(f).__name__}: área={f.area():.2f}, perímetro={f.perimetro():.2f}"</span>)
+
+<span class="kw">for</span> forma <span class="kw">in</span> [<span class="cl">Rectangulo</span>(<span class="nb">4</span>, <span class="nb">5</span>), <span class="cl">Cuadrado</span>(<span class="nb">4</span>), <span class="cl">Rectangulo</span>(<span class="nb">10</span>, <span class="nb">2</span>)]:
+    describir_forma(forma)  <span class="cm"># funciona perfectamente para todos</span></pre>
+  </div>
+  <div class="block-title">Ejercicios</div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 01</div>
+    <h4>Detecta la violación</h4>
+    <p>Dado el código con <code>Ave</code> → <code>AveQueVuela</code> → <code>Pinguino</code> (que sobreescribe <code>volar()</code> lanzando un error), identifica la violación y rediseña la jerarquía.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Solución: clase base <code>Ave</code>, mixin o subclase <code>AveVoladora</code>, <code>Pinguino</code> hereda de <code>Ave</code> directamente sin <code>volar()</code>.</div>
+  </div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 02</div>
+    <h4>Cuentas bancarias sustituibles</h4>
+    <p>Crea <code>CuentaBase</code> con <code>depositar()</code>, <code>retirar()</code> y <code>saldo</code>. Asegúrate de que <code>CuentaAhorro</code> (con límite de retiros mensuales) y <code>CuentaCorriente</code> (con sobregiro permitido) sean completamente sustituibles por <code>CuentaBase</code>.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>El contrato de <code>retirar()</code> dice que lanza <code>ValueError</code> si no hay fondos suficientes. <code>CuentaCorriente</code> puede retener más porque el sobregiro es fondos "disponibles", pero la firma del contrato se respeta.</div>
+  </div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 03 — Desafío</div>
+    <h4>Jerarquía de repositorios</h4>
+    <p>Define <code>RepositorioBase[T]</code> con <code>guardar(item)</code>, <code>buscar(id)</code>, <code>listar() -> list</code>, <code>eliminar(id)</code>. Implementa <code>RepositorioMemoria</code> y <code>RepositorioArchivo</code>. Escribe tests que verifiquen que ambos son sustituibles.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Usa <code>from typing import TypeVar, Generic</code> para hacer el repositorio genérico: <code>T = TypeVar('T')</code> y <code>class RepositorioBase(Generic[T])</code>.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SOLID — ISP
+════════════════════════════════════════ -->
+<div id="sec-isp" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:#1a0a2a">I</div>
+    <div>
+      <div class="section-title">I — Segregación de Interfaces</div>
+      <div class="section-subtitle">Interface Segregation Principle</div>
+    </div>
+  </div>
+  <div class="solid-pill"><span class="solid-letter">I</span>nterface Segregation Principle</div>
+  <div class="concept-def" style="border-left-color:var(--accent2)">
+    <h3 style="color:var(--accent2)">Regla</h3>
+    <p><strong style="color:var(--text)">Ninguna clase debe depender de métodos que no usa.</strong> Prefiere muchas interfaces pequeñas sobre una interfaz grande. Si una clase implementa una interfaz y tiene que dejar métodos vacíos o lanzar <code>NotImplementedError</code>, es señal de que la interfaz es demasiado grande.</p>
+  </div>
+  <div class="two-col">
+    <div class="code-wrap bad-card">
+      <div class="code-header"><span class="col-label">✗ Interfaz demasiado grande</span></div>
+      <pre style="font-size:12.5px"><span class="kw">class</span> <span class="cl">Trabajador</span>(ABC):
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">trabajar</span>(<span class="at">self</span>): ...
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">comer</span>(<span class="at">self</span>): ...
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">dormir</span>(<span class="at">self</span>): ...
+
+<span class="kw">class</span> <span class="cl">Robot</span>(<span class="cl">Trabajador</span>):
+    <span class="kw">def</span> <span class="fn">trabajar</span>(<span class="at">self</span>): ...
+    <span class="kw">def</span> <span class="fn">comer</span>(<span class="at">self</span>):   <span class="kw">pass</span>  <span class="cm"># ¡forzado!</span>
+    <span class="kw">def</span> <span class="fn">dormir</span>(<span class="at">self</span>):  <span class="kw">pass</span>  <span class="cm"># ¡forzado!</span></pre>
+    </div>
+    <div class="code-wrap good-card">
+      <div class="code-header"><span class="col-label">✓ Interfaces pequeñas</span></div>
+      <pre style="font-size:12.5px"><span class="kw">class</span> <span class="cl">Laborable</span>(ABC):
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">trabajar</span>(<span class="at">self</span>): ...
+
+<span class="kw">class</span> <span class="cl">Biologico</span>(ABC):
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">comer</span>(<span class="at">self</span>): ...
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">dormir</span>(<span class="at">self</span>): ...
+
+<span class="kw">class</span> <span class="cl">Robot</span>(<span class="cl">Laborable</span>): ...   <span class="cm"># solo trabaja</span>
+<span class="kw">class</span> <span class="cl">Humano</span>(<span class="cl">Laborable</span>, <span class="cl">Biologico</span>): ...</pre>
+    </div>
+  </div>
+  <div class="block-title">Ejemplo completo</div>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-label">isp_impresoras.py</span><span class="code-lang">Python 3</span></div>
+    <pre><span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
+
+<span class="cm"># Interfaces pequeñas y enfocadas</span>
+<span class="kw">class</span> <span class="cl">Imprimible</span>(ABC):
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">imprimir</span>(<span class="at">self</span>, documento: <span class="cl">str</span>) -> <span class="kw">None</span>: ...
+
+<span class="kw">class</span> <span class="cl">Escaneable</span>(ABC):
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">escanear</span>(<span class="at">self</span>) -> <span class="cl">str</span>: ...
+
+<span class="kw">class</span> <span class="cl">Faxeable</span>(ABC):
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">enviar_fax</span>(<span class="at">self</span>, numero: <span class="cl">str</span>, doc: <span class="cl">str</span>) -> <span class="kw">None</span>: ...
+
+
+<span class="cm"># Cada dispositivo implementa solo lo que puede hacer</span>
+<span class="kw">class</span> <span class="cl">ImpresoraBasica</span>(<span class="cl">Imprimible</span>):
+    <span class="kw">def</span> <span class="fn">imprimir</span>(<span class="at">self</span>, documento: <span class="cl">str</span>) -> <span class="kw">None</span>:
+        <span class="fn">print</span>(<span class="st">f"[ImpresoraBasica] Imprimiendo: {documento[:40]}..."</span>)
+
+
+<span class="kw">class</span> <span class="cl">EscanerSimple</span>(<span class="cl">Escaneable</span>):
+    <span class="kw">def</span> <span class="fn">escanear</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="kw">return</span> <span class="st">"[EscanerSimple] Documento escaneado"</span>
+
+
+<span class="kw">class</span> <span class="cl">ImpresoraMultifuncion</span>(<span class="cl">Imprimible</span>, <span class="cl">Escaneable</span>, <span class="cl">Faxeable</span>):
+    <span class="kw">def</span> <span class="fn">imprimir</span>(<span class="at">self</span>, documento: <span class="cl">str</span>) -> <span class="kw">None</span>:
+        <span class="fn">print</span>(<span class="st">f"[Multifunción] Imprimiendo en alta calidad: {documento[:30]}"</span>)
+
+    <span class="kw">def</span> <span class="fn">escanear</span>(<span class="at">self</span>) -> <span class="cl">str</span>:
+        <span class="kw">return</span> <span class="st">"[Multifunción] Escaneado a 600 DPI"</span>
+
+    <span class="kw">def</span> <span class="fn">enviar_fax</span>(<span class="at">self</span>, numero: <span class="cl">str</span>, doc: <span class="cl">str</span>) -> <span class="kw">None</span>:
+        <span class="fn">print</span>(<span class="st">f"[Multifunción] Fax enviado a {numero}"</span>)
+
+
+<span class="cm"># Funciones que dependen solo de la interfaz que necesitan</span>
+<span class="kw">def</span> <span class="fn">imprimir_reporte</span>(imp: <span class="cl">Imprimible</span>, reporte: <span class="cl">str</span>) -> <span class="kw">None</span>:
+    imp.imprimir(reporte)
+
+<span class="kw">def</span> <span class="fn">digitalizar</span>(scan: <span class="cl">Escaneable</span>) -> <span class="cl">str</span>:
+    <span class="kw">return</span> scan.escanear()
+
+
+impresora = <span class="cl">ImpresoraBasica</span>()
+multifuncion = <span class="cl">ImpresoraMultifuncion</span>()
+
+imprimir_reporte(impresora, <span class="st">"Reporte Q3 2024"</span>)
+imprimir_reporte(multifuncion, <span class="st">"Reporte Q3 2024"</span>)
+<span class="fn">print</span>(digitalizar(multifuncion))
+<span class="cm"># imprimir_reporte(EscanerSimple(), ...)  ← error de tipos: no implementa Imprimible</span></pre>
+  </div>
+  <div class="block-title">Ejercicios</div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 01</div>
+    <h4>Interfaces de vehículos</h4>
+    <p>Divide una interfaz <code>VehiculoCompleto</code> (con <code>acelerar, frenar, volar, navegar, sumergirse</code>) en interfaces específicas. Modela un <code>Automovil</code>, un <code>Barco</code>, un <code>Avion</code> y un <code>Submarino</code>.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Interfaces: <code>Terrestre</code>, <code>Acuatico</code>, <code>Aereo</code>, <code>Sumergible</code>. Un submarino implementa <code>Acuatico</code> y <code>Sumergible</code>.</div>
+  </div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 02</div>
+    <h4>Roles de usuario separados</h4>
+    <p>En lugar de una interfaz <code>UsuarioCompleto</code> con todos los métodos posibles, crea interfaces <code>PuedeLeer</code>, <code>PuedeEscribir</code>, <code>PuedeAdministrar</code>, <code>PuedeFacturar</code>. Modela distintos roles combinando interfaces.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span><code>UsuarioLectura</code> solo implementa <code>PuedeLeer</code>. <code>Editor</code> implementa <code>PuedeLeer</code> y <code>PuedeEscribir</code>. <code>Admin</code> implementa las cuatro.</div>
+  </div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 03</div>
+    <h4>Sensores IoT</h4>
+    <p>Diseña interfaces pequeñas para sensores: <code>MideTemperatura</code>, <code>MideHumedad</code>, <code>MidePressure</code>, <code>EnviaAlertas</code>. Crea sensores simples (solo temperatura) y estaciones meteorológicas completas.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Una función <code>monitorear_temperatura(sensor: MideTemperatura)</code> debe funcionar con cualquier sensor que mida temperatura, sin importar qué otras interfaces implemente.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SOLID — DIP
+════════════════════════════════════════ -->
+<div id="sec-dip" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:#2a2000">D</div>
+    <div>
+      <div class="section-title">D — Inversión de Dependencias</div>
+      <div class="section-subtitle">Dependency Inversion Principle</div>
+    </div>
+  </div>
+  <div class="solid-pill"><span class="solid-letter">D</span>ependency Inversion Principle</div>
+  <div class="concept-def" style="border-left-color:var(--amber)">
+    <h3 style="color:var(--amber)">Regla</h3>
+    <p><strong style="color:var(--text)">Los módulos de alto nivel no deben depender de módulos de bajo nivel. Ambos deben depender de abstracciones.</strong> Esto se implementa con <em>inyección de dependencias</em>: en lugar de que una clase cree sus propias dependencias con <code>self.db = MySQL()</code>, las recibe desde fuera. Facilita enormemente el testing.</p>
+  </div>
+  <div class="two-col">
+    <div class="code-wrap bad-card">
+      <div class="code-header"><span class="col-label">✗ Dependencia directa</span></div>
+      <pre style="font-size:12.5px"><span class="kw">class</span> <span class="cl">ServicioUsuario</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>):
+        <span class="cm"># Acoplado a MySQL específicamente</span>
+        <span class="at">self</span>.db = <span class="cl">MySQLConexion</span>()
+        <span class="at">self</span>.email = <span class="cl">GmailSMTP</span>()
+
+    <span class="cm"># Imposible testear sin MySQL real</span></pre>
+    </div>
+    <div class="code-wrap good-card">
+      <div class="code-header"><span class="col-label">✓ Dependencia inyectada</span></div>
+      <pre style="font-size:12.5px"><span class="kw">class</span> <span class="cl">ServicioUsuario</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>, db: <span class="cl">BaseDatos</span>,
+                       email: <span class="cl">ServicioEmail</span>):
+        <span class="at">self</span>.db = db
+        <span class="at">self</span>.email = email
+    <span class="cm"># Fácil de testear con mocks</span></pre>
+    </div>
+  </div>
+  <div class="block-title">Ejemplo completo</div>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-label">dip_notificaciones.py</span><span class="code-lang">Python 3</span></div>
+    <pre><span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
+
+<span class="cm"># Abstracciones (contratos)</span>
+<span class="kw">class</span> <span class="cl">RepositorioUsuarios</span>(ABC):
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">buscar_por_id</span>(<span class="at">self</span>, uid: <span class="cl">int</span>) -> dict | <span class="kw">None</span>: ...
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">guardar</span>(<span class="at">self</span>, usuario: dict) -> <span class="kw">None</span>: ...
+
+<span class="kw">class</span> <span class="cl">ServicioEmail</span>(ABC):
+    <span class="dp">@abstractmethod</span>
+    <span class="kw">def</span> <span class="fn">enviar</span>(<span class="at">self</span>, destino: <span class="cl">str</span>, asunto: <span class="cl">str</span>, cuerpo: <span class="cl">str</span>) -> bool: ...
+
+
+<span class="cm"># Implementaciones de bajo nivel</span>
+<span class="kw">class</span> <span class="cl">RepositorioMemoria</span>(<span class="cl">RepositorioUsuarios</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>):
+        <span class="at">self</span>._datos: dict[<span class="cl">int</span>, dict] = {}
+
+    <span class="kw">def</span> <span class="fn">buscar_por_id</span>(<span class="at">self</span>, uid: <span class="cl">int</span>) -> dict | <span class="kw">None</span>:
+        <span class="kw">return</span> <span class="at">self</span>._datos.get(uid)
+
+    <span class="kw">def</span> <span class="fn">guardar</span>(<span class="at">self</span>, usuario: dict) -> <span class="kw">None</span>:
+        <span class="at">self</span>._datos[usuario[<span class="st">"id"</span>]] = usuario
+
+
+<span class="kw">class</span> <span class="cl">EmailConsola</span>(<span class="cl">ServicioEmail</span>):
+    <span class="st">"""Para desarrollo/testing: imprime en consola."""</span>
+    <span class="kw">def</span> <span class="fn">enviar</span>(<span class="at">self</span>, destino: <span class="cl">str</span>, asunto: <span class="cl">str</span>, cuerpo: <span class="cl">str</span>) -> bool:
+        <span class="fn">print</span>(<span class="st">f"\n📧 Para: {destino}\n   Asunto: {asunto}\n   {cuerpo}"</span>)
+        <span class="kw">return True</span>
+
+
+<span class="cm"># Módulo de alto nivel: depende SOLO de abstracciones</span>
+<span class="kw">class</span> <span class="cl">ServicioRegistro</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>,
+                 repo: <span class="cl">RepositorioUsuarios</span>,   <span class="cm"># abstracción</span>
+                 email: <span class="cl">ServicioEmail</span>):          <span class="cm"># abstracción</span>
+        <span class="at">self</span>._repo = repo
+        <span class="at">self</span>._email = email
+        <span class="at">self</span>._siguiente_id = <span class="nb">1</span>
+
+    <span class="kw">def</span> <span class="fn">registrar</span>(<span class="at">self</span>, nombre: <span class="cl">str</span>, email_addr: <span class="cl">str</span>) -> dict:
+        usuario = {<span class="st">"id"</span>: <span class="at">self</span>._siguiente_id, <span class="st">"nombre"</span>: nombre, <span class="st">"email"</span>: email_addr}
+        <span class="at">self</span>._siguiente_id += <span class="nb">1</span>
+        <span class="at">self</span>._repo.guardar(usuario)
+        <span class="at">self</span>._email.enviar(
+            email_addr,
+            <span class="st">"Bienvenido"</span>,
+            <span class="st">f"Hola {nombre}, tu cuenta ha sido creada."</span>
+        )
+        <span class="kw">return</span> usuario
+
+
+<span class="cm"># Producción</span>
+repo = <span class="cl">RepositorioMemoria</span>()
+mailer = <span class="cl">EmailConsola</span>()
+servicio = <span class="cl">ServicioRegistro</span>(repo, mailer)  <span class="cm"># inyección</span>
+
+u = servicio.registrar(<span class="st">"Ana García"</span>, <span class="st">"ana@ejemplo.com"</span>)
+<span class="fn">print</span>(repo.buscar_por_id(u[<span class="st">"id"</span>]))
+
+<span class="cm"># Testing: reemplaza dependencias con mocks sin tocar ServicioRegistro</span>
+<span class="kw">class</span> <span class="cl">EmailMock</span>(<span class="cl">ServicioEmail</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="at">self</span>): <span class="at">self</span>.enviados = []
+    <span class="kw">def</span> <span class="fn">enviar</span>(<span class="at">self</span>, d, a, c) -> bool:
+        <span class="at">self</span>.enviados.append({<span class="st">"destino"</span>: d, <span class="st">"asunto"</span>: a})
+        <span class="kw">return True</span>
+
+mock_email = <span class="cl">EmailMock</span>()
+servicio_test = <span class="cl">ServicioRegistro</span>(<span class="cl">RepositorioMemoria</span>(), mock_email)
+servicio_test.registrar(<span class="st">"Test User"</span>, <span class="st">"test@mail.com"</span>)
+<span class="fn">print</span>(mock_email.enviados)  <span class="cm"># [{'destino': 'test@mail.com', 'asunto': 'Bienvenido'}]</span></pre>
+  </div>
+  <div class="block-title">Ejercicios</div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 01</div>
+    <h4>Sistema de cache inyectable</h4>
+    <p>Crea una abstracción <code>Cache</code> con <code>get(clave)</code>, <code>set(clave, valor, ttl)</code> y <code>delete(clave)</code>. Implementa <code>CacheMemoria</code> y <code>CacheNula</code> (que nunca guarda). Inyéctala en un servicio.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span><code>CacheNula</code> siempre retorna <code>None</code> en <code>get()</code> — útil para tests donde no quieres que el cache interfiera.</div>
+  </div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 02</div>
+    <h4>Generador de reportes desacoplado</h4>
+    <p>Diseña un servicio de reportes que reciba via inyección: una fuente de datos (<code>FuenteDatos</code>), un formateador (<code>Formateador</code>) y un destino de salida (<code>Destino</code>). Implementa al menos dos opciones para cada abstracción.</p>
+    <div class="hint"><span class="hint-label">💡 Pista</span><code>FuenteDatos</code>: <code>DatosCSV</code>, <code>DatosMemoria</code>. <code>Formateador</code>: <code>FormatoTexto</code>, <code>FormatoHTML</code>. <code>Destino</code>: <code>Consola</code>, <code>Archivo</code>.</div>
+  </div>
+  <div class="exercise">
+    <div class="exercise-num">EJERCICIO 03 — Desafío</div>
+    <h4>Contenedor de Inyección de Dependencias</h4>
+    <p>Crea un mini-contenedor DI que permita registrar y resolver dependencias:</p>
+    <ul>
+      <li><code>contenedor.registrar(InterfazA, ImplementacionA)</code></li>
+      <li><code>contenedor.resolver(InterfazA)</code> → instancia de ImplementacionA</li>
+      <li>Que resuelva dependencias transitivas automáticamente</li>
+    </ul>
+    <div class="hint"><span class="hint-label">💡 Pista</span>Usa <code>inspect.signature()</code> para leer los parámetros del <code>__init__</code> y resolver recursivamente. Guarda los mapeos en un diccionario interno.</div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const sec = document.getElementById('sec-' + id);
+    if (sec) sec.classList.add('active');
+    const nav = document.querySelector(`[onclick="show('${id}')"]`);
+    if (nav) {
+      nav.classList.add('active');
+      nav.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
