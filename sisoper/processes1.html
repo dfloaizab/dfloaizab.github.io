@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Procesos, IPC y Deadlocks</title>
+    <style>
+        :root {
+            --bg-color: #0f0f12;
+            --card-bg: #1a1a20;
+            --text-color: #e0e0e0;
+            --accent-color: #bb86fc;
+            --secondary-color: #03dac6;
+            --warning-color: #ffb74d;
+            --danger-color: #cf6679;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .container { max-width: 1200px; margin: auto; padding: 20px; }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid var(--accent-color);
+            margin-bottom: 40px;
+        }
+
+        h1 { color: var(--accent-color); font-size: 2.5rem; margin-bottom: 5px; }
+        h2 { color: var(--secondary-color); border-left: 5px solid var(--secondary-color); padding-left: 15px; margin-top: 50px; }
+        h3 { color: var(--accent-color); margin-top: 30px; text-decoration: underline; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; }
+
+        .citation-note { font-size: 0.85rem; color: #888; margin-top: 10px; }
+
+        svg {
+            display: block;
+            margin: 25px auto;
+            background: #fff;
+            border-radius: 8px;
+            max-width: 100%;
+            height: auto;
+            padding: 15px;
+        }
+
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+        b { color: var(--secondary-color); }
+        .deadlock-cond { color: var(--danger-color); font-weight: bold; }
+
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Sistemas Operativos - Universidad Santiago de Cali</h1>
+        <p>Anatomía de Procesos, Sincronización (IPC), Algoritmos de Planificación y Gestión de Interbloqueos</p>
+    </header>
+
+    <!-- 1. ANATOMÍA Y CARACTERÍSTICAS -->
+    <section>
+        <h2>1. Características y Estructura del Proceso</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Imagen del Proceso (Core Image)</h3>
+                <p>Un proceso es una instancia de un programa en ejecución que reside en un espacio de direcciones [1, 2]. La <b>Imagen del Proceso</b> es la colección completa de elementos necesarios para su ejecución: el código del programa (segmento de texto), los datos (globales y estáticos) y la pila (stack) para llamadas a funciones [2, 3]. En sistemas modernos, esta imagen puede estar parcialmente en memoria o en disco mediante paginación [4, 5].</p>
+            </div>
+            <div class="card">
+                <h3>El PCB (Bloque de Control de Proceso)</h3>
+                <p>El <b>PCB</b> es la estructura de datos más importante para el SO, permitiendo la multiprogramación [6, 7]. Contiene <b>Identificadores</b> (PID, PID del padre), <b>Información de Estado del Procesador</b> (registros, contador de programa, punteros de pila) e <b>Información de Control</b> (estado del proceso, prioridad, parámetros de planificación y recursos asignados) [8-10]. El PCB es el "descriptor" que permite al kernel suspender un proceso y reanudarlo exactamente en el mismo estado [6, 11].</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. IPC Y SINCRONIZACIÓN -->
+    <section>
+        <h2>💬 2. Inter-Process Communication (IPC) y Sincronización</h2>
+        <div class="card">
+            <p>La IPC aborda tres problemas: paso de información, evitar que los procesos interfieran entre sí al acceder a datos compartidos y gestionar dependencias de secuenciación [12].</p>
+            
+            <h3>Primitivas de Sincronización</h3>
+            <ul>
+                <li><b>Semáforos:</b> Variables enteras con operaciones atómicas <i>Up</i> (incrementar) y <i>Down</i> (decrementar/bloquear) [13, 14]. Un semáforo binario (mutex) garantiza exclusión mutua, mientras que los contadores gestionan recursos múltiples [15, 16].</li>
+                <li><b>Monitores:</b> Construcción de lenguaje de alto nivel donde solo un proceso puede estar activo a la vez [17, 18]. Utilizan <b>Variables de Condición</b> con operaciones <i>Wait</i> y <i>Signal</i> para bloquear procesos hasta que se cumpla un predicado [19, 20].</li>
+                <li><b>Message Passing:</b> Útil en sistemas distribuidos; usa primitivas <i>Send</i> y <i>Receive</i> [21, 22]. Puede ser <b>bloqueante</b> (sincrónico) o <b>no bloqueante</b> (asincrónico) [23, 24].</li>
+                <li><b>Barreras:</b> Sincronizan grupos de procesos en fases; ninguno avanza hasta que todos lleguen a la barrera [25, 26].</li>
+            </ul>
+
+            <h3>Anomalías de Acceso</h3>
+            <p>Las <b>Condiciones de Carrera</b> ocurren cuando el resultado final depende del orden preciso de ejecución [27, 28]. Para evitarlas, se definen <b>Regiones Críticas</b>, donde el acceso debe ser mutuamente exclusivo [29, 30].</p>
+        </div>
+    </section>
+
+    <!-- 3. SCHEDULING (PLANIFICACIÓN) -->
+    <section>
+        <h2>📅 3. Planificación de Procesos (Scheduling)</h2>
+        <div class="card">
+            <p>El planificador busca optimizar criterios como la equidad, el rendimiento (throughput) y el tiempo de respuesta [31, 32].</p>
+            
+            <div class="grid">
+                <div>
+                    <h3>Niveles de Planificación</h3>
+                    <ul>
+                        <li><b>Largo Plazo:</b> Decide qué trabajos se admiten al sistema como procesos [33].</li>
+                        <li><b>Medio Plazo:</b> Gestiona el intercambio (swapping) entre memoria y disco [34].</li>
+                        <li><b>Corto Plazo (Dispatcher):</b> Selecciona qué proceso listo se ejecuta en la CPU a continuación [34].</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>Algoritmos Notables</h3>
+                    <ul>
+                        <li><b>Round Robin (RR):</b> Asigna un <i>quantum</i> de tiempo fijo; si expira, el proceso se preempa [35, 36].</li>
+                        <li><b>Shortest Process Next (SPN):</b> Favorece tareas cortas, minimizando el tiempo de espera promedio [37, 38].</li>
+                        <li><b>Multilevel Feedback Queues (FB):</b> Penaliza a procesos que usan mucha CPU moviéndolos a colas de menor prioridad [39, 40].</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="border: 2px solid var(--secondary-color); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                <h3>🐧 El Caso de Linux</h3>
+                <p>Linux usa el <b>Completely Fair Scheduler (CFS)</b> para tareas normales [41]. No usa colas de prioridad tradicionales, sino un <b>Árbol Rojo-Negro</b> para rastrear el tiempo de ejecución virtual (<i>vruntime</i>) de cada tarea, seleccionando siempre la que menos CPU ha recibido para maximizar la equidad [41, 42].</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. INTERBLOQUEOS (DEADLOCKS) -->
+    <section>
+        <h2>🔒 4. Gestión Exhaustiva de Interbloqueos</h2>
+        <div class="card">
+            <p>Un interbloqueo ocurre cuando un conjunto de procesos se bloquea permanentemente porque cada uno espera un evento que solo otro proceso del mismo conjunto puede causar [43, 44].</p>
+            
+            <h3>Las 4 Condiciones de Coffman (Necesarias)</h3>
+            <ol>
+                <li><span class="deadlock-cond">Exclusión Mutua:</span> Los recursos se asignan a un solo proceso a la vez [45, 46].</li>
+                <li><span class="deadlock-cond">Retener y Esperar:</span> Procesos con recursos pueden solicitar nuevos [45, 46].</li>
+                <li><span class="deadlock-cond">Sin Preopción:</span> Los recursos no pueden quitarse por la fuerza [45, 46].</li>
+                <li><span class="deadlock-cond">Espera Circular:</span> Cadena cerrada donde P1 espera a P2, P2 a P3... y Pn a P1 [47, 48].</li>
+            </ol>
+        </div>
+
+        <h3>Estrategias de Gestión</h3>
+        <div class="grid">
+            <div class="card">
+                <h3>Prevención (Prevention)</h3>
+                <p>Ataca estructuralmente una de las condiciones de Coffman, por ejemplo, forzando un <b>orden numérico</b> en la solicitud de recursos para evitar ciclos [49, 50].</p>
+            </div>
+            <div class="card">
+                <h3>Evitación (Avoidance)</h3>
+                <p>Usa el <b>Algoritmo del Banquero</b> para decidir dinámicamente si otorgar un recurso es <i>seguro</i> (existe una secuencia de finalización garantizada) o <i>inseguro</i> [51, 52].</p>
+            </div>
+            <div class="card">
+                <h3>Detección y Recuperación</h3>
+                <p>Permite que ocurran interbloqueos, los detecta buscando <b>ciclos en grafos de asignación</b> y recupera mediante la terminación de procesos o la preopción de recursos [53-55].</p>
+            </div>
+        </div>
+
+        <h3>Grafo de Asignación de Recursos (SVG)</h3>
+        <svg width="600" height="250" viewBox="0 0 600 250">
+            <!-- Procesos -->
+            <circle cx="150" cy="125" r="35" fill="none" stroke="#bb86fc" stroke-width="3"/>
+            <text x="138" y="132" font-family="Arial" font-weight="bold">P1</text>
+            <circle cx="450" cy="125" r="35" fill="none" stroke="#bb86fc" stroke-width="3"/>
+            <text x="438" y="132" font-family="Arial" font-weight="bold">P2</text>
+            <!-- Recursos -->
+            <rect x="275" y="40" width="50" height="50" fill="none" stroke="#03dac6" stroke-width="3"/>
+            <text x="288" y="70" font-family="Arial" font-size="12">R1</text>
+            <rect x="275" y="160" width="50" height="50" fill="none" stroke="#03dac6" stroke-width="3"/>
+            <text x="288" y="190" font-family="Arial" font-size="12">R2</text>
+            <!-- Arcos -->
+            <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#555" />
+                </marker>
+            </defs>
+            <line x1="185" y1="110" x2="275" y2="75" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+            <text x="195" y="85" font-size="10" fill="#777">Solicita</text>
+            <line x1="275" y1="185" x2="185" y2="140" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+            <text x="200" y="180" font-size="10" fill="#777">Poseído por</text>
+            <line x1="415" y1="140" x2="325" y2="185" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+            <line x1="325" y1="75" x2="415" y2="110" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+        </svg>
+    </section>
+
+    <!-- 5. MAPA MENTAL RESUMEN -->
+    <section>
+        <h2>5. Mapa Mental del Ciclo de Proceso y Gestión</h2>
+        <svg width="900" height="550" viewBox="0 0 900 550">
+            <!-- Nivel Central -->
+            <ellipse cx="450" cy="275" rx="100" ry="40" fill="#bb86fc" stroke="#333" stroke-width="2"/>
+            <text x="395" y="282" font-family="Arial" font-weight="bold" font-size="18">EL PROCESO</text>
+
+            <!-- Rama Estructura -->
+            <path d="M350 275 Q200 275 150 150" fill="none" stroke="#03dac6" stroke-width="4"/>
+            <text x="50" y="130" font-family="Arial" font-size="16" font-weight="bold" fill="#03dac6">ESTRUCTURA [8, 56]</text>
+            <text x="50" y="155" font-size="13">• PCB: Metadata SO</text>
+            <text x="50" y="175" font-size="13">• Imagen: Código/Datos/Stack</text>
+
+            <!-- Rama IPC -->
+            <path d="M550 275 Q700 275 750 150" fill="none" stroke="#03dac6" stroke-width="4"/>
+            <text x="730" y="130" font-family="Arial" font-size="16" font-weight="bold" fill="#03dac6">IPC [2.3, 5.3]</text>
+            <text x="730" y="155" font-size="13">• Semáforos y Mutexes</text>
+            <text x="730" y="175" font-size="13">• Monitores (Mesa/Hoare)</text>
+            <text x="730" y="195" font-size="13">• Message Passing</text>
+
+            <!-- Rama Planificación -->
+            <path d="M550 275 Q700 275 750 400" fill="none" stroke="#ffb74d" stroke-width="4"/>
+            <text x="730" y="430" font-family="Arial" font-size="16" font-weight="bold" fill="#ffb74d">SCHEDULING [2.4, 9.2]</text>
+            <text x="730" y="455" font-size="13">• Round Robin (Quanta)</text>
+            <text x="730" y="475" font-size="13">• SPN/SRTN (Equidad)</text>
+            <text x="730" y="495" font-size="13">• Linux CFS (Árbol R-B)</text>
+
+            <!-- Rama Deadlocks -->
+            <path d="M350 275 Q200 275 150 400" fill="none" stroke="#cf6679" stroke-width="4"/>
+            <text x="50" y="430" font-family="Arial" font-size="16" font-weight="bold" fill="#cf6679">DEADLOCKS [6, 6.2]</text>
+            <text x="50" y="455" font-size="13">• Cond. de Coffman</text>
+            <text x="50" y="475" font-size="13">• Alg. del Banquero</text>
+            <text x="50" y="495" font-size="13">• Prevención y Detección</text>
+        </svg>
+    </section>
+
+    <footer class="citation-note">
+        Sistemas Operativos, Universidad Santiago de Cali, 2026
+    </footer>
+</div>
+
+</body>
+</html>
