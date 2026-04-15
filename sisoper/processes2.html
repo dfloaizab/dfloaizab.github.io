@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio SO: Planificación Avanzada, CFS y Gestión de Interbloqueos</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0f;
+            --card-bg: #14141c;
+            --text-color: #eaeef2;
+            --accent-color: #7c4dff;
+            --secondary-color: #18e7c5;
+            --warning-color: #ffb86b;
+            --danger-color: #ff6b6b;
+            --code-bg: #1e1e2a;
+            --border-glow: rgba(124, 77, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0 20px;
+            border-bottom: 2px solid var(--accent-color);
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            font-size: 2.4rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #b77cff, #18e7c5);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            border-left: 5px solid var(--secondary-color);
+            padding-left: 18px;
+            margin: 40px 0 20px 0;
+            font-size: 1.8rem;
+        }
+
+        h3 {
+            color: var(--accent-color);
+            margin: 20px 0 12px 0;
+            font-size: 1.4rem;
+            display: inline-block;
+            border-bottom: 1px dashed var(--accent-color);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 28px;
+            border: 1px solid #2c2c3a;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            transition: transform 0.1s ease;
+        }
+
+        .grid-2cols {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 28px;
+        }
+
+        .diagram-svg {
+            background: #fefefe;
+            border-radius: 20px;
+            padding: 16px;
+            margin: 20px 0;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        pre {
+            background: var(--code-bg);
+            padding: 20px;
+            border-radius: 18px;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.85rem;
+            border-left: 4px solid var(--accent-color);
+            margin: 20px 0;
+            color: #d6deeb;
+        }
+
+        code {
+            font-family: monospace;
+            background: #2a2a36;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+
+        .badge {
+            background: #2c2c3a;
+            border-radius: 40px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .footnote {
+            font-size: 0.75rem;
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            border-top: 1px solid #2c2c3a;
+            color: #8f8f9e;
+        }
+
+        ul, ol {
+            padding-left: 1.6rem;
+            margin: 12px 0;
+        }
+
+        li {
+            margin: 6px 0;
+        }
+
+        hr {
+            border-color: #2c2c3a;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+     <header>
+        <h1>Sistemas Operativos - Universidad Santiago de Cali</h1>
+        <p>Algoritmos de Planificación y Gestión de Interbloqueos, Plantilla de Laboratorio</p>
+    </header>
+
+    <!-- ========= SECCIÓN 1: ALGORITMOS IMPORTANTES ========= -->
+    <h2>1. Algoritmos de Planificación de Procesos</h2>
+    <div class="grid-2cols">
+        <div class="card">
+            <h3>1. Round Robin (RR)</h3>
+            <p>Asigna un <strong>quantum de tiempo</strong> fijo a cada proceso en la cola de listos. Si el proceso no termina en el quantum, es desalojado (preemptivo) y se reinserta al final. <em>Ventaja:</em> justo para sistemas interactivos. <em>Desventaja:</em> elegir quantum óptimo es crítico.</p>
+            <div class="diagram-svg">
+                <svg width="100%" height="80" viewBox="0 0 500 60" style="background:#1a1a2e; border-radius:12px;">
+                    <rect x="10" y="10" width="70" height="35" fill="#7c4dff" rx="6" /><text x="30" y="33" fill="white" font-size="10">P1</text>
+                    <rect x="90" y="10" width="70" height="35" fill="#18e7c5" rx="6" /><text x="110" y="33" fill="black" font-size="10">P2</text>
+                    <rect x="170" y="10" width="70" height="35" fill="#ffb86b" rx="6" /><text x="190" y="33" fill="black" font-size="10">P3</text>
+                    <rect x="250" y="10" width="70" height="35" fill="#7c4dff" rx="6" /><text x="270" y="33" fill="white" font-size="10">P1</text>
+                    <text x="340" y="33" fill="#aaa" font-size="12">→ quantum</text>
+                </svg>
+                <p class="badge" style="display:inline-block;">preemptivo · justicia</p>
+            </div>
+        </div>
+        <div class="card">
+            <h3>2.  Shortest Process First (SPN / SJF)</h3>
+            <p>Selecciona el proceso con la ráfaga de CPU más corta (no preventivo). Minimiza tiempo de espera promedio óptimo, pero puede causar inanición de procesos largos. La versión <strong>SRTF</strong> es preventiva basada en el menor tiempo restante.</p>
+            <div class="diagram-svg">
+                <svg width="300" height="50" viewBox="0 0 300 40"><rect x="10" y="5" width="30" height="28" fill="#ff6b6b"/><text x="15" y="25" fill="white" font-size="9">P4</text><rect x="45" y="5" width="60" height="28" fill="#18e7c5"/><text x="60" y="25" fill="black" font-size="9">P1(corto)</text></svg>
+            </div>
+        </div>
+        <div class="card">
+            <h3>3.  Algoritmo del Banquero (Evitación Deadlock)</h3>
+            <p>Algoritmo de Dijkstra que simula asignaciones de recursos para decidir si el sistema permanece en <strong>estado seguro</strong>. Usa matrices: <code>Max</code>, <code>Allocation</code>, <code>Need</code> y vectores <code>Available</code>. Evita el interbloqueo rechazando solicitudes inseguras.</p>
+        </div>
+        <div class="card">
+            <h3>4. Colas Multinivel (MLQ / MLFQ)</h3>
+            <p>Múltiples colas con distintas prioridades (ej: sistema, interactivo, batch). <strong>MLFQ (Feedback)</strong> mueve procesos entre colas según comportamiento: procesos CPU-bound degradan prioridad; I/O-bound ascienden. Usado en sistemas generales.</p>
+        </div>
+    </div>
+
+    <!-- SECCIÓN ESPECIAL: CFS + ÁRBOLES ROJO-NEGRO -->
+    <div class="card" style="border-left: 5px solid #7c4dff;">
+        <h3>4. Linux CFS (Completely Fair Scheduler)</h3>
+        <p><strong>CFS</strong> reemplazó los antiguos schedulers de Linux desde 2.6.23. Su meta: <strong>fairness perfecta</strong> en términos de tiempo de CPU. No usa colas de prioridad tradicionales, sino un <strong>árbol rojo-negro (Red-Black Tree)</strong> auto-balanceado indexado por <code>vruntime</code> (tiempo virtual de ejecución).</p>
+        <ul>
+            <li><strong>vruntime:</strong> Cada tarea tiene un contador que incrementa según el tiempo real ponderado por la prioridad (nice value). A menor vruntime, más derecho a CPU.</li>
+            <li><strong>Árbol Rojo-Negro:</strong> Estructura eficiente (O(log n)) para insertar/remover procesos. El nodo más a la izquierda es el de menor vruntime → próximo a ejecutarse.</li>
+            <li><strong>Prioridad & Niceness:</strong> Rango -20 (máxima prioridad) a +19 (mínima). CFS mapea nice a un <strong>factor de ponderación</strong>: procesos con nice bajo reciben más tiempo por intervalo de scheduling.</li>
+            <li><strong>Latencia objetivo y granularidad mínima:</strong> Parámetros como <code>sched_latency_ns</code> y <code>sched_min_granularity_ns</code> controlan el intervalo de distribución justa.</li>
+        </ul>
+        <div class="diagram-svg">
+            <svg width="500" height="200" viewBox="0 0 500 180" style="background:#1e1e2e; border-radius:14px;">
+                <text x="20" y="30" fill="#b77cff" font-size="12">Árbol Rojo-Negro (CFS)</text>
+                <circle cx="150" cy="70" r="18" fill="none" stroke="#18e7c5" stroke-width="2"/><text x="140" y="75" fill="white" font-size="9">vr=50</text>
+                <circle cx="80" cy="110" r="16" fill="none" stroke="#18e7c5" stroke-width="2"/><text x="70" y="115" fill="white" font-size="9">vr=20</text>
+                <circle cx="220" cy="110" r="16" fill="none" stroke="#18e7c5" stroke-width="2"/><text x="210" y="115" fill="white" font-size="9">vr=90</text>
+                <circle cx="40" cy="150" r="14" fill="#7c4dff"/><text x="30" y="155" fill="white" font-size="8">vr=5</text>
+                <text x="10" y="170" fill="#ffb86b" font-size="11">← mínimo vruntime → próximo proceso</text>
+                <line x1="150" y1="70" x2="80" y2="110" stroke="#aaa" stroke-width="1.5"/>
+                <line x1="150" y1="70" x2="220" y2="110" stroke="#aaa" stroke-width="1.5"/>
+                <line x1="80" y1="110" x2="40" y2="150" stroke="#aaa" stroke-width="1.5"/>
+            </svg>
+        </div>
+        <p><strong>Ventaja del CFS:</strong> No necesita recalcular prioridades estáticas, adaptación dinámica, excelente para cargas mixtas. Usado en Android, servidores y equipos de escritorio modernos.</p>
+    </div>
+
+    <!-- ========= SECCIÓN 2: COMBINACIÓN DE ESTRATEGIAS DEADLOCK ========= -->
+    <h2> 2. Gestión Integrada: Prevención, Evitación, Detección y Recuperación</h2>
+    <div class="grid-2cols">
+        <div class="card">
+            <h3>Prevención</h3>
+            <p>Ataca una de las 4 condiciones de Coffman. Ej: <strong>orden global</strong> en solicitud de recursos (evita espera circular) o solicitud de todos los recursos al inicio (elimina retener-y-esperar). <em>Ejemplo práctico:</em> semáforos con jerarquía.</p>
+        </div>
+        <div class="card">
+            <h3>Evitación (Banquero)</h3>
+            <p>El SO requiere información máxima de recursos por proceso. Antes de asignar, verifica estado seguro. Alta sobrecarga pero evita deadlock sin prevención rígida.</p>
+        </div>
+        <div class="card">
+            <h3>Detección + Recuperación</h3>
+            <p>Permite interbloqueos y los detecta mediante <strong>algoritmo de detección de ciclos</strong> en grafo de asignación. Recuperación: abortar procesos (drástico) o desasignar recursos (rollback).</p>
+        </div>
+    </div>
+    <div class="card">
+        <p><strong>Combinación en sistemas reales:</strong> Muchos SO híbridos usan <em>prevención para recursos comunes</em> (ej: orden en locks del kernel) + <em>evitación limitada</em> para memoria + <em>detección periódica</em> en recursos intercambiables. En Linux, los bloqueos mutex con prioridad heredada evitan inversión de prioridad, y el OOM killer actúa como recuperación extrema.</p>
+    </div>
+
+    <!-- ========= SECCIÓN 3: PLANTILLA DE CÓDIGO ANSI C (processes.c) ========= -->
+    <h2>Laboratorio Evaluable: Módulo Gestión de Procesos (processes.c)</h2>
+    <div class="card">
+        <p><strong>Instrucción:</strong> Implemente un módulo básico en <strong>ANSI C</strong> que modele un proceso con PCB, una imagen sencilla y esqueletos de algoritmos de planificación. Complete las funciones marcadas con <code>// TODO</code>. El código ya incluye estructuras y comentarios pedagógicos.</p>
+        <pre>
+/**
+ * processes.c
+ * Universidad Santiago de Cali, 2026A         
+ * Laboratorio #2 Sistemas Operativos - Planificación y Representación de Procesos
+ * Basado en algoritmos: Round Robin, FCFS, Prioridad simple, esqueleto CFS-like.
+ * COMPILAR: gcc -Wall -std=c99 processes.c -o scheduler_lab
+ */
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdbool.h&gt;
+
+#define MAX_PROCESOS 10
+#define QUANTUM 2      // para Round Robin
+
+/* ------------------- 1. DEFINICIÓN DEL PCB ------------------- */
+typedef enum { NUEVO, LISTO, EJECUCION, BLOQUEADO, TERMINADO } EstadoProceso;
+
+typedef struct {
+    int pid;
+    char nombre[32];
+    int prioridad;            // numérica: menor valor = mayor prioridad (para planificación prioritaria)
+    int rafaga_total;         // tiempo total de CPU necesario
+    int rafaga_restante;      // para SRTF o contabilidad
+    int tiempo_llegada;
+    int tiempo_respuesta;     // para estadísticas
+    EstadoProceso estado;
+    /* Datos específicos para CFS (simulación) */
+    long vruntime;            // tiempo virtual (simulado)
+    int nice;                 // rango -20..19 (más bajo = más prioridad en CFS)
+    /* imagen del proceso: simulación de contexto */
+    int *contexto_registros;  // array simple (simula guardado de contexto)
+} PCB;
+
+/* Cola de listos (FIFO para RR y FCFS, ordenable por prioridad/vruntime) */
+typedef struct ColaListos {
+    PCB* procesos[MAX_PROCESOS];
+    int frente, final;
+    int cantidad;
+} ReadyQueue;
+
+/* ------------------- 2. FUNCIONES AUXILIARES ------------------- */
+void init_ready_queue(ReadyQueue *q) {
+    q->frente = 0; q->final = 0; q->cantidad = 0;
+    memset(q->procesos, 0, sizeof(q->procesos));
+}
+
+bool queue_vacia(ReadyQueue *q) { return q->cantidad == 0; }
+bool queue_llena(ReadyQueue *q) { return q->cantidad == MAX_PROCESOS; }
+
+void encolar(ReadyQueue *q, PCB *p) {
+    if (queue_llena(q)) return;
+    q->procesos[q->final] = p;
+    q->final = (q->final + 1) % MAX_PROCESOS;
+    q->cantidad++;
+}
+
+PCB* desencolar(ReadyQueue *q) {
+    if (queue_vacia(q)) return NULL;
+    PCB *p = q->procesos[q->frente];
+    q->frente = (q->frente + 1) % MAX_PROCESOS;
+    q->cantidad--;
+    return p;
+}
+
+/* Para FIFO / Round Robin se usa orden FIFO normal */
+/* Para SPN (SJF) y prioridad se requiere ordenación (implementación simple) */
+
+/* ------------------- 3. ALGORITMOS DE PLANIFICACIÓN (TEMPLATES) ------------------- */
+
+// A) FIFO (FCFS) - No preventivo
+void planificar_fcfs(ReadyQueue *q) {
+    printf("\n=== PLANIFICACIÓN FCFS ===\n");
+    while (!queue_vacia(q)) {
+        PCB *actual = desencolar(q);
+        printf("Ejecutando proceso %s (PID %d) | ráfaga %d\n", actual->nombre, actual->pid, actual->rafaga_total);
+        // Simula ejecución consumiendo rafaga_total
+        actual->estado = TERMINADO;
+        // TODO: calcular tiempo de retorno y espera
+    }
+}
+
+// B) Round Robin (preemptivo con quantum fijo)
+void planificar_rr(ReadyQueue *q, int quantum) {
+    printf("\n=== ROUND ROBIN (quantum=%d) ===\n", quantum);
+    ReadyQueue cola_tmp;
+    init_ready_queue(&cola_tmp);
+    // copiar procesos a cola temporal
+    while (!queue_vacia(q)) {
+        encolar(&cola_tmp, desencolar(q));
+    }
+    int tiempo_global = 0;
+    while (!queue_vacia(&cola_tmp)) {
+        PCB *actual = desencolar(&cola_tmp);
+        if (actual->rafaga_restante == 0) actual->rafaga_restante = actual->rafaga_total;
+        printf("[t=%d] Ejecuta %s (restante=%d)\n", tiempo_global, actual->nombre, actual->rafaga_restante);
+        if (actual->rafaga_restante <= quantum) {
+            tiempo_global += actual->rafaga_restante;
+            actual->rafaga_restante = 0;
+            actual->estado = TERMINADO;
+            printf("  -> %s terminado.\n", actual->nombre);
+        } else {
+            tiempo_global += quantum;
+            actual->rafaga_restante -= quantum;
+            encolar(&cola_tmp, actual);  // vuelve al final
+        }
+    }
+    // TODO: completar estadísticas y permitir llegada de procesos en tiempo real.
+}
+
+// C) Shortest Process Next (SPN) no preventivo: ordenar por ráfaga total
+int cmp_rafaga(const void *a, const void *b) {
+    PCB *pa = *(PCB**)a;
+    PCB *pb = *(PCB**)b;
+    return (pa->rafaga_total - pb->rafaga_total);
+}
+
+void planificar_spn(ReadyQueue *q) {
+    printf("\n=== SPN (SJF no preventivo) ===\n");
+    // Convertir cola a array temporal
+    PCB *lista[MAX_PROCESOS];
+    int count = 0;
+    while (!queue_vacia(q)) {
+        lista[count++] = desencolar(q);
+    }
+    qsort(lista, count, sizeof(PCB*), cmp_rafaga);
+    for (int i = 0; i < count; i++) {
+        printf("Ejecutando %s (ráfaga=%d)\n", lista[i]->nombre, lista[i]->rafaga_total);
+        lista[i]->estado = TERMINADO;
+    }
+    // TODO: Reconstruir estadísticas
+}
+
+// D) Plantilla para simulación de CFS usando vruntime y árbol (simulación lineal)
+void planificar_cfs_simple(ReadyQueue *q) {
+    printf("\n=== CFS SIMULADO (basado en vruntime mínimo) ===\n");
+    PCB *procs[MAX_PROCESOS];
+    int n = 0;
+    while (!queue_vacia(q)) procs[n++] = desencolar(q);
+    // Ordenar por vruntime (menor primero)
+    for (int i = 0; i < n-1; i++) {
+        for (int j = i+1; j < n; j++) {
+            if (procs[i]->vruntime > procs[j]->vruntime) {
+                PCB *tmp = procs[i];
+                procs[i] = procs[j];
+                procs[j] = tmp;
+            }
+        }
+    }
+    // Simulación: cada proceso recibe una tajada proporcional a su nice (factor ficticio)
+    for (int i = 0; i < n; i++) {
+        int slice = 2; // base
+        if (procs[i]->nice < 0) slice = 4;   // más prioridad -> más tiempo
+        else if (procs[i]->nice > 0) slice = 1;
+        printf("Ejecuta %s (nice=%d, vruntime=%ld) slice=%d\n", procs[i]->nombre, procs[i]->nice, procs[i]->vruntime, slice);
+        procs[i]->vruntime += slice;  // incrementa vruntime según tiempo ejecutado
+        procs[i]->rafaga_restante -= slice;
+        if (procs[i]->rafaga_restante <= 0) procs[i]->estado = TERMINADO;
+        else encolar(q, procs[i]);   // realimentar
+    }
+    /* 
+     * NOTA: En CFS real se usa un árbol rojo-negro para seleccionar el mínimo vruntime O(log n).
+     * El estudiante debe implementar una estructura RBT o usar una cola de prioridad basada en heap.
+     * El nice afecta el incremento de vruntime: delta = tiempo_ejecucion * (NICE_0_WEIGHT / peso(nice))
+     */
+}
+
+// ------------------- 4. FUNCIÓN PARA CREAR PCB DE PRUEBA -------------------
+PCB* crear_proceso(int pid, const char *nombre, int rafaga, int nice_val, int prioridad) {
+    PCB *nuevo = (PCB*)malloc(sizeof(PCB));
+    nuevo->pid = pid;
+    strcpy(nuevo->nombre, nombre);
+    nuevo->rafaga_total = rafaga;
+    nuevo->rafaga_restante = rafaga;
+    nuevo->prioridad = prioridad;
+    nuevo->nice = nice_val;
+    nuevo->vruntime = 0;
+    nuevo->estado = NUEVO;
+    nuevo->contexto_registros = NULL;  // no implementado
+    return nuevo;
+}
+
+void liberar_pcb(PCB *p) { free(p); }
+
+// ------------------- MAIN DE PRUEBAS -------------------
+int main() {
+    ReadyQueue cola;
+    init_ready_queue(&cola);
+    
+    // Procesos de ejemplo (pid, nombre, ráfaga, nice, prioridad)
+    encolar(&cola, crear_proceso(1, "EditorTexto", 8, 0, 3));
+    encolar(&cola, crear_proceso(2, "Compilador", 4, -5, 1));
+    encolar(&cola, crear_proceso(3, "Navegador", 12, 5, 4));
+    encolar(&cola, crear_proceso(4, "Servidor", 6, -2, 2));
+    
+    // Seleccione algoritmo descomentando:
+    // planificar_fcfs(&cola); 
+    // Reinicializar cola para cada prueba (en laboratorio hacer copias)
+    
+    printf("\n👉 LABORATORIO: Completar implementación de:\n");
+    printf("   - Colas multinivel (Feedback)\n");
+    printf("   - Algoritmo del banquero (evitación)\n");
+    printf("   - Detección de deadlocks con matriz de asignación\n");
+    printf("   - Mejora del CFS con árbol Rojo-Negro real (inserción/extracción min)\n");
+    printf("   - Cálculo de métricas: turnaround, waiting time, response time.\n");
+    
+    // Limpiar (evitar leaks en implementación final)
+    // En un entorno real se libera toda la cola.
+    return 0;
+}
+/* ================= FIN DE PLANTILLA ================= */
+        </pre>
+        <p><strong>🔧 Tareas pendientes en el código:</strong> implementar planificación por <strong>colas multinivel</strong>, algoritmo del Banquero con matrices, detección de ciclos, y completar el módulo <code>planificar_cfs_simple</code> con un árbol rojo-negro real (estructura de datos adicional). Además se sugiere agregar manejo de estados y estadísticas completas.</p>
+    </div>
+
+    <!-- DIAGRAMA FINAL RESUMEN ESTRATEGIAS COMBINADAS -->
+    <h2>📊 Estrategias combinadas: Prevención + Evitación + Detección</h2>
+    <div class="card">
+        <div class="diagram-svg">
+            <svg width="100%" height="200" viewBox="0 0 800 160">
+                <rect x="20" y="20" width="150" height="60" fill="#2a2a3a" stroke="#7c4dff" stroke-width="2" rx="12"/>
+                <text x="50" y="55" fill="#fff" font-size="14">Prevención</text>
+                <text x="40" y="75" fill="#aaa" font-size="10">Rompe condición</text>
+                <rect x="220" y="20" width="150" height="60" fill="#2a2a3a" stroke="#18e7c5" stroke-width="2" rx="12"/>
+                <text x="260" y="55" fill="#fff" font-size="14">Evitación</text>
+                <text x="250" y="75" fill="#aaa" font-size="10">Banquero</text>
+                <rect x="430" y="20" width="160" height="60" fill="#2a2a3a" stroke="#ffb86b" stroke-width="2" rx="12"/>
+                <text x="465" y="55" fill="#fff" font-size="14">Detección + Rec.</text>
+                <path d="M170 50 L210 50" stroke="#777" stroke-width="2" marker-end="url(#arrowdead)"/>
+                <path d="M370 50 L420 50" stroke="#777" stroke-width="2"/>
+                <text x="290" y="110" fill="#b77cff" font-size="13">→ Sistema híbrido: combinación en kernel</text>
+                <defs><marker id="arrowdead" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><polygon points="0 0, 8 4, 0 8" fill="#777"/></marker></defs>
+            </svg>
+        </div>
+        <p>En sistemas operativos reales (como Linux o Windows) no existe una única estrategia, sino un <strong>enfoque mixto</strong>: prevención sobre ciertos recursos internos, evitación limitada para memoria, y detección/recuperación para deadlocks en recursos de usuario (ej: hilos). El alumno debe comprender cuándo aplicar cada táctica según el contexto.</p>
+    </div>
+    
+  <footer class="citation-note">
+        Sistemas Operativos, Universidad Santiago de Cali, 2026
+    </footer>
+</div>
+</body>
+</html>
