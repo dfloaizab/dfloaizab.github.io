@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>SOLID</title>
+<style>
+body { font-family: Georgia; margin: 60px; background:#f7f7f7;}
+code { display:block; background:#ececec; padding:10px; margin:10px;}
+.section { margin-bottom:50px;}
+</style>
+</head>
+<body>
+
+<h1>Principios SOLID</h1>
+
+<div class="section">
+<h2>SRP</h2>
+
+<p>
+Una clase debe tener una única razón de cambio. Esto reduce el acoplamiento y mejora la cohesión.
+</p>
+
+<h3>Correcto</h3>
+<code>
+class GeneradorReporte:
+    def generar(self):
+        pass
+
+class PersistenciaReporte:
+    def guardar(self):
+        pass
+</code>
+
+<h3>Incorrecto</h3>
+<code>
+class Reporte:
+    def generar(self): pass
+    def guardar(self): pass
+</code>
+
+<p>Trade-off: proliferación de clases.</p>
+</div>
+
+<div class="section">
+<h2>OCP: Open-Closed Principle: Open for extension, closed for modification</h2>
+
+<code>
+class Forma:
+    def area(self):
+        pass
+
+class Circulo(Forma):
+    def area(self):
+        return 3.14 * 2**2
+</code>
+
+<p>No modificar código existente para agregar nuevas formas.</p>
+
+</div>
+
+<div class="section">
+<h2>LSP: Liskov Substitution Principle</h2>
+
+<code>
+class Ave:
+    def volar(self):
+        pass
+
+class Pinguino(Ave):
+    def volar(self):
+        raise Exception("No puede volar")
+</code>
+
+<p>Violación: rompe sustitución.</p>
+
+</div>
+
+<div class="section">
+<h2>ISP</h2>
+
+<code>
+class Impresora:
+    def imprimir(self): pass
+
+class Escaner:
+    def escanear(self): pass
+</code>
+
+</div>
+
+<div class="section">
+<h2>DIP</h2>
+
+<code>
+class Servicio:
+    def __init__(self, repositorio):
+        self.repo = repositorio
+</code>
+
+<p>Uso de inyección de dependencias.</p>
+
+</div>
+
+</body>
+</html>
