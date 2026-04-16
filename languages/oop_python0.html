@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Principios de Programación Orientada a Objetos</title>
+<style>
+body {
+    font-family: Georgia, "Times New Roman", serif;
+    margin: 60px;
+    line-height: 1.6;
+    color: #222;
+    background: #f9f9f9;
+}
+h1, h2 {
+    color: #1a1a1a;
+}
+code {
+    display: block;
+    background: #eee;
+    padding: 10px;
+    margin: 10px 0;
+    white-space: pre;
+}
+.section {
+    margin-bottom: 50px;
+}
+svg {
+    margin: 20px 0;
+    border: 1px solid #ccc;
+}
+</style>
+</head>
+<body>
+
+<h1>Principios de Programación Orientada a Objetos</h1>
+
+<div class="section">
+<h2>Abstracción</h2>
+<p>La abstracción consiste en modelar entidades del mundo real destacando únicamente sus características esenciales, ocultando detalles innecesarios.</p>
+
+<svg width="400" height="120">
+<rect x="50" y="30" width="300" height="60" fill="none" stroke="black"/>
+<text x="120" y="65">Clase Vehículo</text>
+</svg>
+
+<h3>Ejemplo 1</h3>
+<code>
+class Vehiculo:
+    def mover(self):
+        pass
+</code>
+
+<h3>Ejemplo 2</h3>
+<code>
+class CuentaBancaria:
+    def depositar(self, monto):
+        pass
+</code>
+
+<h3>Ejemplo 3</h3>
+<code>
+class Figura:
+    def area(self):
+        pass
+</code>
+</div>
+
+<div class="section">
+<h2>Encapsulamiento</h2>
+<p>El encapsulamiento protege los datos internos de un objeto y controla su acceso.</p>
+
+<h3>Ejemplo 1</h3>
+<code>
+class Persona:
+    def __init__(self):
+        self.__edad = 0
+
+    def set_edad(self, edad):
+        self.__edad = edad
+</code>
+
+<h3>Ejemplo 2</h3>
+<code>
+class Cuenta:
+    def __init__(self):
+        self.__saldo = 0
+
+    def depositar(self, monto):
+        self.__saldo += monto
+</code>
+
+<h3>Ejemplo 3</h3>
+<code>
+class Producto:
+    def __init__(self, precio):
+        self._precio = precio
+</code>
+</div>
+
+<div class="section">
+<h2>Herencia</h2>
+<p>La herencia permite que una clase derive de otra reutilizando su comportamiento.</p>
+
+<svg width="400" height="150">
+<text x="150" y="20">Animal</text>
+<line x1="200" y1="30" x2="200" y2="80" stroke="black"/>
+<text x="100" y="110">Perro</text>
+<text x="260" y="110">Gato</text>
+</svg>
+
+<h3>Ejemplo 1</h3>
+<code>
+class Animal:
+    def hablar(self):
+        pass
+
+class Perro(Animal):
+    def hablar(self):
+        return "Guau"
+</code>
+
+<h3>Ejemplo 2</h3>
+<code>
+class Vehiculo:
+    pass
+
+class Auto(Vehiculo):
+    pass
+</code>
+
+<h3>Ejemplo 3</h3>
+<code>
+class Figura:
+    pass
+
+class Circulo(Figura):
+    pass
+</code>
+</div>
+
+<div class="section">
+<h2>Polimorfismo</h2>
+<p>El polimorfismo permite usar una misma interfaz con diferentes implementaciones.</p>
+
+<h3>Ejemplo 1</h3>
+<code>
+def hablar(animal):
+    print(animal.hablar())
+</code>
+
+<h3>Ejemplo 2</h3>
+<code>
+class Gato:
+    def hablar(self):
+        return "Miau"
+</code>
+
+<h3>Ejemplo 3</h3>
+<code>
+class Pato:
+    def hablar(self):
+        return "Cuac"
+</code>
+
+</div>
+
+</body>
+</html>
