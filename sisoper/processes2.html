@@ -159,7 +159,7 @@
     <div class="grid-2cols">
         <div class="card">
             <h3>1. Round Robin (RR)</h3>
-            <p>Asigna un <strong>quantum de tiempo</strong> fijo a cada proceso en la cola de listos. Si el proceso no termina en el quantum, es desalojado (preemptivo) y se reinserta al final. <em>Ventaja:</em> justo para sistemas interactivos. <em>Desventaja:</em> elegir quantum óptimo es crítico.</p>
+            <p>Asigna un <strong>quantum de tiempo</strong> fijo a cada proceso en la cola de listos. Si el proceso no termina en el quantum, es desalojado ("preemptive", apropiativo) y se reinserta al final. <em>Ventaja:</em> justo para sistemas interactivos. <em>Desventaja:</em> elegir quantum óptimo es crítico.</p>
             <div class="diagram-svg">
                 <svg width="100%" height="80" viewBox="0 0 500 60" style="background:#1a1a2e; border-radius:12px;">
                     <rect x="10" y="10" width="70" height="35" fill="#7c4dff" rx="6" /><text x="30" y="33" fill="white" font-size="10">P1</text>
@@ -168,7 +168,7 @@
                     <rect x="250" y="10" width="70" height="35" fill="#7c4dff" rx="6" /><text x="270" y="33" fill="white" font-size="10">P1</text>
                     <text x="340" y="33" fill="#aaa" font-size="12">→ quantum</text>
                 </svg>
-                <p class="badge" style="display:inline-block;">preemptivo · "justo" (no tiene en cuenta prioridades o métricas de desempeño)</p>
+                <p class="badge" style="display:inline-block;">apropiativo · "justo", hasta cierto punto (no tiene en cuenta prioridades o métricas de desempeño)</p>
             </div>
         </div>
         <div class="card">
@@ -322,7 +322,7 @@ void planificar_fcfs(ReadyQueue *q) {
     }
 }
 
-// B) Round Robin (preemptivo con quantum fijo)
+// B) Round Robin ("preemptivo", apropiativo con quantum fijo)
 void planificar_rr(ReadyQueue *q, int quantum) {
     printf("\n=== ROUND ROBIN (quantum=%d) ===\n", quantum);
     ReadyQueue cola_tmp;
