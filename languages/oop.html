@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>POO - Fundamentos</title>
+<style>
+body { font-family: Georgia, serif; margin: 60px; background:#f5f5f5; line-height:1.7;}
+h1,h2,h3 { color:#111; }
+code { display:block; background:#eaeaea; padding:12px; margin:12px 0; border-left:4px solid #333;}
+.section { margin-bottom:60px;}
+svg { margin-top:20px; }
+</style>
+</head>
+<body>
+
+<h1>Fundamentos de Programación Orientada a Objetos</h1>
+
+<div class="section">
+<h2>1. Abstracción</h2>
+
+<p>
+La abstracción es el proceso de modelado mediante el cual se identifican las propiedades
+relevantes de una entidad, ignorando detalles de implementación. Constituye el fundamento
+para la construcción de sistemas complejos mediante capas de representación.
+</p>
+
+<h3>Diagrama conceptual</h3>
+<svg width="500" height="180">
+<rect x="150" y="40" width="200" height="60" fill="none" stroke="black"/>
+<text x="185" y="75">MétodoPago</text>
+<text x="60" y="150">Tarjeta</text>
+<text x="350" y="150">PayPal</text>
+<line x1="250" y1="100" x2="120" y2="140" stroke="black"/>
+<line x1="250" y1="100" x2="380" y2="140" stroke="black"/>
+</svg>
+
+<h3>Ejemplo: sistema de pagos</h3>
+<code>
+from abc import ABC, abstractmethod
+
+class MetodoPago(ABC):
+
+    @abstractmethod
+    def procesar_pago(self, monto: float) -> str:
+        pass
+
+class TarjetaCredito(MetodoPago):
+
+    def procesar_pago(self, monto):
+        return f"Procesando {monto} con tarjeta"
+
+class PayPal(MetodoPago):
+
+    def procesar_pago(self, monto):
+        return f"Procesando {monto} con PayPal"
+</code>
+
+<p>
+La abstracción permite desacoplar el sistema del mecanismo específico de pago.
+</p>
+
+</div>
+
+<div class="section">
+<h2>2. Encapsulamiento</h2>
+
+<p>
+El encapsulamiento controla el acceso al estado interno de los objetos,
+garantizando invariantes y evitando modificaciones no controladas.
+</p>
+
+<h3>Diagrama</h3>
+<svg width="400" height="150">
+<rect x="100" y="30" width="200" height="80" fill="none" stroke="black"/>
+<text x="140" y="60">CuentaBancaria</text>
+<text x="120" y="85">__saldo</text>
+</svg>
+
+<h3>Ejemplo realista</h3>
+<code>
+class CuentaBancaria:
+
+    def __init__(self, saldo_inicial: float):
+        self.__saldo = saldo_inicial
+
+    def depositar(self, monto: float):
+        if monto <= 0:
+            raise ValueError("Monto inválido")
+        self.__saldo += monto
+
+    def retirar(self, monto: float):
+        if monto > self.__saldo:
+            raise ValueError("Fondos insuficientes")
+        self.__saldo -= monto
+
+    @property
+    def saldo(self):
+        return self.__saldo
+</code>
+
+<p>
+Aquí se preserva el invariante: saldo >= 0.
+</p>
+
+</div>
+
+<div class="section">
+<h2>3. Herencia</h2>
+
+<p>
+La herencia permite definir jerarquías donde clases derivadas extienden o especializan
+comportamientos.
+</p>
+
+<h3>Diagrama UML</h3>
+<svg width="500" height="180">
+<text x="220" y="20">Empleado</text>
+<line x1="250" y1="30" x2="250" y2="90" stroke="black"/>
+<text x="150" y="130">Ingeniero</text>
+<text x="320" y="130">Gerente</text>
+</svg>
+
+<h3>Ejemplo</h3>
+<code>
+class Empleado:
+    def calcular_salario(self):
+        raise NotImplementedError
+
+class Ingeniero(Empleado):
+    def calcular_salario(self):
+        return 5000
+
+class Gerente(Empleado):
+    def calcular_salario(self):
+        return 8000
+</code>
+
+<p>
+Permite reutilización y especialización controlada.
+</p>
+
+</div>
+
+<div class="section">
+<h2>4. Polimorfismo</h2>
+
+<p>
+El polimorfismo permite tratar objetos de distintas clases mediante una interfaz común. También, diversificar el comportamiento de las clases a través de la sobrecarga de funciones y operadores.
+</p>
+
+<h3>Ejemplo aplicado</h3>
+<code>
+def procesar_nomina(empleados):
+    total = 0
+    for e in empleados:
+        total += e.calcular_salario()
+    return total
+</code>
+
+<p>
+El algoritmo, en este caso, no depende del tipo concreto.
+</p>
+
+</div>
+
+</body>
+</html>
