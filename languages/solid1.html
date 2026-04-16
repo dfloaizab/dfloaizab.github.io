@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>SOLID</title>
+<style>
+body { font-family: Georgia; margin:60px; background:#f5f5f5;}
+code { display:block; background:#eaeaea; padding:10px;}
+.section { margin-bottom:60px;}
+</style>
+</head>
+<body>
+
+<h1>Principios SOLID</h1>
+
+<div class="section">
+<h2>SRP: Single Responsibility Principle</h2>
+
+<p>
+Una clase debe tener una única razón de cambio y un único papel o rol en el módulo. Esto permite generar alta cohesión.
+</p>
+
+<code>
+class GeneradorFactura:
+    def generar(self): pass
+
+class RepositorioFactura:
+    def guardar(self): pass
+</code>
+
+<p>Trade-off: aumento en número de clases.</p>
+
+</div>
+
+<div class="section">
+<h2>OCP: Open-Closed Principle - Open for extension, Closed for modification</h2>
+
+<p>
+Las entidades deben poder ser extensibles sin necesidad de modificar su código.
+</p>
+
+<code>
+class MetodoPago:
+    def pagar(self): pass
+
+class Cripto(MetodoPago):
+    def pagar(self): return "Pago cripto"
+</code>
+
+</div>
+
+<div class="section">
+<h2>LSP: Liskov Substitution Principle</h2>
+
+<p>
+Las subclases deben ser sustituibles por su super-clase, o clase madre, sin alterar el comportamiento esperado.
+</p>
+
+<code>
+class Ave:
+    def volar(self): pass
+
+class Aguila(Ave):
+    def volar(self): return "vuela"
+
+class Pinguino(Ave):
+    def volar(self):
+        raise Exception("Violación LSP")
+</code>
+
+</div>
+
+<div class="section">
+<h2>ISP: Interface Segregation Principle </h2>
+
+  <p>
+Si se diseña una jerarquía de clases para aplicar herencia y polimorfismo, no se debe obligar a una clase a implementar métodos que no va a usar. Cada interfaz ("contrato"), debe tener solo las funciones necesarias 
+    que definan su comportamiento y funcionalidad.
+</p>
+
+<code>
+class Impresora:
+    def imprimir(self): pass
+
+class Multifuncional(Impresora):
+    def escanear(self): pass
+</code>
+
+</div>
+
+<div class="section">
+<h2>DIP: Dependency Inversion Principle</h2>
+
+<p>
+Depender de abstracciones, no de clases concretas.
+</p>
+
+<code>
+class Repositorio:
+    def guardar(self): pass
+
+class Servicio:
+    def __init__(self, repo: Repositorio):
+        self.repo = repo
+</code>
+  <p>Una de las soluciones es la "inyección de dependencias": Se parametriza la dependencia de una abstracción en la funcionalidad de una clase determinada</p>
+
+</div>
+
+  <p>
+    Más ejemplos de código en:
+    <ul>
+      <li><a href="https://github.com/dfloaizab/ProgrammingLanguages/blob/main/2026A/Unidad2/OOP.py">Otro Resumen OOP y SOLID</a></li>
+      <li><a href="https://github.com/dfloaizab/ProgrammingLanguages/blob/main/2026A/Unidad2/OOP.py">Ejemplos Principios OOP</a></li>
+      <li><a href="https://github.com/dfloaizab/ProgrammingLanguages/blob/main/2026A/Unidad2/SOLID.py">Ejemplos SOLID</a></li>
+    </ul>
+    
+  </p>
+
+</body>
+</html>
