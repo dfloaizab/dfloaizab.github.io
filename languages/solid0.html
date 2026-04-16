@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Principios SOLID</title>
+<style>
+body {
+    font-family: Georgia, serif;
+    margin: 60px;
+    background: #f9f9f9;
+}
+h1, h2 {
+    color: #1a1a1a;
+}
+code {
+    display: block;
+    background: #eee;
+    padding: 10px;
+    margin: 10px 0;
+}
+.section {
+    margin-bottom: 40px;
+}
+</style>
+</head>
+<body>
+
+<h1>Principios SOLID</h1>
+
+<div class="section">
+<h2>Single Responsibility Principle</h2>
+<p>Una clase debe tener una única razón para cambiar.</p>
+
+<h3>Aplicación</h3>
+<code>
+class Reporte:
+    def generar(self):
+        pass
+</code>
+
+<h3>No aplicación</h3>
+<code>
+class Reporte:
+    def generar(self):
+        pass
+    def guardar_db(self):
+        pass
+</code>
+
+<p>Beneficio: mantenimiento claro. Trade-off: más clases.</p>
+</div>
+
+<div class="section">
+<h2>Open/Closed Principle</h2>
+<p>Abierto a extensión, cerrado a modificación.</p>
+
+<code>
+class Descuento:
+    def calcular(self, tipo):
+        pass
+</code>
+
+<p>Trade-off: mayor complejidad inicial.</p>
+</div>
+
+<div class="section">
+<h2>Liskov Substitution Principle</h2>
+<p>Las subclases deben ser sustituibles por sus clases base.</p>
+
+<code>
+class Ave:
+    def volar(self):
+        pass
+</code>
+
+<p>Problema típico: pingüinos que no vuelan.</p>
+</div>
+
+<div class="section">
+<h2>Interface Segregation Principle</h2>
+<p>No obligar a implementar métodos innecesarios.</p>
+
+<code>
+class Impresora:
+    def imprimir(self):
+        pass
+</code>
+</div>
+
+<div class="section">
+<h2>Dependency Inversion Principle</h2>
+<p>Depender de abstracciones, no de implementaciones.</p>
+
+<code>
+class Servicio:
+    def __init__(self, repo):
+        self.repo = repo
+</code>
+</div>
+
+</body>
+</html>
