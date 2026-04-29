@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archivos y Periféricos — Sistemas Operativos</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --crimson:   rgb(128,0,0);
+  --crimson2:  rgb(160,20,20);
+  --crimson3:  rgb(200,40,40);
+  --gold:      #c9a227;
+  --gold2:     #e8c060;
+  --cream:     #f5f0e8;
+  --parchment: #ede6d6;
+  --ink:       #1a1208;
+  --ink2:      #2d2010;
+  --muted:     #5c4a30;
+  --border:    rgba(128,0,0,0.15);
+  --surface:   #faf7f2;
+  --card:      #fff9f0;
+  --dark:      #12060a;
+  --dark2:     #1e0a10;
+}
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'Crimson Pro',Georgia,serif;
+  font-size:1.1rem; background:var(--surface);
+  color:var(--ink); line-height:1.75; overflow-x:hidden;
+}
+body::before {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+/* ── NAV ── */
+nav {
+  position:sticky; top:0; z-index:100;
+  background:var(--crimson);
+  display:flex; align-items:center; padding:0 2rem;
+  box-shadow:0 3px 20px rgba(128,0,0,.4);
+  overflow-x:auto; white-space:nowrap;
+}
+.nav-logo {
+  display:flex; align-items:center; gap:.7rem;
+  padding:.65rem 1.2rem .65rem 0;
+  border-right:1px solid rgba(255,255,255,.2);
+  margin-right:.8rem; flex-shrink:0;
+}
+.logo-placeholder {
+  width:34px; height:34px;
+  border:2px dashed rgba(255,255,255,.5); border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono',monospace; font-size:.55rem;
+  color:rgba(255,255,255,.5); text-align:center; line-height:1.2;
+}
+.nav-brand-text {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.3rem; letter-spacing:.08em; color:#fff;
+}
+nav a {
+  font-family:'JetBrains Mono',monospace; font-size:.68rem;
+  letter-spacing:.08em; text-transform:uppercase;
+  color:rgba(255,255,255,.7); text-decoration:none;
+  padding:.9rem .85rem; transition:color .2s,background .2s; flex-shrink:0;
+}
+nav a:hover { color:#fff; background:rgba(255,255,255,.1); }
+
+/* ── HERO ── */
+.hero {
+  position:relative; z-index:1;
+  background:linear-gradient(135deg, var(--dark) 0%, var(--crimson) 50%, #6b0000 100%);
+  min-height:85vh; display:grid; place-items:center;
+  text-align:center; padding:4rem 2rem; overflow:hidden;
+}
+.hero-circuit {
+  position:absolute; inset:0; z-index:0; opacity:.1;
+}
+.hero-content { position:relative; z-index:1; max-width:860px; }
+.hero-tag {
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace; font-size:.72rem;
+  letter-spacing:.2em; text-transform:uppercase;
+  color:var(--gold); border:1px solid rgba(201,162,39,.4);
+  padding:.3rem .9rem; border-radius:2px; margin-bottom:1.2rem;
+  animation:fadeUp .7s ease both;
+}
+.hero h1 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3rem,9vw,7rem); line-height:.95; color:#fff;
+  letter-spacing:.04em; animation:fadeUp .7s .12s ease both;
+  text-shadow:0 4px 30px rgba(0,0,0,.6);
+}
+.hero h1 span { color:var(--gold); }
+.hero-sub {
+  font-size:1.2rem; color:rgba(255,255,255,.72); font-style:italic;
+  margin-top:.8rem; margin-bottom:2rem; animation:fadeUp .7s .22s ease both;
+}
+.hero-chips {
+  display:flex; gap:.6rem; justify-content:center; flex-wrap:wrap;
+  animation:fadeUp .7s .32s ease both;
+}
+.chip {
+  font-family:'JetBrains Mono',monospace; font-size:.7rem;
+  padding:.3rem .8rem; border:1px solid rgba(255,255,255,.2);
+  border-radius:3px; color:rgba(255,255,255,.7);
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── SECTION ── */
+section { position:relative; z-index:1; padding:4.5rem 2rem; max-width:1100px; margin:0 auto; }
+section+section { border-top:1px solid var(--border); }
+.sec-label {
+  font-family:'JetBrains Mono',monospace; font-size:.68rem;
+  letter-spacing:.2em; color:var(--crimson); text-transform:uppercase;
+  margin-bottom:.6rem; display:flex; align-items:center; gap:.5rem;
+}
+.sec-label::after { content:''; height:1px; width:80px; background:var(--border); }
+h2 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(2rem,4vw,3.2rem); letter-spacing:.05em;
+  color:var(--ink); margin-bottom:1.2rem; line-height:1.1;
+}
+h2 span { color:var(--crimson); }
+h3 {
+  font-family:'Bebas Neue',sans-serif; font-size:1.7rem;
+  letter-spacing:.05em; color:var(--crimson); margin:2.5rem 0 .7rem;
+}
+h4 {
+  font-family:'JetBrains Mono',monospace; font-size:.86rem;
+  color:var(--ink2); margin:1.4rem 0 .4rem;
+  text-transform:uppercase; letter-spacing:.05em;
+}
+p { margin-bottom:.9rem; color:#3d2e1a; }
+strong { color:var(--crimson); }
+
+/* ── DEF BOX ── */
+.def {
+  border-left:3px solid var(--crimson);
+  background:rgba(128,0,0,.05);
+  padding:1rem 1.4rem; margin:1.3rem 0;
+  border-radius:0 5px 5px 0; font-style:italic; font-size:1.05rem;
+}
+.def strong { color:var(--crimson); font-style:normal; }
+
+/* ── DIAGRAM WRAP ── */
+.dw {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:8px; padding:1.4rem; margin:2rem 0; overflow-x:auto;
+}
+.dw-title {
+  font-family:'JetBrains Mono',monospace; font-size:.72rem;
+  color:var(--muted); letter-spacing:.1em; text-transform:uppercase;
+  margin-bottom:1rem; display:flex; align-items:center; gap:.4rem;
+}
+.dw-title::before { content:'◈'; color:var(--crimson); }
+
+/* ── CONCEPT CARDS ── */
+.cc-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.1rem; margin:1.8rem 0; }
+.cc {
+  background:var(--card); border:1px solid var(--border);
+  border-top:3px solid var(--crimson); border-radius:0 0 6px 6px;
+  padding:1.2rem; transition:box-shadow .25s,transform .25s;
+}
+.cc:hover { box-shadow:0 5px 20px rgba(128,0,0,.12); transform:translateY(-3px); }
+.cc-icon { font-size:1.6rem; margin-bottom:.5rem; }
+.cc h4 { margin:0 0 .4rem; font-size:.8rem; color:var(--crimson); }
+.cc p { font-size:.92rem; color:var(--muted); margin:0; }
+
+/* ── SYSCALL TABLE ── */
+.tw { overflow-x:auto; margin:1.5rem 0; }
+table { width:100%; border-collapse:collapse; font-size:.93rem; }
+th {
+  background:var(--crimson); color:#fff;
+  font-family:'JetBrains Mono',monospace; font-size:.68rem;
+  letter-spacing:.08em; text-transform:uppercase;
+  padding:.7rem 1rem; text-align:left;
+}
+td { padding:.6rem 1rem; border-bottom:1px solid var(--border); color:var(--ink2); }
+tr:hover td { background:rgba(128,0,0,.04); }
+.mono { font-family:'JetBrains Mono',monospace; font-size:.82rem; color:var(--crimson); }
+
+/* ── CODE ── */
+.code-block {
+  background:#1a0000; border:1px solid rgba(128,0,0,.35);
+  border-radius:6px; overflow:hidden; margin:1.2rem 0;
+}
+.code-hdr {
+  background:rgba(128,0,0,.3); padding:.45rem 1rem;
+  display:flex; justify-content:space-between;
+  font-family:'JetBrains Mono',monospace; font-size:.7rem;
+  color:rgba(255,200,200,.7);
+}
+pre {
+  font-family:'JetBrains Mono',monospace; font-size:.82rem;
+  line-height:1.6; padding:1.1rem 1.4rem; overflow-x:auto; color:#ffb3b3;
+}
+.kw{color:#ff6b6b} .fn{color:#ffd93d} .cm{color:#5a3535;font-style:italic}
+.str{color:#a8ff78} .num{color:#ff9f43} .tp{color:#48dbfb}
+
+/* ── LAYERED BOXES ── */
+.layer-stack { display:flex; flex-direction:column; gap:2px; margin:2rem 0; max-width:640px; }
+.layer {
+  padding:.9rem 1.4rem; border-radius:4px; position:relative;
+  display:flex; align-items:center; gap:1rem;
+  font-family:'JetBrains Mono',monospace; font-size:.85rem;
+}
+.layer-lbl { font-weight:700; min-width:160px; }
+.layer-desc { font-size:.82rem; color:rgba(0,0,0,.55); flex:1; font-family:'Crimson Pro',serif; }
+.l-app     { background:#fef9c3; border:1px solid #d4b800; }
+.l-api     { background:#dcfce7; border:1px solid #16a34a; }
+.l-vfs     { background:#dbeafe; border:1px solid #2563eb; }
+.l-driver  { background:#f3e8ff; border:1px solid #7c3aed; }
+.l-hw      { background:#fee2e2; border:1px solid var(--crimson); }
+.layer-arrow { text-align:center; color:var(--muted); font-size:.9rem; }
+
+/* ── INTERRUPT TIMELINE ── */
+.int-flow {
+  display:flex; gap:0; overflow-x:auto; margin:2rem 0;
+  border:1px solid var(--border); border-radius:8px;
+  background:var(--card);
+}
+.if-step {
+  flex:1; min-width:120px; padding:1rem .8rem;
+  border-right:1px solid var(--border); text-align:center;
+}
+.if-step:last-child { border-right:none; }
+.if-num {
+  font-family:'Bebas Neue',sans-serif; font-size:1.8rem;
+  color:var(--crimson); line-height:1;
+}
+.if-label {
+  font-family:'JetBrains Mono',monospace; font-size:.68rem;
+  color:var(--muted); text-transform:uppercase; letter-spacing:.06em;
+  margin:.3rem 0;
+}
+.if-desc { font-size:.88rem; color:var(--ink2); }
+
+/* ── REVEAL ── */
+.reveal { opacity:0; transform:translateY(18px); transition:opacity .55s,transform .55s; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* ── FOOTER ── */
+footer {
+  position:relative; z-index:1;
+  background:var(--crimson); text-align:center; padding:2.5rem 2rem;
+  font-family:'JetBrains Mono',monospace; font-size:.75rem;
+  color:rgba(255,255,255,.6);
+}
+footer .fl { display:inline-flex; align-items:center; gap:.8rem; margin-bottom:.8rem; }
+footer .logo-placeholder { border-color:rgba(255,255,255,.3); color:rgba(255,255,255,.4); }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-logo">
+    <div class="logo-placeholder">TU<br>LOGO</div>
+    <span class="nav-brand-text">Sistemas Operativos</span>
+  </div>
+  <a href="#sisarch">Sist. Archivos</a>
+  <a href="#operaciones">Operaciones</a>
+  <a href="#interrupciones">Interrupciones</a>
+  <a href="#traps">Traps & Syscalls</a>
+  <a href="#perifericos">Periféricos</a>
+  <a href="#io">Modelos E/S</a>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <svg class="hero-circuit" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <g stroke="white" fill="none" stroke-width="1">
+      <rect x="100" y="100" width="200" height="120" rx="4"/>
+      <rect x="500" y="80" width="240" height="140" rx="4"/>
+      <rect x="900" y="120" width="180" height="100" rx="4"/>
+      <rect x="200" y="400" width="160" height="100" rx="4"/>
+      <rect x="600" y="380" width="200" height="120" rx="4"/>
+      <line x1="300" y1="160" x2="500" y2="150"/>
+      <line x1="740" y1="150" x2="900" y2="170"/>
+      <line x1="200" y1="220" x2="200" y2="400"/>
+      <line x1="620" y1="220" x2="620" y2="380"/>
+      <line x1="360" y1="450" x2="600" y2="440"/>
+      <circle cx="300" cy="160" r="4" fill="white"/>
+      <circle cx="740" cy="150" r="4" fill="white"/>
+      <circle cx="200" cy="220" r="4" fill="white"/>
+      <circle cx="620" cy="220" r="4" fill="white"/>
+    </g>
+  </svg>
+  <div class="hero-content">
+    <div class="hero-tag">Sistemas Operativos · Ingeniería de Sistemas</div>
+    <h1>Archivos<br>y <span>Periféricos</span></h1>
+    <p class="hero-sub">Sistemas de archivos, operaciones, interrupciones, traps y comunicación CPU–periférico</p>
+    <div class="hero-chips">
+      <span class="chip">Sistemas de Archivos</span>
+      <span class="chip">Interrupciones</span>
+      <span class="chip">Traps / Syscalls</span>
+      <span class="chip">DMA</span>
+      <span class="chip">Controladores E/S</span>
+      <span class="chip">VFS</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- 1. SISTEMAS DE ARCHIVOS -->
+<!-- ══════════════════════════════════════════════ -->
+<section id="sisarch">
+  <div class="sec-label">01 · Sistemas de Archivos</div>
+  <h2>Sistemas de <span>Archivos</span></h2>
+
+  <div class="def">
+    Un <strong>sistema de archivos</strong> es la capa del SO que organiza, almacena y recupera datos en dispositivos de almacenamiento. Abstrae los sectores físicos del disco en <strong>archivos</strong> y <strong>directorios</strong> con nombres y permisos.
+  </div>
+
+  <h3>Arquitectura en capas</h3>
+  <div class="layer-stack reveal">
+    <div class="layer l-app"><span class="layer-lbl">Aplicación</span><span class="layer-desc">fopen(), read(), write() — API de alto nivel en C/POSIX</span></div>
+    <div class="layer-arrow">↕</div>
+    <div class="layer l-api"><span class="layer-lbl">Syscall Interface</span><span class="layer-desc">open(2), read(2), write(2), close(2) — llamadas al kernel</span></div>
+    <div class="layer-arrow">↕</div>
+    <div class="layer l-vfs"><span class="layer-lbl">VFS (Virtual FS)</span><span class="layer-desc">Capa de abstracción: unifica ext4, NTFS, FAT32, procfs...</span></div>
+    <div class="layer-arrow">↕</div>
+    <div class="layer l-driver"><span class="layer-lbl">Driver del FS</span><span class="layer-desc">Implementación específica (ext4, FAT32, ZFS…) — traduce VFS a bloques</span></div>
+    <div class="layer-arrow">↕</div>
+    <div class="layer l-hw"><span class="layer-lbl">Hardware</span><span class="layer-desc">Controlador de disco, SSD, NVMe — transferencias en bloques físicos</span></div>
+  </div>
+
+  <h3>Estructuras internas clave</h3>
+  <div class="cc-grid">
+    <div class="cc reveal">
+      <div class="cc-icon">📄</div>
+      <h4>Inodo (inode)</h4>
+      <p>Estructura metadato de un archivo: tamaño, permisos, timestamps, propietario, y punteros a bloques de datos. NO contiene el nombre del archivo.</p>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">📁</div>
+      <h4>Directorio</h4>
+      <p>Tabla de {nombre → número de inodo}. El nombre vive en el directorio; el contenido y metadatos en el inodo. Permite hard links: dos nombres apuntando al mismo inodo.</p>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">🗂️</div>
+      <h4>Superbloque</h4>
+      <p>Metadatos del sistema de archivos completo: tamaño total, número de inodos libres, bloques libres, magic number para identificar el tipo de FS.</p>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">🗺️</div>
+      <h4>Bitmap de bloques</h4>
+      <p>Mapa de bits donde 1 = bloque ocupado, 0 = libre. Permite al FS encontrar espacio libre eficientemente sin escanear todo el disco.</p>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">🔗</div>
+      <h4>FAT (File Alloc. Table)</h4>
+      <p>En FAT32: tabla de cadenas de clústeres. Cada entrada apunta al siguiente clúster del archivo o marca EOF. Simple pero frágil (punto único de fallo).</p>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">📋</div>
+      <h4>Journaling</h4>
+      <p>Log (journal) de transacciones pendientes. Si el sistema falla a mitad de una escritura, el journal permite recuperar la consistencia. Usado en ext4, NTFS, XFS.</p>
+    </div>
+  </div>
+
+  <h3>Estructura del inodo en ext2/ext4</h3>
+  <div class="dw reveal">
+    <div class="dw-title">Inodo con punteros directos, indirectos y doble-indirectos</div>
+    <svg viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:680px;display:block;margin:auto">
+      <!-- Inode box -->
+      <rect x="20" y="20" width="180" height="300" fill="#fff9f0" stroke="rgb(128,0,0)" stroke-width="2" rx="4"/>
+      <rect x="20" y="20" width="180" height="36" fill="rgb(128,0,0)" rx="4"/>
+      <rect x="20" y="52" width="180" height="4" fill="rgb(128,0,0)"/>
+      <text x="110" y="44" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="16" fill="white" letter-spacing="1">INODO</text>
+      <!-- fields -->
+      <g font-family="JetBrains Mono,monospace" font-size="10" fill="#5c4a30">
+        <text x="30" y="78">modo / permisos</text>
+        <text x="30" y="96">uid / gid</text>
+        <text x="30" y="114">tamaño</text>
+        <text x="30" y="132">atime / mtime / ctime</text>
+        <text x="30" y="150">nlinks</text>
+      </g>
+      <line x1="20" y1="158" x2="200" y2="158" stroke="rgba(128,0,0,.3)" stroke-width="1"/>
+      <!-- pointers -->
+      <g font-family="JetBrains Mono,monospace" font-size="10">
+        <rect x="30" y="164" width="140" height="18" fill="rgba(128,0,0,.08)" rx="2"/>
+        <text x="38" y="177" fill="rgb(128,0,0)">directo[0..11]</text>
+        <rect x="30" y="186" width="140" height="18" fill="rgba(201,162,39,.15)" rx="2"/>
+        <text x="38" y="199" fill="#7a5c00">indirecto simple</text>
+        <rect x="30" y="208" width="140" height="18" fill="rgba(201,162,39,.25)" rx="2"/>
+        <text x="38" y="221" fill="#7a5c00">indirecto doble</text>
+        <rect x="30" y="230" width="140" height="18" fill="rgba(201,162,39,.38)" rx="2"/>
+        <text x="38" y="243" fill="#7a5c00">indirecto triple</text>
+      </g>
+      <!-- Direct block arrows -->
+      <g stroke="rgb(128,0,0)" fill="none" stroke-width="1.5">
+        <line x1="170" y1="173" x2="290" y2="100"/>
+        <line x1="170" y1="173" x2="290" y2="145"/>
+        <line x1="170" y1="173" x2="290" y2="190"/>
+      </g>
+      <!-- Direct blocks -->
+      <rect x="290" y="82" width="90" height="32" fill="#fff9f0" stroke="rgb(128,0,0)" stroke-width="1.5" rx="3"/>
+      <text x="335" y="103" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="rgb(128,0,0)">Bloque datos</text>
+      <rect x="290" y="127" width="90" height="32" fill="#fff9f0" stroke="rgb(128,0,0)" stroke-width="1.5" rx="3"/>
+      <text x="335" y="148" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="rgb(128,0,0)">Bloque datos</text>
+      <rect x="290" y="172" width="90" height="32" fill="#fff9f0" stroke="rgb(128,0,0)" stroke-width="1.5" rx="3"/>
+      <text x="335" y="193" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="rgb(128,0,0)">Bloque datos</text>
+      <!-- Indirect -->
+      <line x1="170" y1="195" x2="290" y2="250" stroke="#c9a227" stroke-width="1.5" fill="none"/>
+      <rect x="290" y="232" width="90" height="32" fill="#fffbe8" stroke="#c9a227" stroke-width="1.5" rx="3"/>
+      <text x="335" y="253" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#7a5c00">Bloque ptr</text>
+      <!-- Indirect → data -->
+      <line x1="380" y1="248" x2="460" y2="210" stroke="#c9a227" stroke-width="1.2"/>
+      <line x1="380" y1="248" x2="460" y2="260" stroke="#c9a227" stroke-width="1.2"/>
+      <rect x="460" y="192" width="90" height="28" fill="#fffbe8" stroke="#c9a227" stroke-width="1" rx="3"/>
+      <text x="505" y="211" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#7a5c00">Bloque datos</text>
+      <rect x="460" y="242" width="90" height="28" fill="#fffbe8" stroke="#c9a227" stroke-width="1" rx="3"/>
+      <text x="505" y="261" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#7a5c00">Bloque datos</text>
+      <!-- Labels -->
+      <text x="290" y="300" font-family="Crimson Pro,serif" font-size="11" fill="#9b8060" font-style="italic">directo → acceso en 1 nivel</text>
+      <text x="290" y="318" font-family="Crimson Pro,serif" font-size="11" fill="#9b8060" font-style="italic">indirecto → 2 niveles de punteros</text>
+    </svg>
+  </div>
+
+  <h3>Sistemas de archivos comunes</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>FS</th><th>SO</th><th>Journaling</th><th>Máx. tamaño archivo</th><th>Característica</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ext4</strong></td><td>Linux</td><td>✅ sí</td><td>16 TiB</td><td>Extents, delayed allocation, muy estable</td></tr>
+        <tr><td><strong>NTFS</strong></td><td>Windows</td><td>✅ sí</td><td>16 EiB</td><td>MFT, ACLs, compresión, cifrado nativo</td></tr>
+        <tr><td><strong>FAT32</strong></td><td>Universal</td><td>❌ no</td><td>4 GiB</td><td>Máxima compatibilidad (USBs, tarjetas SD)</td></tr>
+        <tr><td><strong>exFAT</strong></td><td>Universal</td><td>❌ no</td><td>128 PiB</td><td>FAT32 moderno para flash drives grandes</td></tr>
+        <tr><td><strong>ZFS</strong></td><td>Linux/BSD</td><td>Copy-on-write</td><td>16 EiB</td><td>Checksums, snapshots, RAID integrado</td></tr>
+        <tr><td><strong>APFS</strong></td><td>macOS/iOS</td><td>Copy-on-write</td><td>8 EiB</td><td>Clones, snapshots, cifrado por defecto</td></tr>
+        <tr><td><strong>procfs / sysfs</strong></td><td>Linux</td><td>N/A</td><td>Virtual</td><td>FS virtuales: exponen info del kernel como archivos</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- 2. OPERACIONES SOBRE ARCHIVOS -->
+<!-- ══════════════════════════════════════════════ -->
+<section id="operaciones">
+  <div class="sec-label">02 · Operaciones</div>
+  <h2>Operaciones sobre <span>Archivos</span></h2>
+  <p>El SO provee a los procesos un conjunto de <strong>llamadas al sistema (syscalls)</strong> para manipular archivos. Internamente, cada syscall transita por el VFS hacia el driver específico del FS.</p>
+
+  <div class="tw reveal">
+    <table>
+      <thead><tr><th>Syscall (POSIX)</th><th>Operación</th><th>Descripción</th><th>Retorna</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">open(path, flags)</td><td>Abrir</td><td>Crea una entrada en la tabla de archivos del proceso. Asigna un descriptor (fd). flags: O_RDONLY, O_WRONLY, O_CREAT, O_TRUNC, O_APPEND</td><td>fd ≥ 0 o -1</td></tr>
+        <tr><td class="mono">read(fd, buf, n)</td><td>Leer</td><td>Transfiere hasta n bytes del archivo al buffer. Mueve el puntero del archivo. Puede bloquearse si no hay datos disponibles.</td><td>bytes leídos</td></tr>
+        <tr><td class="mono">write(fd, buf, n)</td><td>Escribir</td><td>Transfiere n bytes del buffer al archivo. Puede ir al page cache antes del disco (escritura diferida). Actualiza mtime.</td><td>bytes escritos</td></tr>
+        <tr><td class="mono">lseek(fd, offset, whence)</td><td>Posicionar</td><td>Mueve el puntero del archivo. whence: SEEK_SET (absoluto), SEEK_CUR (relativo), SEEK_END (desde el final).</td><td>posición nueva</td></tr>
+        <tr><td class="mono">close(fd)</td><td>Cerrar</td><td>Libera el descriptor. Si nlinks=0 y ningún proceso lo tiene abierto, libera el inodo y los bloques de datos.</td><td>0 o -1</td></tr>
+        <tr><td class="mono">stat(path, &sb)</td><td>Metadatos</td><td>Llena struct stat con: inodo, modo, uid, gid, tamaño, timestamps, nlinks. No abre el archivo.</td><td>0 o -1</td></tr>
+        <tr><td class="mono">unlink(path)</td><td>Eliminar</td><td>Elimina la entrada del directorio (decrementa nlinks). El inodo/datos se liberan cuando nlinks llega a 0 Y no hay fds abiertos.</td><td>0 o -1</td></tr>
+        <tr><td class="mono">mmap(addr, len, prot, flags, fd, off)</td><td>Mapear en memoria</td><td>Mapea un archivo en el espacio de direcciones del proceso. Acceso por puntero, sin read/write explícitos. La MMU gestiona la E/S.</td><td>ptr o MAP_FAILED</td></tr>
+        <tr><td class="mono">fsync(fd)</td><td>Sincronizar</td><td>Fuerza la escritura de todos los datos y metadatos del archivo al dispositivo físico. Crucial para consistencia en bases de datos.</td><td>0 o -1</td></tr>
+        <tr><td class="mono">ioctl(fd, cmd, arg)</td><td>Control</td><td>Operaciones específicas del dispositivo no cubiertas por read/write: configurar baudrate de un puerto serial, tamaño de terminal, etc.</td><td>varía</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Tabla de archivos abiertos — Estructura interna</h3>
+  <div class="dw reveal">
+    <div class="dw-title">Relación proceso → tabla de archivos → inodo</div>
+    <svg viewBox="0 0 680 270" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:680px;display:block;margin:auto">
+      <!-- Process A -->
+      <rect x="10" y="40" width="130" height="180" fill="#fff9f0" stroke="rgb(128,0,0)" stroke-width="2" rx="4"/>
+      <rect x="10" y="40" width="130" height="30" fill="rgb(128,0,0)" rx="4"/>
+      <rect x="10" y="66" width="130" height="4" fill="rgb(128,0,0)"/>
+      <text x="75" y="61" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="white">Proceso A</text>
+      <g font-family="JetBrains Mono,monospace" font-size="10" fill="#5c4a30">
+        <text x="20" y="90">fd 0 (stdin) ──→</text>
+        <text x="20" y="114">fd 1 (stdout) ──→</text>
+        <text x="20" y="138">fd 2 (stderr) ──→</text>
+        <text x="20" y="162">fd 3 ──────────→</text>
+        <text x="20" y="186">fd 4 ──────────→</text>
+      </g>
+      <!-- Global open-file table -->
+      <rect x="220" y="20" width="180" height="220" fill="#fff9f0" stroke="#c9a227" stroke-width="2" rx="4"/>
+      <rect x="220" y="20" width="180" height="30" fill="#c9a227" rx="4"/>
+      <rect x="220" y="46" width="180" height="4" fill="#c9a227"/>
+      <text x="310" y="41" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="white">Tabla Global (kernel)</text>
+      <g font-family="JetBrains Mono,monospace" font-size="9" fill="#5c4a30">
+        <rect x="228" y="56" width="164" height="28" fill="rgba(201,162,39,.1)" rx="2"/>
+        <text x="234" y="68">entrada 0: pos=0, flags=R</text>
+        <text x="234" y="81">inode_ptr → inodo #1</text>
+        <rect x="228" y="88" width="164" height="28" fill="rgba(201,162,39,.1)" rx="2"/>
+        <text x="234" y="100">entrada 1: pos=0, flags=W</text>
+        <text x="234" y="113">inode_ptr → inodo #2</text>
+        <rect x="228" y="120" width="164" height="28" fill="rgba(201,162,39,.15)" rx="2"/>
+        <text x="234" y="132">entrada 2: pos=0, flags=W</text>
+        <text x="234" y="145">inode_ptr → inodo #2</text>
+        <rect x="228" y="152" width="164" height="28" fill="rgba(128,0,0,.07)" rx="2"/>
+        <text x="234" y="164">entrada 3: pos=1024, flags=R</text>
+        <text x="234" y="177">inode_ptr → inodo #42</text>
+        <rect x="228" y="184" width="164" height="28" fill="rgba(128,0,0,.07)" rx="2"/>
+        <text x="234" y="196">entrada 4: pos=0, flags=RW</text>
+        <text x="234" y="209">inode_ptr → inodo #42</text>
+      </g>
+      <!-- Inode table -->
+      <rect x="480" y="60" width="160" height="190" fill="#fff9f0" stroke="#2563eb" stroke-width="2" rx="4"/>
+      <rect x="480" y="60" width="160" height="30" fill="#2563eb" rx="4"/>
+      <rect x="480" y="86" width="160" height="4" fill="#2563eb"/>
+      <text x="560" y="81" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="white">Tabla de inodos</text>
+      <g font-family="JetBrains Mono,monospace" font-size="9" fill="#1e3a8a">
+        <text x="490" y="104">inodo #1: /dev/stdin</text>
+        <text x="490" y="116">inodo #2: /dev/stdout</text>
+        <text x="490" y="136">inodo #42: archivo.txt</text>
+        <text x="490" y="148">  size=4096, nlinks=1</text>
+        <text x="490" y="160">  blks=[100,101,102]</text>
+      </g>
+      <!-- Arrows -->
+      <g stroke="#c9a227" stroke-width="1.2" fill="none" stroke-dasharray="3 2">
+        <line x1="148" y1="87" x2="220" y2="70"/>
+        <line x1="148" y1="111" x2="220" y2="102"/>
+        <line x1="148" y1="135" x2="220" y2="134"/>
+        <line x1="148" y1="159" x2="220" y2="166"/>
+        <line x1="148" y1="183" x2="220" y2="198"/>
+      </g>
+      <g stroke="#2563eb" stroke-width="1.2" fill="none">
+        <line x1="400" y1="75" x2="480" y2="104"/>
+        <line x1="400" y1="107" x2="480" y2="116"/>
+        <line x1="400" y1="139" x2="480" y2="116"/>
+        <line x1="400" y1="171" x2="480" y2="146"/>
+        <line x1="400" y1="203" x2="480" y2="152"/>
+      </g>
+      <!-- Note: fd 3 y 4 comparten inodo -->
+      <text x="480" y="240" font-family="Crimson Pro,serif" font-size="11" fill="#5c4a30" font-style="italic">fd 3 y fd 4 → mismo inodo (punteros independientes)</text>
+    </svg>
+  </div>
+
+  <h3>Ejemplo en C — syscalls de archivos</h3>
+  <div class="code-block reveal">
+    <div class="code-hdr"><span>Operaciones básicas con archivos</span><span>C / POSIX</span></div>
+    <pre><span class="kw">#include</span> <span class="str">&lt;fcntl.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;unistd.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;sys/stat.h&gt;</span>
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+    <span class="cm">/* 1. Abrir (crea si no existe, trunca si existe) */</span>
+    <span class="kw">int</span> fd = <span class="fn">open</span>(<span class="str">"datos.bin"</span>, O_RDWR | O_CREAT | O_TRUNC, <span class="num">0644</span>);
+    <span class="cm">/* permisos 0644 = rw-r--r--                          */</span>
+
+    <span class="cm">/* 2. Escribir */</span>
+    <span class="kw">char</span> buf[] = <span class="str">"Hola SO"</span>;
+    <span class="fn">write</span>(fd, buf, <span class="kw">sizeof</span>(buf));
+
+    <span class="cm">/* 3. Reposicionar al inicio */</span>
+    <span class="fn">lseek</span>(fd, <span class="num">0</span>, SEEK_SET);
+
+    <span class="cm">/* 4. Leer de vuelta */</span>
+    <span class="kw">char</span> lectura[<span class="num">16</span>];
+    <span class="tp">ssize_t</span> n = <span class="fn">read</span>(fd, lectura, <span class="num">16</span>);
+
+    <span class="cm">/* 5. Obtener metadatos */</span>
+    <span class="kw">struct</span> <span class="tp">stat</span> st;
+    <span class="fn">fstat</span>(fd, &st);
+    <span class="cm">/* st.st_size, st.st_mtime, st.st_mode … */</span>
+
+    <span class="cm">/* 6. Sincronizar con disco (¡crítico para BD!) */</span>
+    <span class="fn">fsync</span>(fd);
+
+    <span class="cm">/* 7. Cerrar */</span>
+    <span class="fn">close</span>(fd);
+
+    <span class="cm">/* 8. Mapear en memoria (alternativa a read/write) */</span>
+    fd = <span class="fn">open</span>(<span class="str">"datos.bin"</span>, O_RDONLY);
+    <span class="kw">void</span>* ptr = <span class="fn">mmap</span>(NULL, st.st_size, PROT_READ,
+                      MAP_PRIVATE, fd, <span class="num">0</span>);
+    <span class="cm">/* acceder ptr[i] como si fuera un array en RAM */</span>
+    <span class="fn">munmap</span>(ptr, st.st_size);
+    <span class="fn">close</span>(fd);
+}</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- 3. INTERRUPCIONES -->
+<!-- ══════════════════════════════════════════════ -->
+<section id="interrupciones">
+  <div class="sec-label">03 · Interrupciones</div>
+  <h2>Interrupciones <span>de Hardware</span></h2>
+
+  <div class="def">
+    Una <strong>interrupción</strong> es una señal asíncrona generada por hardware que fuerza a la CPU a suspender su ejecución actual, guardar su estado, y ejecutar una <strong>rutina de manejo de interrupción (ISR/IRQ handler)</strong> en el kernel.
+  </div>
+
+  <h3>Flujo completo de una interrupción</h3>
+  <div class="int-flow reveal">
+    <div class="if-step">
+      <div class="if-num">1</div>
+      <div class="if-label">Dispositivo señaliza</div>
+      <div class="if-desc">El disco/teclado/NIC levanta la línea IRQ del bus</div>
+    </div>
+    <div class="if-step">
+      <div class="if-num">2</div>
+      <div class="if-label">PIC / APIC captura</div>
+      <div class="if-desc">El controlador de interrupciones asigna un vector y notifica a la CPU</div>
+    </div>
+    <div class="if-step">
+      <div class="if-num">3</div>
+      <div class="if-label">CPU finaliza instrucción</div>
+      <div class="if-desc">Completa la instrucción en curso (no es inmediato)</div>
+    </div>
+    <div class="if-step">
+      <div class="if-num">4</div>
+      <div class="if-label">Contexto salvado</div>
+      <div class="if-desc">PC, registros, flags → pila del kernel (modo kernel)</div>
+    </div>
+    <div class="if-step">
+      <div class="if-num">5</div>
+      <div class="if-label">ISR ejecuta</div>
+      <div class="if-desc">Kernel lee/escribe el dispositivo, actualiza buffers, despierta procesos</div>
+    </div>
+    <div class="if-step">
+      <div class="if-num">6</div>
+      <div class="if-label">Contexto restaurado</div>
+      <div class="if-desc">IRET restaura registros y retoma el proceso interrumpido</div>
+    </div>
+  </div>
+
+  <h3>Tipos de interrupciones</h3>
+  <div class="cc-grid">
+    <div class="cc reveal">
+      <div class="cc-icon">⚡</div>
+      <h4>IRQ de hardware</h4>
+      <p>Generadas por dispositivos externos: teclado (IRQ 1), disco IDE (IRQ 14), NIC (IRQ 11). Asíncronas — llegan en cualquier momento. Manejadas por el PIC/APIC.</p>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">⏱️</div>
+      <h4>Timer / Reloj (IRQ 0)</h4>
+      <p>La interrupción más importante del SO. Dispara cada 1–10 ms. El scheduler la usa para implementar time-slicing y expulsar procesos que agotan su quantum.</p>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">💾</div>
+      <h4>DMA completado</h4>
+      <p>El controlador DMA notifica que terminó la transferencia entre memoria y dispositivo. Permite que la CPU haga otro trabajo mientras el disco transfiere datos.</p>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">❌</div>
+      <h4>Excepción / Fault</h4>
+      <p>Generada por la CPU ante errores: división por cero (INT 0), fallo de página (INT 14), acceso a memoria ilegal. Pueden ser recuperables (page fault normal) o no (SIGSEGV).</p>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">🔢</div>
+      <h4>NMI (Non-Maskable)</h4>
+      <p>No puede ser deshabilitada. Reservada para fallas críticas de hardware: errores de paridad en RAM, fallos de watchdog. El SO sólo puede loggear y, generalmente, hacer panic.</p>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">📡</div>
+      <h4>IPI (Inter-Processor)</h4>
+      <p>En sistemas multiprocesador: una CPU interrumpe a otra para sincronización (TLB shootdown, migración de proceso, apagado de núcleo).</p>
+    </div>
+  </div>
+
+  <h3>IDT — Interrupt Descriptor Table (x86)</h3>
+  <div class="dw reveal">
+    <div class="dw-title">Vectores de interrupción en arquitectura x86-64</div>
+    <svg viewBox="0 0 660 260" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:660px;display:block;margin:auto">
+      <!-- IDT table -->
+      <rect x="20" y="20" width="200" height="220" fill="#fff9f0" stroke="rgb(128,0,0)" stroke-width="2" rx="4"/>
+      <rect x="20" y="20" width="200" height="30" fill="rgb(128,0,0)" rx="4"/>
+      <rect x="20" y="46" width="200" height="4" fill="rgb(128,0,0)"/>
+      <text x="120" y="41" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="14" fill="white">IDT (256 entradas)</text>
+      <g font-family="JetBrains Mono,monospace" font-size="10">
+        <rect x="28" y="55" width="184" height="22" fill="rgba(128,0,0,.12)" rx="2"/>
+        <text x="35" y="70" fill="rgb(128,0,0)">0x00: #DE División por cero</text>
+        <rect x="28" y="80" width="184" height="22" fill="rgba(128,0,0,.08)" rx="2"/>
+        <text x="35" y="95" fill="rgb(128,0,0)">0x01: #DB Debug</text>
+        <rect x="28" y="105" width="184" height="22" fill="rgba(201,162,39,.15)" rx="2"/>
+        <text x="35" y="120" fill="#7a5c00">0x02: NMI (no enmascarable)</text>
+        <rect x="28" y="130" width="184" height="22" fill="rgba(128,0,0,.08)" rx="2"/>
+        <text x="35" y="145" fill="rgb(128,0,0)">0x03: #BP Breakpoint</text>
+        <rect x="28" y="155" width="184" height="22" fill="rgba(30,80,180,.1)" rx="2"/>
+        <text x="35" y="170" fill="#1e50b4">0x0E: #PF Page Fault</text>
+        <text x="35" y="192" fill="#64748b">0x10–0x1F: reservados CPU</text>
+        <text x="35" y="207" fill="#16a34a">0x20–0xFF: IRQ hardware</text>
+        <text x="35" y="222" fill="#7c3aed">0x80: syscall Linux (int 0x80)</text>
+      </g>
+      <!-- Handler pointer arrows -->
+      <line x1="220" y1="66"  x2="310" y2="80"  stroke="rgb(128,0,0)" stroke-width="1.5" stroke-dasharray="4 2"/>
+      <line x1="220" y1="141" x2="310" y2="160" stroke="#1e50b4" stroke-width="1.5" stroke-dasharray="4 2"/>
+      <line x1="220" y1="218" x2="310" y2="220" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4 2"/>
+      <!-- Handler boxes -->
+      <rect x="310" y="60" width="170" height="42" fill="rgba(128,0,0,.08)" stroke="rgb(128,0,0)" stroke-width="1.5" rx="4"/>
+      <text x="395" y="77" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="rgb(128,0,0)">divide_error_handler()</text>
+      <text x="395" y="93" text-anchor="middle" font-family="Crimson Pro,serif" font-size="11" fill="#9b8060" font-style="italic">reportar SIGFPE al proceso</text>
+      <rect x="310" y="142" width="170" height="42" fill="rgba(30,80,180,.08)" stroke="#2563eb" stroke-width="1.5" rx="4"/>
+      <text x="395" y="159" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#1e50b4">page_fault_handler()</text>
+      <text x="395" y="175" text-anchor="middle" font-family="Crimson Pro,serif" font-size="11" fill="#9b8060" font-style="italic">cargar página de disco / SIGSEGV</text>
+      <rect x="310" y="206" width="170" height="42" fill="rgba(124,58,237,.08)" stroke="#7c3aed" stroke-width="1.5" rx="4"/>
+      <text x="395" y="223" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#7c3aed">syscall_handler()</text>
+      <text x="395" y="239" text-anchor="middle" font-family="Crimson Pro,serif" font-size="11" fill="#9b8060" font-style="italic">despachar syscall por número</text>
+      <!-- CPU -->
+      <rect x="510" y="100" width="120" height="60" fill="#fff9f0" stroke="#2e7d32" stroke-width="2" rx="4"/>
+      <text x="570" y="127" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="15" fill="#2e7d32">CPU</text>
+      <text x="570" y="149" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#5c4a30">lee IDT[vector]</text>
+      <line x1="480" y1="80"  x2="510" y2="120" stroke="#2e7d32" stroke-width="1.2"/>
+      <line x1="480" y1="163" x2="510" y2="135" stroke="#2e7d32" stroke-width="1.2"/>
+      <line x1="480" y1="227" x2="510" y2="150" stroke="#2e7d32" stroke-width="1.2"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- 4. TRAPS & SYSCALLS -->
+<!-- ══════════════════════════════════════════════ -->
+<section id="traps">
+  <div class="sec-label">04 · Traps y Llamadas al Sistema</div>
+  <h2>Traps y <span>Syscalls</span></h2>
+
+  <div class="def">
+    Un <strong>trap</strong> (o interrupción software) es una interrupción generada deliberadamente por el proceso para solicitar servicios del kernel — es el mecanismo fundamental que implementa las <strong>llamadas al sistema</strong>.
+  </div>
+
+  <h3>Diferencia: Interrupción vs. Trap vs. Excepción</h3>
+  <div class="tw reveal">
+    <table>
+      <thead><tr><th>Tipo</th><th>Origen</th><th>¿Sincrónico?</th><th>¿Intencional?</th><th>Ejemplo</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Interrupción HW</strong></td><td>Dispositivo externo</td><td>❌ Asíncrono</td><td>No aplica</td><td>Teclado presionado, paquete de red recibido</td></tr>
+        <tr><td><strong>Trap</strong></td><td>CPU (instrucción INT)</td><td>✅ Síncrono</td><td>✅ Sí (intencional)</td><td>syscall: <span class="mono">int 0x80</span>, <span class="mono">syscall</span></td></tr>
+        <tr><td><strong>Excepción / Fault</strong></td><td>CPU (error)</td><td>✅ Síncrono</td><td>❌ No (error)</td><td>División por cero, page fault, instrucción inválida</td></tr>
+        <tr><td><strong>Abort</strong></td><td>CPU / HW crítico</td><td>✅ Síncrono</td><td>❌ No</td><td>Error de paridad en RAM, fallo de doble fault</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Mecanismo de syscall en Linux x86-64</h3>
+  <div class="dw reveal">
+    <div class="dw-title">Transición usuario → kernel y retorno</div>
+    <svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:680px;display:block;margin:auto">
+      <!-- User space -->
+      <rect x="10" y="10" width="300" height="130" fill="rgba(52,211,153,.06)" stroke="#16a34a" stroke-width="2" rx="6" stroke-dasharray="6 3"/>
+      <text x="160" y="30" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="#16a34a" letter-spacing=".5">ESPACIO DE USUARIO (Ring 3)</text>
+      <g font-family="JetBrains Mono,monospace" font-size="10" fill="#16a34a">
+        <text x="25" y="55">rax = 1   ; número syscall write</text>
+        <text x="25" y="72">rdi = 1   ; fd = stdout</text>
+        <text x="25" y="89">rsi = buf ; dirección del buffer</text>
+        <text x="25" y="106">rdx = len ; longitud</text>
+        <text x="25" y="123">syscall   ; instrucción SYSCALL</text>
+      </g>
+      <!-- Kernel space -->
+      <rect x="10" y="160" width="300" height="130" fill="rgba(128,0,0,.06)" stroke="rgb(128,0,0)" stroke-width="2" rx="6" stroke-dasharray="6 3"/>
+      <text x="160" y="180" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="rgb(128,0,0)" letter-spacing=".5">ESPACIO KERNEL (Ring 0)</text>
+      <g font-family="JetBrains Mono,monospace" font-size="10" fill="rgb(128,0,0)">
+        <text x="25" y="202">; guardar registros del usuario</text>
+        <text x="25" y="219">; validar argumentos (ptr en userspace?)</text>
+        <text x="25" y="236">; llamar sys_write()</text>
+        <text x="25" y="253">; copiar datos usuario→kernel</text>
+        <text x="25" y="270">; sysret → restaurar Ring 3</text>
+      </g>
+      <!-- Arrow down -->
+      <line x1="160" y1="140" x2="160" y2="160" stroke="rgb(128,0,0)" stroke-width="3"/>
+      <polygon points="152,155 160,165 168,155" fill="rgb(128,0,0)"/>
+      <text x="170" y="154" font-family="JetBrains Mono,monospace" font-size="9" fill="#5c4a30">SYSCALL ↓ (Ring 3→0)</text>
+      <!-- Arrow up -->
+      <line x1="300" y1="160" x2="300" y2="140" stroke="#16a34a" stroke-width="3"/>
+      <polygon points="292,145 300,135 308,145" fill="#16a34a"/>
+      <text x="310" y="154" font-family="JetBrains Mono,monospace" font-size="9" fill="#16a34a">SYSRET ↑ (Ring 0→3)</text>
+      <!-- Syscall table -->
+      <rect x="390" y="10" width="270" height="280" fill="#fff9f0" stroke="#c9a227" stroke-width="2" rx="6"/>
+      <rect x="390" y="10" width="270" height="30" fill="#c9a227" rx="6"/>
+      <rect x="390" y="36" width="270" height="4" fill="#c9a227"/>
+      <text x="525" y="30" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="white">SYSCALL TABLE (Linux)</text>
+      <g font-family="JetBrains Mono,monospace" font-size="10">
+        <text x="400" y="57" fill="#5c4a30">rax=0  → sys_read</text>
+        <text x="400" y="74" fill="#5c4a30">rax=1  → sys_write</text>
+        <text x="400" y="91" fill="#5c4a30">rax=2  → sys_open</text>
+        <text x="400" y="108" fill="#5c4a30">rax=3  → sys_close</text>
+        <text x="400" y="125" fill="#5c4a30">rax=9  → sys_mmap</text>
+        <text x="400" y="142" fill="#5c4a30">rax=11 → sys_munmap</text>
+        <text x="400" y="159" fill="#5c4a30">rax=12 → sys_brk</text>
+        <text x="400" y="176" fill="#5c4a30">rax=39 → sys_getpid</text>
+        <text x="400" y="193" fill="#5c4a30">rax=57 → sys_fork</text>
+        <text x="400" y="210" fill="#5c4a30">rax=59 → sys_execve</text>
+        <text x="400" y="227" fill="#5c4a30">rax=60 → sys_exit</text>
+        <text x="400" y="244" fill="#5c4a30">rax=62 → sys_kill</text>
+        <text x="400" y="261" fill="#64748b">...  (400+ syscalls)</text>
+      </g>
+      <!-- arrow connecting -->
+      <line x1="310" y1="170" x2="390" y2="140" stroke="rgb(128,0,0)" stroke-width="1.5" stroke-dasharray="4 2"/>
+    </svg>
+  </div>
+
+  <h3>Ejemplo de syscall directa en ensamblador</h3>
+  <div class="code-block reveal">
+    <div class="code-hdr"><span>sys_write desde Assembly x86-64</span><span>NASM / Linux</span></div>
+    <pre><span class="cm">; Escribe "Hola SO\n" en stdout usando syscall directa</span>
+section .data
+    msg  db  <span class="str">"Hola SO"</span>, <span class="num">10</span>   <span class="cm">; 10 = '\n'</span>
+    mlen equ $ - msg
+
+section .text
+    global _start
+
+_start:
+    <span class="cm">; syscall write(fd=1, buf=msg, count=mlen)</span>
+    mov rax, <span class="num">1</span>          <span class="cm">; número syscall: write</span>
+    mov rdi, <span class="num">1</span>          <span class="cm">; fd: stdout</span>
+    mov rsi, msg        <span class="cm">; dirección del mensaje</span>
+    mov rdx, mlen       <span class="cm">; longitud</span>
+    syscall             <span class="cm">; ← TRAP → kernel</span>
+    <span class="cm">; al retornar, rax = bytes escritos (o -errno)</span>
+
+    <span class="cm">; syscall exit(0)</span>
+    mov rax, <span class="num">60</span>         <span class="cm">; número syscall: exit</span>
+    xor rdi, rdi        <span class="cm">; código de salida = 0</span>
+    syscall             <span class="cm">; proceso termina</span></pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- 5. PERIFÉRICOS -->
+<!-- ══════════════════════════════════════════════ -->
+<section id="perifericos">
+  <div class="sec-label">05 · Periféricos</div>
+  <h2>Estructura de <span>Periféricos</span> y Drivers</h2>
+
+  <div class="def">
+    Un <strong>periférico</strong> es cualquier dispositivo de E/S conectado a la CPU: disco, teclado, NIC, pantalla, USB. El SO se comunica con ellos a través de <strong>drivers</strong> que hablan con los <strong>controladores hardware</strong> mediante registros mapeados en memoria o puertos de E/S.
+  </div>
+
+  <h3>Anatomía de un controlador de dispositivo</h3>
+  <div class="dw reveal">
+    <div class="dw-title">Registros de control de un controlador de disco (simplificado)</div>
+    <svg viewBox="0 0 680 260" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:680px;display:block;margin:auto">
+      <!-- CPU -->
+      <rect x="10" y="80" width="120" height="100" fill="#fff9f0" stroke="rgb(128,0,0)" stroke-width="2" rx="5"/>
+      <text x="70" y="105" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="16" fill="rgb(128,0,0)">CPU</text>
+      <text x="70" y="125" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#5c4a30">lee/escribe</text>
+      <text x="70" y="140" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#5c4a30">registros del</text>
+      <text x="70" y="155" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#5c4a30">controlador</text>
+      <!-- Bus -->
+      <rect x="130" y="110" width="160" height="40" fill="rgba(201,162,39,.15)" stroke="#c9a227" stroke-width="2" rx="3"/>
+      <text x="210" y="135" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="#7a5c00">BUS PCI-e / USB</text>
+      <!-- Controller -->
+      <rect x="300" y="40" width="200" height="200" fill="#fff9f0" stroke="#2563eb" stroke-width="2" rx="5"/>
+      <rect x="300" y="40" width="200" height="30" fill="#2563eb" rx="5"/>
+      <rect x="300" y="66" width="200" height="4" fill="#2563eb"/>
+      <text x="400" y="61" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="14" fill="white">CONTROLADOR HW</text>
+      <g font-family="JetBrains Mono,monospace" font-size="10" fill="#1e3a8a">
+        <rect x="308" y="74" width="184" height="22" fill="rgba(30,80,180,.1)" rx="2"/>
+        <text x="315" y="89">STATUS  [busy|ready|error]</text>
+        <rect x="308" y="100" width="184" height="22" fill="rgba(30,80,180,.1)" rx="2"/>
+        <text x="315" y="115">COMMAND [read|write|seek]</text>
+        <rect x="308" y="126" width="184" height="22" fill="rgba(30,80,180,.1)" rx="2"/>
+        <text x="315" y="141">DATA    [buffer 512 bytes]</text>
+        <rect x="308" y="152" width="184" height="22" fill="rgba(30,80,180,.1)" rx="2"/>
+        <text x="315" y="167">LBA     [dirección sector]</text>
+        <rect x="308" y="178" width="184" height="22" fill="rgba(128,0,0,.12)" rx="2"/>
+        <text x="315" y="193" fill="rgb(128,0,0)">ERROR   [código de error]</text>
+        <rect x="308" y="204" width="184" height="28" fill="rgba(52,211,153,.1)" rx="2"/>
+        <text x="315" y="216" fill="#16a34a">IRQ → levanta cuando listo</text>
+        <text x="315" y="228" fill="#16a34a">DMA → burst al completar</text>
+      </g>
+      <!-- Disk -->
+      <rect x="530" y="100" width="130" height="60" fill="rgba(30,80,180,.06)" stroke="#2563eb" stroke-width="2" rx="5"/>
+      <text x="595" y="127" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="14" fill="#2563eb">DISCO / SSD</text>
+      <text x="595" y="148" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#5c4a30">sectores físicos</text>
+      <!-- Arrows -->
+      <line x1="130" y1="130" x2="300" y2="130" stroke="rgb(128,0,0)" stroke-width="2" marker-end="url(#aw)"/>
+      <defs><marker id="aw" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="rgb(128,0,0)"/></marker></defs>
+      <line x1="500" y1="130" x2="530" y2="130" stroke="#2563eb" stroke-width="2"/>
+      <!-- DMA arrow to RAM -->
+      <rect x="300" y="250" width="160" height="30" fill="rgba(124,58,237,.1)" stroke="#7c3aed" stroke-width="1.5" rx="3"/>
+      <text x="380" y="270" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#7c3aed">RAM (DMA directo)</text>
+      <line x1="400" y1="240" x2="400" y2="250" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="3 2"/>
+    </svg>
+  </div>
+
+  <h3>Tipos de dispositivos en UNIX/Linux</h3>
+  <div class="tw reveal">
+    <table>
+      <thead><tr><th>Tipo</th><th>Acceso</th><th>Ejemplo</th><th>Representación en /dev</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bloque (block)</strong></td><td>Por bloques de tamaño fijo (512B–4KB). Soporta seek.</td><td>Disco duro, SSD, USB flash</td><td class="mono">/dev/sda, /dev/nvme0n1</td></tr>
+        <tr><td><strong>Carácter (char)</strong></td><td>Flujo de bytes secuencial. No soporta seek.</td><td>Teclado, puerto serial, ratón</td><td class="mono">/dev/tty, /dev/input/event0</td></tr>
+        <tr><td><strong>Red (network)</strong></td><td>Paquetes. Sin archivo en /dev. Interfaz propia (socket).</td><td>Tarjeta de red (NIC), WiFi</td><td class="mono">eth0, wlan0 (en /sys/class/net)</td></tr>
+        <tr><td><strong>Pseudodispositivos</strong></td><td>Virtuales — sin hardware real.</td><td>/dev/null, /dev/zero, /dev/random</td><td class="mono">/dev/null, /dev/urandom</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- 6. MODELOS E/S -->
+<!-- ══════════════════════════════════════════════ -->
+<section id="io">
+  <div class="sec-label">06 · Comunicación CPU–Periférico</div>
+  <h2>Modelos de <span>Entrada/Salida</span></h2>
+  <p>La forma en que la CPU coordina las transferencias con los periféricos es crítica para el rendimiento del sistema. Existen cuatro modelos fundamentales.</p>
+
+  <div class="cc-grid">
+    <div class="cc reveal">
+      <div class="cc-icon">🔄</div>
+      <h4>1 · E/S programada (Polling / Busy-wait)</h4>
+      <p>La CPU verifica activamente el bit STATUS del controlador en un bucle. Simple pero ineficiente: la CPU desperdicia 100% de ciclos esperando. Solo útil en sistemas embebidos con periférico único.</p>
+      <div style="margin-top:.5rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:rgb(128,0,0);background:rgba(128,0,0,.05);padding:.5rem;border-radius:3px">
+        while(STATUS != READY);<br>
+        leer/escribir DATA;<br>
+        <span style="color:#9b8060">// CPU bloqueada todo el tiempo</span>
+      </div>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">⚡</div>
+      <h4>2 · E/S por interrupciones</h4>
+      <p>La CPU inicia la operación y regresa a otro proceso. Cuando el periférico termina, levanta una IRQ. La CPU maneja la interrupción, transfiere datos y continúa. El bus sólo se usa cuando hay datos reales.</p>
+      <div style="margin-top:.5rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:rgb(128,0,0);background:rgba(128,0,0,.05);padding:.5rem;border-radius:3px">
+        escribir_comando();<br>
+        dormir_proceso();<br>
+        <span style="color:#9b8060">// IRQ → despertar → leer DATA</span>
+      </div>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">🚀</div>
+      <h4>3 · DMA — Acceso Directo a Memoria</h4>
+      <p>El controlador DMA transfiere bloques entre dispositivo y RAM <em>sin involucrar a la CPU byte a byte</em>. La CPU sólo configura origen, destino y tamaño. Al terminar el bloque, el DMA genera una sola IRQ. Ideal para discos y redes.</p>
+      <div style="margin-top:.5rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:rgb(128,0,0);background:rgba(128,0,0,.05);padding:.5rem;border-radius:3px">
+        configurar_DMA(src,dst,len);<br>
+        iniciar_DMA();<br>
+        <span style="color:#9b8060">// CPU libre → IRQ al final</span>
+      </div>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">🗺️</div>
+      <h4>4 · Memory-Mapped I/O (MMIO)</h4>
+      <p>Los registros del controlador se mapean en el espacio de direcciones de memoria. La CPU los lee/escribe con instrucciones normales (MOV, LOAD, STORE). Elimina puertos de E/S dedicados. Usado por GPU, PCI-e, controladores modernos.</p>
+      <div style="margin-top:.5rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:rgb(128,0,0);background:rgba(128,0,0,.05);padding:.5rem;border-radius:3px">
+        volatile uint32_t* reg<br>
+        = (uint32_t*)0xFEE00000;<br>
+        *reg = COMANDO; <span style="color:#9b8060">// ← escribe HW</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>Comparación de modelos de E/S</h3>
+  <div class="tw reveal">
+    <table>
+      <thead><tr><th>Modelo</th><th>CPU ocupada</th><th>Latencia</th><th>Overhead</th><th>Caso de uso</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Polling</strong></td><td>100% (busy-wait)</td><td>Mínima</td><td>Ninguno</td><td>Sistemas embebidos simple, latencia crítica</td></tr>
+        <tr><td><strong>Interrupciones</strong></td><td>Solo en ISR</td><td>Latencia de IRQ (~1–5 μs)</td><td>Context switch</td><td>Teclado, ratón, puerto serial</td></tr>
+        <tr><td><strong>DMA</strong></td><td>Solo configuración + ISR final</td><td>Igual que interrupción</td><td>Setup DMA</td><td>Disco, red, audio, GPU transfer</td></tr>
+        <tr><td><strong>MMIO</strong></td><td>Sólo en accesos explícitos</td><td>Muy baja (bus directo)</td><td>Minimal</td><td>Controladores PCI-e, GPU, framebuffer</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Diagrama: flujo DMA en transferencia de disco</h3>
+  <div class="dw reveal">
+    <div class="dw-title">Escritura con DMA: CPU libre mientras el disco trabaja</div>
+    <svg viewBox="0 0 660 200" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:660px;display:block;margin:auto">
+      <defs>
+        <marker id="bw" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#1e50b4"/></marker>
+        <marker id="gw" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#16a34a"/></marker>
+        <marker id="rw2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="rgb(128,0,0)"/></marker>
+      </defs>
+      <!-- Entities -->
+      <rect x="10"  y="30" width="90" height="40" fill="#fff9f0" stroke="rgb(128,0,0)" stroke-width="2" rx="4"/>
+      <text x="55" y="55" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="14" fill="rgb(128,0,0)">CPU</text>
+      <rect x="220" y="30" width="90" height="40" fill="#fff9f0" stroke="#7c3aed" stroke-width="2" rx="4"/>
+      <text x="265" y="55" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="14" fill="#7c3aed">DMA</text>
+      <rect x="430" y="30" width="90" height="40" fill="#fff9f0" stroke="#1e50b4" stroke-width="2" rx="4"/>
+      <text x="475" y="55" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="14" fill="#1e50b4">DISCO</text>
+      <rect x="540" y="30" width="100" height="40" fill="#fff9f0" stroke="#16a34a" stroke-width="2" rx="4"/>
+      <text x="590" y="55" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="#16a34a">RAM</text>
+      <!-- Step 1 -->
+      <line x1="100" y1="50" x2="220" y2="50" stroke="rgb(128,0,0)" stroke-width="2" marker-end="url(#rw2)"/>
+      <text x="160" y="44" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="rgb(128,0,0)">①configurar DMA</text>
+      <!-- Step 2 -->
+      <line x1="310" y1="55" x2="430" y2="55" stroke="#7c3aed" stroke-width="2" marker-end="url(#bw)"/>
+      <text x="370" y="49" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#7c3aed">②iniciar disco</text>
+      <!-- CPU libre -->
+      <rect x="10" y="95" width="90" height="30" fill="rgba(52,211,153,.15)" stroke="#16a34a" stroke-width="1.5" rx="3" stroke-dasharray="4 2"/>
+      <text x="55" y="115" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#16a34a">③ CPU libre!</text>
+      <!-- Step 3: DMA reads disk → RAM -->
+      <line x1="430" y1="62" x2="540" y2="62" stroke="#1e50b4" stroke-width="2" marker-end="url(#bw)"/>
+      <text x="485" y="78" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#1e50b4">④ datos → RAM</text>
+      <!-- Step 4: IRQ -->
+      <line x1="265" y1="70" x2="55" y2="95" stroke="#16a34a" stroke-width="2" marker-end="url(#gw)" stroke-dasharray="4 2"/>
+      <text x="150" y="92" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#16a34a">⑤ IRQ: "completado"</text>
+      <!-- Note -->
+      <text x="330" y="175" text-anchor="middle" font-family="Crimson Pro,serif" font-size="12" fill="#5c4a30" font-style="italic">El DMA controla el bus de memoria durante la transferencia; la CPU puede ejecutar otro proceso.</text>
+      <text x="330" y="193" text-anchor="middle" font-family="Crimson Pro,serif" font-size="12" fill="#5c4a30" font-style="italic">Una sola IRQ al final en lugar de una por cada byte (como polling o E/S por interrupción byte a byte).</text>
+    </svg>
+  </div>
+
+  <h3>Resumen integrador: camino completo de una lectura de disco</h3>
+  <div class="def" style="margin-top:1.5rem">
+    <strong>Proceso:</strong> read(fd, buf, 4096) →
+    <strong>glibc:</strong> empaqueta args → <strong>syscall</strong> (trap al kernel) →
+    <strong>VFS:</strong> lookup inodo, revisa page cache → <em>cache miss</em> →
+    <strong>Driver ext4:</strong> calcula LBA → envía comando al controlador →
+    <strong>DMA</strong> configurado (destino = page cache en RAM) →
+    <strong>CPU:</strong> continúa scheduler → <strong>IRQ:</strong> "DMA completo" →
+    <strong>Kernel:</strong> copia page cache → buffer del proceso →
+    <strong>sysret</strong> → proceso recibe bytes leídos.
+  </div>
+</section>
+
+<footer>
+  <div class="fl">
+    <div class="logo-placeholder">TU<br>LOGO</div>
+    <span style="font-size:.9rem;color:rgba(255,255,255,.8);letter-spacing:.1em;font-family:'Bebas Neue',sans-serif">Sistemas Operativos — Ingeniería de Sistemas</span>
+  </div>
+  <p>Archivos · Interrupciones · Traps · Periféricos · DMA</p>
+  <p style="margin-top:.3rem;color:rgba(255,255,255,.4)">Material de referencia para curso de SO</p>
+</footer>
+
+<script>
+const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);} }), {threshold:.07});
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+const secs = document.querySelectorAll('section[id]');
+const links = document.querySelectorAll('nav a');
+const sObs = new IntersectionObserver(es => {
+  es.forEach(e => { if(e.isIntersecting){ links.forEach(a=>a.style.color=''); const l=document.querySelector(`nav a[href="#${e.target.id}"]`); if(l)l.style.color='#fff'; }});
+},{rootMargin:'-40% 0px -50% 0px'});
+secs.forEach(s=>sObs.observe(s));
+</script>
+</body>
+</html>
