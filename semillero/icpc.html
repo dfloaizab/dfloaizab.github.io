@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan ICPC — Preparación desde Cero</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --crimson:   rgb(128,0,0);
+  --crimson2:  rgb(160,20,20);
+  --crimson3:  rgb(200,40,40);
+  --gold:      #d4a843;
+  --gold2:     #f0c060;
+  --cream:     #f5f0e8;
+  --parchment: #ede6d6;
+  --ink:       #1a1208;
+  --ink2:      #2d2010;
+  --muted:     #6b5a3e;
+  --border:    rgba(128,0,0,0.18);
+  --surface:   #faf7f2;
+  --card:      #fff9f0;
+}
+
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+
+body {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-size: 1.1rem;
+  background: var(--surface);
+  color: var(--ink);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ── TEXTURE OVERLAY ── */
+body::before {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:1;
+}
+
+/* ── NAV ── */
+nav {
+  position:sticky; top:0; z-index:100;
+  background: var(--crimson);
+  display:flex; align-items:center; gap:0;
+  padding:0 2rem;
+  box-shadow: 0 3px 20px rgba(128,0,0,0.4);
+  overflow-x:auto; white-space:nowrap;
+}
+.nav-logo {
+  display:flex; align-items:center; gap:.7rem;
+  padding:0.65rem 1.2rem 0.65rem 0;
+  border-right: 1px solid rgba(255,255,255,.2);
+  margin-right:.8rem; flex-shrink:0;
+}
+.logo-placeholder {
+  width:34px; height:34px;
+  border: 2px dashed rgba(255,255,255,.5);
+  border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.55rem; color:rgba(255,255,255,.5);
+  text-align:center; line-height:1.2;
+  flex-shrink:0;
+}
+.nav-brand-text {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.3rem; letter-spacing:.08em;
+  color:#fff;
+}
+nav a {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.68rem; letter-spacing:.08em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.7);
+  text-decoration:none;
+  padding:.9rem .85rem;
+  transition:color .2s, background .2s;
+  flex-shrink:0;
+}
+nav a:hover { color:#fff; background:rgba(255,255,255,.1); }
+
+/* ── HERO ── */
+.hero {
+  position:relative; z-index:1;
+  background: linear-gradient(135deg, var(--crimson) 0%, #6b0000 40%, #1a0000 100%);
+  min-height:88vh;
+  display:grid; place-items:center;
+  text-align:center; padding:4rem 2rem;
+  overflow:hidden;
+}
+.hero-lines {
+  position:absolute; inset:0; z-index:0; overflow:hidden; opacity:.12;
+}
+.hero-lines svg { width:100%; height:100%; }
+.hero-content { position:relative; z-index:1; max-width:820px; }
+.hero-tag {
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.72rem; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--gold); border:1px solid rgba(212,168,67,.4);
+  padding:.3rem .9rem; border-radius:2px; margin-bottom:1.2rem;
+  animation:fadeUp .7s ease both;
+}
+.hero h1 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3.5rem,10vw,8rem);
+  line-height:.95; color:#fff;
+  letter-spacing:.04em;
+  animation:fadeUp .7s .12s ease both;
+  text-shadow: 0 4px 30px rgba(0,0,0,.5);
+}
+.hero h1 span { color:var(--gold); }
+.hero-sub {
+  font-size:1.25rem; color:rgba(255,255,255,.75);
+  font-style:italic; margin-top:.8rem; margin-bottom:2rem;
+  animation:fadeUp .7s .22s ease both;
+}
+.hero-stats {
+  display:flex; gap:2rem; justify-content:center; flex-wrap:wrap;
+  animation:fadeUp .7s .32s ease both;
+}
+.stat { text-align:center; }
+.stat-n {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:2.8rem; color:var(--gold); line-height:1;
+}
+.stat-l { font-family:'JetBrains Mono',monospace; font-size:.7rem; color:rgba(255,255,255,.5); text-transform:uppercase; letter-spacing:.1em; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── SECTIONS ── */
+section { position:relative; z-index:1; padding:4.5rem 2rem; max-width:1100px; margin:0 auto; }
+section + section { border-top: 1px solid var(--border); }
+
+.sec-label {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.68rem; letter-spacing:.2em; color:var(--crimson);
+  text-transform:uppercase; margin-bottom:.6rem;
+  display:flex; align-items:center; gap:.5rem;
+}
+.sec-label::after { content:''; height:1px; width:80px; background:var(--border); }
+
+h2 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(2rem,4vw,3.2rem);
+  letter-spacing:.05em; color:var(--ink);
+  margin-bottom:1.2rem; line-height:1.1;
+}
+h2 span { color:var(--crimson); }
+h3 {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:1.7rem; letter-spacing:.05em;
+  color:var(--crimson); margin:2.5rem 0 .7rem;
+}
+h4 {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.88rem; color:var(--ink2); margin:1.4rem 0 .4rem;
+  text-transform:uppercase; letter-spacing:.05em;
+}
+p { margin-bottom:.9rem; color:#3d2e1a; }
+strong { color:var(--crimson); }
+
+/* ── PROBLEM CARDS ── */
+.problems-grid { display:grid; gap:1.4rem; margin:2rem 0; }
+
+.problem-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-left:4px solid var(--crimson);
+  border-radius:6px;
+  padding:1.4rem 1.6rem;
+  display:grid;
+  grid-template-columns: auto 1fr auto;
+  gap:.8rem 1.2rem;
+  align-items:start;
+  transition:box-shadow .25s, transform .25s;
+  box-shadow:0 2px 8px rgba(128,0,0,.06);
+}
+.problem-card:hover { box-shadow:0 6px 24px rgba(128,0,0,.14); transform:translateY(-2px); }
+
+.problem-num {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:2.2rem; color:var(--crimson);
+  line-height:1; padding-top:.1rem;
+  opacity:.35;
+}
+.problem-body { grid-column:2; }
+.problem-title {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.95rem; font-weight:700;
+  color:var(--ink); margin-bottom:.3rem;
+}
+.problem-title a { color:var(--crimson); text-decoration:none; border-bottom:1px dashed rgba(128,0,0,.3); }
+.problem-title a:hover { border-bottom-style:solid; }
+.problem-desc { font-size:.97rem; color:var(--muted); margin:.3rem 0 .5rem; }
+.problem-tags { display:flex; gap:.4rem; flex-wrap:wrap; margin-top:.5rem; }
+.tag {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.68rem; padding:.18rem .55rem;
+  border-radius:3px; text-transform:uppercase; letter-spacing:.04em;
+}
+.tag-topic { background:rgba(128,0,0,.08); color:var(--crimson); border:1px solid rgba(128,0,0,.2); }
+.tag-algo  { background:rgba(212,168,67,.12); color:#8a6800; border:1px solid rgba(212,168,67,.3); }
+.tag-cs    { background:rgba(30,80,180,.08); color:#1e50b4; border:1px solid rgba(30,80,180,.2); }
+
+.difficulty-badge {
+  grid-column:3; grid-row:1;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.72rem; font-weight:700;
+  padding:.3rem .7rem; border-radius:4px;
+  text-align:center; white-space:nowrap;
+}
+.d800  { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+.d900  { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+.d1000 { background:#fff3e0; color:#e65100; border:1px solid #ffcc80; }
+.d1200 { background:#fff8e1; color:#f57f17; border:1px solid #ffe082; }
+.d1300 { background:#fce4ec; color:#880e4f; border:1px solid #f48fb1; }
+.d1500 { background:#fce4ec; color:#880e4f; border:1px solid #f48fb1; }
+.d1600 { background:#f3e5f5; color:#4a148c; border:1px solid #ce93d8; }
+.d1700 { background:#ede7f6; color:#311b92; border:1px solid #b39ddb; }
+
+/* ── STRATEGY CARDS ── */
+.strat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.2rem; margin:2rem 0; }
+.strat-card {
+  background:var(--card); border:1px solid var(--border); border-radius:8px;
+  padding:1.4rem; transition:border-color .25s, transform .25s;
+}
+.strat-card:hover { border-color:var(--crimson); transform:translateY(-3px); }
+.strat-icon { font-size:2rem; margin-bottom:.6rem; }
+.strat-card h4 { margin:0 0 .5rem; color:var(--crimson); font-size:.82rem; }
+.strat-card p { font-size:.95rem; margin:0; color:var(--muted); }
+
+/* ── CS TOPICS ── */
+.topic-row {
+  display:grid; grid-template-columns:180px 1fr 1fr;
+  gap:0; border-bottom:1px solid var(--border);
+  padding:.9rem 0;
+  align-items:start;
+}
+.topic-row:first-child { border-top:1px solid var(--border); }
+.topic-name {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.82rem; font-weight:700;
+  color:var(--crimson); padding-right:1rem;
+}
+.topic-what { font-size:.95rem; color:var(--ink2); padding-right:1rem; }
+.topic-where { font-size:.9rem; color:var(--muted); font-style:italic; }
+
+/* ── RESOURCES ── */
+.res-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.2rem; margin:2rem 0; }
+.res-card {
+  background:var(--card); border:1px solid var(--border); border-radius:8px;
+  overflow:hidden; transition:box-shadow .25s;
+}
+.res-card:hover { box-shadow:0 4px 20px rgba(128,0,0,.12); }
+.res-header {
+  background:linear-gradient(90deg,var(--crimson),var(--crimson2));
+  padding:.7rem 1.1rem;
+  display:flex; align-items:center; gap:.6rem;
+}
+.res-icon { font-size:1.2rem; }
+.res-type {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem; color:rgba(255,255,255,.8);
+  text-transform:uppercase; letter-spacing:.1em;
+}
+.res-body { padding:1rem 1.1rem; }
+.res-title { font-weight:700; color:var(--ink); font-size:1rem; margin-bottom:.3rem; }
+.res-desc { font-size:.9rem; color:var(--muted); margin:0; }
+.res-link {
+  display:inline-block; margin-top:.5rem;
+  font-family:'JetBrains Mono',monospace; font-size:.72rem;
+  color:var(--crimson); text-decoration:none;
+  border-bottom:1px dashed rgba(128,0,0,.3);
+}
+.res-link:hover { border-bottom-style:solid; }
+
+/* ── ROADMAP ── */
+.roadmap { position:relative; padding-left:2.5rem; margin:2rem 0; }
+.roadmap::before { content:''; position:absolute; left:.6rem; top:0; bottom:0; width:3px; background:linear-gradient(to bottom,var(--crimson),var(--gold)); border-radius:3px; }
+.rm-item { position:relative; margin-bottom:2.2rem; }
+.rm-dot {
+  position:absolute; left:-2.5rem; top:.4rem;
+  width:16px; height:16px; border-radius:50%;
+  background:var(--crimson); border:3px solid var(--surface);
+  box-shadow:0 0 0 2px var(--crimson);
+}
+.rm-phase {
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem; color:var(--gold); text-transform:uppercase; letter-spacing:.12em;
+  margin-bottom:.2rem;
+}
+.rm-item h4 { margin:0 0 .3rem; color:var(--ink); font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:.04em; }
+.rm-item p { font-size:.97rem; color:var(--muted); margin:0; }
+
+/* ── CODE BLOCK ── */
+.code-block {
+  background:#1a0000; border:1px solid rgba(128,0,0,.35);
+  border-radius:6px; overflow:hidden; margin:1.2rem 0;
+}
+.code-hdr {
+  background:rgba(128,0,0,.3); padding:.45rem 1rem;
+  display:flex; justify-content:space-between;
+  font-family:'JetBrains Mono',monospace; font-size:.7rem;
+  color:rgba(255,200,200,.7);
+}
+pre {
+  font-family:'JetBrains Mono',monospace; font-size:.82rem;
+  line-height:1.6; padding:1.1rem 1.4rem; overflow-x:auto;
+  color:#ffb3b3;
+}
+.kw{color:#ff6b6b} .fn{color:#ffd93d} .cm{color:#5a3535;font-style:italic}
+.str{color:#a8ff78} .num{color:#ff9f43} .tp{color:#48dbfb}
+
+/* ── TABLE ── */
+.tw { overflow-x:auto; margin:1.5rem 0; }
+table { width:100%; border-collapse:collapse; font-size:.95rem; }
+th {
+  background:var(--crimson); color:#fff;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.7rem; letter-spacing:.08em; text-transform:uppercase;
+  padding:.75rem 1rem; text-align:left;
+}
+td { padding:.65rem 1rem; border-bottom:1px solid var(--border); color:var(--ink2); }
+tr:hover td { background:rgba(128,0,0,.04); }
+
+/* ── REVEAL ── */
+.reveal { opacity:0; transform:translateY(18px); transition:opacity .55s,transform .55s; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* ── FOOTER ── */
+footer {
+  position:relative; z-index:1;
+  background:var(--crimson);
+  text-align:center; padding:2.5rem 2rem;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.75rem; color:rgba(255,255,255,.6);
+}
+footer .footer-logo {
+  display:inline-flex; align-items:center; gap:.8rem;
+  margin-bottom:.8rem;
+}
+footer .logo-placeholder { border-color:rgba(255,255,255,.3); color:rgba(255,255,255,.4); }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-logo">
+    <div class="logo-placeholder">TU<br>LOGO</div>
+    <span class="nav-brand-text">ICPC Prep</span>
+  </div>
+  <a href="#problemas">Problemas</a>
+  <a href="#estrategias">Estrategias</a>
+  <a href="#temas">Temas CS</a>
+  <a href="#material">Material</a>
+  <a href="#roadmap">Hoja de Ruta</a>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-lines">
+    <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <line x1="0" y1="350" x2="1200" y2="350" stroke="white" stroke-width="1"/>
+      <line x1="600" y1="0" x2="600" y2="700" stroke="white" stroke-width="1"/>
+      <circle cx="600" cy="350" r="200" fill="none" stroke="white" stroke-width="1"/>
+      <circle cx="600" cy="350" r="350" fill="none" stroke="white" stroke-width="1"/>
+      <polygon points="600,50 1100,650 100,650" fill="none" stroke="white" stroke-width="1"/>
+    </svg>
+  </div>
+  <div class="hero-content">
+    <div class="hero-tag">Ingeniería de Sistemas · Programación Competitiva</div>
+    <h1>Plan<br><span>ICPC</span><br>desde Cero</h1>
+    <p class="hero-sub">De Codeforces 800 a la maratón — guía estructurada para el equipo</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-n">11</div><div class="stat-l">Problemas</div></div>
+      <div class="stat"><div class="stat-n">8</div><div class="stat-l">Estrategias</div></div>
+      <div class="stat"><div class="stat-n">12</div><div class="stat-l">Temas CS</div></div>
+      <div class="stat"><div class="stat-n">20+</div><div class="stat-l">Recursos</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PROBLEMAS -->
+<!-- ════════════════════════════════════════════ -->
+<section id="problemas">
+  <div class="sec-label">01 · Ejercicios Iniciales</div>
+  <h2>Problemas de <span>Codeforces</span> — Nivel Gradual</h2>
+  <p>Los siguientes problemas están ordenados por dificultad creciente (rating CF). Cada uno introduce uno o más conceptos que reaparecerán en la maratón. Resuélvelos en orden y trata de entender el <em>por qué</em> de cada solución, no sólo el código.</p>
+
+  <div class="problems-grid">
+
+    <!-- 1 -->
+    <div class="problem-card reveal">
+      <div class="problem-num">01</div>
+      <div class="problem-body">
+        <div class="problem-title"><a href="https://codeforces.com/problemset/problem/4/A" target="_blank">4A — Watermelon</a></div>
+        <div class="problem-desc">Dado el peso W de una sandía, ¿puede repartirse en dos partes pares ambas mayores que 0?</div>
+        <div class="problem-tags">
+          <span class="tag tag-topic">Matemáticas básicas</span>
+          <span class="tag tag-algo">Paridad</span>
+          <span class="tag tag-cs">Aritmética entera</span>
+        </div>
+      </div>
+      <div class="difficulty-badge d800">800 ⭐</div>
+    </div>
+
+    <!-- 2 -->
+    <div class="problem-card reveal">
+      <div class="problem-num">02</div>
+      <div class="problem-body">
+        <div class="problem-title"><a href="https://codeforces.com/problemset/problem/71/A" target="_blank">71A — Way Too Long Words</a></div>
+        <div class="problem-desc">Si la palabra tiene más de 10 caracteres, abrevia como primera_letra + cantidad_media + última_letra.</div>
+        <div class="problem-tags">
+          <span class="tag tag-topic">Strings</span>
+          <span class="tag tag-algo">Manipulación de cadenas</span>
+          <span class="tag tag-cs">Arreglos de caracteres</span>
+        </div>
+      </div>
+      <div class="difficulty-badge d800">800 ⭐</div>
+    </div>
+
+    <!-- 3 -->
+    <div class="problem-card reveal">
+      <div class="problem-num">03</div>
+      <div class="problem-body">
+        <div class="problem-title"><a href="https://codeforces.com/problemset/problem/158/A" target="_blank">158A — Next Round</a></div>
+        <div class="problem-desc">Dado el puntaje mínimo de clasificación (el del k-ésimo), ¿cuántos participantes avanzan? (puntaje > 0).</div>
+        <div class="problem-tags">
+          <span class="tag tag-topic">Implementación</span>
+          <span class="tag tag-algo">Filtrado / conteo</span>
+          <span class="tag tag-cs">Arrays, condiciones</span>
+        </div>
+      </div>
+      <div class="difficulty-badge d800">800 ⭐</div>
+    </div>
+
+    <!-- 4 -->
+    <div class="problem-card reveal">
+      <div class="problem-num">04</div>
+      <div class="problem-body">
+        <div class="problem-title"><a href="https://codeforces.com/problemset/problem/1/A" target="_blank">1A — Theatre Square</a></div>
+        <div class="problem-desc">Cuántas baldosas de a×a se necesitan para cubrir un rectángulo n×m (las baldosas no se cortan).</div>
+        <div class="problem-tags">
+          <span class="tag tag-topic">Matemáticas</span>
+          <span class="tag tag-algo">División techo (ceiling)</span>
+          <span class="tag tag-cs">Aritmética de enteros</span>
+        </div>
+      </div>
+      <div class="difficulty-badge d1000">1000 ★</div>
+    </div>
+
+    <!-- 5 -->
+    <div class="problem-card reveal">
+      <div class="problem-num">05</div>
+      <div class="problem-body">
+        <div class="problem-title"><a href="https://codeforces.com/problemset/problem/231/A" target="_blank">231A — Team</a></div>
+        <div class="problem-desc">Tres amigos votan si resolver un problema. ¿En cuántos problemas al menos 2 de 3 están de acuerdo?</div>
+        <div class="problem-tags">
+          <span class="tag tag-topic">Implementación</span>
+          <span class="tag tag-algo">Conteo con condiciones</span>
+          <span class="tag tag-cs">Operadores lógicos</span>
+        </div>
+      </div>
+      <div class="difficulty-badge d1000">1000 ★</div>
+    </div>
+
+    <!-- 6 -->
+    <div class="problem-card reveal">
+      <div class="problem-num">06</div>
+      <div class="problem-body">
+        <div class="problem-title"><a href="https://codeforces.com/problemset/problem/59/A" target="_blank">59A — Word</a></div>
+        <div class="problem-desc">Dada una palabra, si tiene más mayúsculas que minúsculas → todo mayúsculas; si no → todo minúsculas.</div>
+        <div class="problem-tags">
+          <span class="tag tag-topic">Strings</span>
+          <span class="tag tag-algo">Conteo + transformación</span>
+          <span class="tag tag-cs">ASCII, tipos char</span>
+        </div>
+      </div>
+      <div class="difficulty-badge d1000">1000 ★</div>
+    </div>
+
+    <!-- 7 -->
+    <div class="problem-card reveal">
+      <div class="problem-num">07</div>
+      <div class="problem-body">
+        <div class="problem-title"><a href="https://codeforces.com/problemset/problem/339/A" target="_blank">339A — Helpful Maths</a></div>
+        <div class="problem-desc">Dada la expresión "a+b+c" con dígitos del 1 al 9, reordena los sumandos de menor a mayor.</div>
+        <div class="problem-tags">
+          <span class="tag tag-topic">Sorting + Strings</span>
+          <span class="tag tag-algo">Ordenación, parsing</span>
+          <span class="tag tag-cs">Arrays, comparadores</span>
+        </div>
+      </div>
+      <div class="difficulty-badge d1200">1200 ★★</div>
+    </div>
+
+    <!-- 8 -->
+    <div class="problem-card reveal">
+      <div class="problem-num">08</div>
+      <div class="problem-body">
+        <div class="problem-title"><a href="https://codeforces.com/problemset/problem/266/B" target="_blank">266B — Queue at the School</a></div>
+        <div class="problem-desc">Simula t segundos de una cola: chicos y chicas intercambian posiciones bajo ciertas reglas.</div>
+        <div class="problem-tags">
+          <span class="tag tag-topic">Simulación</span>
+          <span class="tag tag-algo">Modelado paso a paso</span>
+          <span class="tag tag-cs">Arrays, bucles, estado</span>
+        </div>
+      </div>
+      <div class="difficulty-badge d1200">1200 ★★</div>
+    </div>
+
+    <!-- 9 -->
+    <div class="problem-card reveal">
+      <div class="problem-num">09</div>
+      <div class="problem-body">
+        <div class="problem-title"><a href="https://codeforces.com/problemset/problem/263/B" target="_blank">263B — Appleman and Card Game</a></div>
+        <div class="problem-desc">Elige k cartas para maximizar puntos: cada letra vale su frecuencia si se toman todas las cartas con esa letra.</div>
+        <div class="problem-tags">
+          <span class="tag tag-topic">Greedy</span>
+          <span class="tag tag-algo">Ordenar por frecuencia</span>
+          <span class="tag tag-cs">HashMaps, sorting</span>
+        </div>
+      </div>
+      <div class="difficulty-badge d1300">1300 ★★</div>
+    </div>
+
+    <!-- 10 -->
+    <div class="problem-card reveal">
+      <div class="problem-num">10</div>
+      <div class="problem-body">
+        <div class="problem-title"><a href="https://codeforces.com/problemset/problem/616/C" target="_blank">616C — The Labyrinth</a></div>
+        <div class="problem-desc">Laberinto 2D: encuentra el máximo área obtenible al convertir un '*' en '.' y conectar componentes adyacentes.</div>
+        <div class="problem-tags">
+          <span class="tag tag-topic">BFS / DFS</span>
+          <span class="tag tag-algo">Flood fill, componentes</span>
+          <span class="tag tag-cs">Grafos implícitos, conjuntos</span>
+        </div>
+      </div>
+      <div class="difficulty-badge d1600">1600 ★★★</div>
+    </div>
+
+    <!-- 11 -->
+    <div class="problem-card reveal">
+      <div class="problem-num">11</div>
+      <div class="problem-body">
+        <div class="problem-title"><a href="https://codeforces.com/problemset/problem/580/C" target="_blank">580C — Kefa and Park</a></div>
+        <div class="problem-desc">Árbol enraizado. Cuenta hojas cuyo camino desde la raíz no tiene más de m gatos consecutivos.</div>
+        <div class="problem-tags">
+          <span class="tag tag-topic">Árboles + DFS</span>
+          <span class="tag tag-algo">DFS con estado, backtracking</span>
+          <span class="tag tag-cs">Grafos, recursión, árboles</span>
+        </div>
+      </div>
+      <div class="difficulty-badge d1700">1700 ★★★</div>
+    </div>
+
+  </div>
+
+  <h3>Patrones de solución por problema</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>#</th><th>Problema</th><th>Insight clave</th><th>Complejidad</th></tr></thead>
+      <tbody>
+        <tr><td>01</td><td>Watermelon</td><td>W par AND W &gt; 2 → siempre posible</td><td>O(1)</td></tr>
+        <tr><td>02</td><td>Too Long Words</td><td>len &gt; 10 ? s[0]+(len-2)+s[n-1] : s</td><td>O(n·L)</td></tr>
+        <tr><td>03</td><td>Next Round</td><td>contar scores[i] >= scores[k-1] AND > 0</td><td>O(n)</td></tr>
+        <tr><td>04</td><td>Theatre Square</td><td>⌈n/a⌉·⌈m/a⌉ = (n+a-1)/a · (m+a-1)/a</td><td>O(1)</td></tr>
+        <tr><td>05</td><td>Team</td><td>sumar votos; contar donde suma ≥ 2</td><td>O(n)</td></tr>
+        <tr><td>06</td><td>Word</td><td>count_upper > count_lower → toupper, si no tolower</td><td>O(L)</td></tr>
+        <tr><td>07</td><td>Helpful Maths</td><td>extraer dígitos, sort(), unir con '+'</td><td>O(n log n)</td></tr>
+        <tr><td>08</td><td>Queue</td><td>simular t rondas; marcar intercambios simultáneos</td><td>O(t·n)</td></tr>
+        <tr><td>09</td><td>Card Game</td><td>ordenar por freq desc, tomar vorazmente hasta k</td><td>O(26 log 26)</td></tr>
+        <tr><td>10</td><td>The Labyrinth</td><td>BFS para etiquetar componentes + set de vecinos</td><td>O(n·m)</td></tr>
+        <tr><td>11</td><td>Kefa and Park</td><td>DFS; cortar si gatos_consecutivos > m</td><td>O(n)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- ESTRATEGIAS -->
+<!-- ════════════════════════════════════════════ -->
+<section id="estrategias">
+  <div class="sec-label">02 · Estrategias de Resolución</div>
+  <h2>Cómo <span>Atacar</span> un Problema</h2>
+  <p>La diferencia entre un principiante y un competidor experimentado no es sólo el conocimiento de algoritmos: es el <em>proceso mental</em> para abordar problemas desconocidos en tiempo limitado.</p>
+
+  <div class="strat-grid">
+    <div class="strat-card reveal">
+      <div class="strat-icon">📖</div>
+      <h4>1 · Leer con precisión quirúrgica</h4>
+      <p>Subraya restricciones: n, tiempos, tipos de entrada. Los límites dictan la complejidad permitida. Un n ≤ 10⁶ exige O(n log n) o mejor; n ≤ 500 puede admitir O(n³).</p>
+    </div>
+    <div class="strat-card reveal">
+      <div class="strat-icon">🧪</div>
+      <h4>2 · Construir ejemplos propios</h4>
+      <p>No dependas solo de los ejemplos del enunciado. Crea casos extremos: n=0, n=1, todos iguales, orden inverso, valores máximos. El 80% de los bugs se revelan aquí.</p>
+    </div>
+    <div class="strat-card reveal">
+      <div class="strat-icon">🔍</div>
+      <h4>3 · Identificar el patrón</h4>
+      <p>¿Es búsqueda? ¿Optimización? ¿Conteo? Categoriza antes de codificar. Los problemas ICPC rara vez son novedosos en estructura; reconoces el molde con práctica.</p>
+    </div>
+    <div class="strat-card reveal">
+      <div class="strat-icon">✏️</div>
+      <h4>4 · Pseudocódigo primero</h4>
+      <p>Escribe la solución en papel antes de abrir el editor. Verifica la lógica manualmente con un ejemplo. Esto ahorra tiempo en depuración y penalizaciones por Wrong Answer.</p>
+    </div>
+    <div class="strat-card reveal">
+      <div class="strat-icon">⚡</div>
+      <h4>5 · Velocidad de implementación</h4>
+      <p>Entrena plantillas: I/O rápido, templates de grafos, DSU, segment tree. En ICPC el tiempo de tipeo importa. Un equipo con plantillas ahorra 10–20 min por problema.</p>
+    </div>
+    <div class="strat-card reveal">
+      <div class="strat-icon">🐛</div>
+      <h4>6 · Depuración sistemática</h4>
+      <p>Ante un WA: imprime el estado en cada paso, compara con el ejemplo, reduce el input al mínimo que falla. Nunca cambies código al azar; cada cambio debe tener hipótesis.</p>
+    </div>
+    <div class="strat-card reveal">
+      <div class="strat-icon">🤝</div>
+      <h4>7 · Trabajo en equipo ICPC</h4>
+      <p>Una sola computadora. Estrategia: el más rápido resuelve los fáciles mientras los otros piensan los difíciles en papel. Rotación disciplinada, nunca dos personas tecleando ideas.</p>
+    </div>
+    <div class="strat-card reveal">
+      <div class="strat-icon">🎯</div>
+      <h4>8 · Greedy vs DP — la pregunta clave</h4>
+      <p>¿La decisión local óptima siempre lleva al global óptimo? Si sí → Greedy. Si necesitas recordar decisiones pasadas → DP. Prueba con un contraejemplo antes de decidir.</p>
+    </div>
+  </div>
+
+  <h3>Plantilla base en C++ para ICPC</h3>
+  <div class="code-block">
+    <div class="code-hdr"><span>Plantilla competitiva</span><span>C++17</span></div>
+    <pre><span class="cm">// ── Plantilla ICPC ──────────────────────────────</span>
+<span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="cm">// Alias de tipos</span>
+<span class="kw">using</span> ll  = <span class="tp">long long</span>;
+<span class="kw">using</span> vi  = vector&lt;<span class="tp">int</span>&gt;;
+<span class="kw">using</span> vll = vector&lt;ll&gt;;
+<span class="kw">using</span> pii = pair&lt;<span class="tp">int</span>,<span class="tp">int</span>&gt;;
+
+<span class="cm">// Constantes útiles</span>
+<span class="kw">const</span> ll INF = <span class="num">1e18</span>;
+<span class="kw">const</span> <span class="tp">int</span> MOD = <span class="num">1e9</span>+<span class="num">7</span>;
+
+<span class="cm">// Macros de conveniencia</span>
+<span class="kw">#define</span> <span class="fn">all</span>(x)   (x).begin(),(x).end()
+<span class="kw">#define</span> <span class="fn">pb</span>       push_back
+<span class="kw">#define</span> <span class="fn">fi</span>       first
+<span class="kw">#define</span> <span class="fn">se</span>       second
+
+<span class="cm">// I/O ultrarrápido</span>
+<span class="kw">void</span> <span class="fn">fast_io</span>() {
+    ios::sync_with_stdio(<span class="kw">false</span>);
+    cin.tie(<span class="kw">nullptr</span>);
+}
+
+<span class="kw">void</span> <span class="fn">solve</span>() {
+    <span class="cm">// Tu solución aquí</span>
+}
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+    <span class="fn">fast_io</span>();
+    <span class="tp">int</span> t = <span class="num">1</span>;
+    <span class="cm">// cin >> t;  // des-comentar si hay múltiples casos</span>
+    <span class="kw">while</span> (t--) <span class="fn">solve</span>();
+    <span class="kw">return</span> <span class="num">0</span>;
+}</pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- TEMAS CS -->
+<!-- ════════════════════════════════════════════ -->
+<section id="temas">
+  <div class="sec-label">03 · Temas de Ciencias de la Computación</div>
+  <h2>Fundamentos <span>Teóricos</span> Involucrados</h2>
+  <p>Cada categoría de problemas ICPC tiene raíces en uno o más temas de CS. Conocer la teoría te permite generalizar soluciones y reconocer variantes.</p>
+
+  <div class="topic-row reveal">
+    <div class="topic-name">Aritmética entera</div>
+    <div class="topic-what">División, módulo, paridad, divisibilidad. Representación binaria y bit manipulation. Aritmética modular para evitar overflow.</div>
+    <div class="topic-where">Watermelon, Theatre Square, mayoría de problemas matemáticos.</div>
+  </div>
+  <div class="topic-row reveal">
+    <div class="topic-name">Strings & ASCII</div>
+    <div class="topic-what">Representación de caracteres (ASCII/Unicode), operaciones sobre cadenas: búsqueda, reemplazo, subcadenas. Codificación y comparación lexicográfica.</div>
+    <div class="topic-where">Too Long Words, Word, Helpful Maths. Trie, KMP en nivel avanzado.</div>
+  </div>
+  <div class="topic-row reveal">
+    <div class="topic-name">Arrays & Sorting</div>
+    <div class="topic-what">Estructuras de datos lineales. Algoritmos de ordenación (mergesort O(n log n)). Búsqueda binaria como herramienta de reducción de complejidad.</div>
+    <div class="topic-where">Next Round, Helpful Maths, Card Game.</div>
+  </div>
+  <div class="topic-row reveal">
+    <div class="topic-name">Simulación</div>
+    <div class="topic-what">Modelar el sistema exactamente según el enunciado. Requiere buen manejo de estado y estructuras mutables. El riesgo es la complejidad accidental.</div>
+    <div class="topic-where">Queue at the School, problemas de juegos por turnos.</div>
+  </div>
+  <div class="topic-row reveal">
+    <div class="topic-name">Greedy Algorithms</div>
+    <div class="topic-what">Elegir en cada paso la opción localmente óptima. Se prueba por exchange argument o por inducción. Fundamental en scheduling, selección de intervalos, MST.</div>
+    <div class="topic-where">Card Game, selección de intervalos, Huffman.</div>
+  </div>
+  <div class="topic-row reveal">
+    <div class="topic-name">Teoría de Grafos</div>
+    <div class="topic-what">Representación (adyacencia), BFS (distancias no ponderadas), DFS (componentes, ciclos, topológico), Dijkstra, Union-Find.</div>
+    <div class="topic-where">The Labyrinth, Kefa and Park. Base de ~30% de los problemas ICPC.</div>
+  </div>
+  <div class="topic-row reveal">
+    <div class="topic-name">Recursión y Backtracking</div>
+    <div class="topic-what">Dividir el problema en subproblemas. DFS sobre árboles de decisión. Poda de ramas no prometedoras. Base de la Programación Dinámica.</div>
+    <div class="topic-where">Kefa and Park (DFS), problemas de permutaciones.</div>
+  </div>
+  <div class="topic-row reveal">
+    <div class="topic-name">Complejidad Algorítmica</div>
+    <div class="topic-what">Notación Big-O. Análisis de peor caso. Límites típicos: n=10⁶ → O(n log n); n=10⁵ → O(n log² n); n=5000 → O(n²). Decisiones de diseño basadas en constraints.</div>
+    <div class="topic-where">Todos los problemas — es el primer filtro de viabilidad.</div>
+  </div>
+  <div class="topic-row reveal">
+    <div class="topic-name">Hash Maps / Sets</div>
+    <div class="topic-what">Tablas de dispersión para búsqueda O(1) amortizado. unordered_map en C++, HashMap en Java. Colisiones y casos patológicos.</div>
+    <div class="topic-where">Card Game (frecuencias), problemas de conteo de apariciones.</div>
+  </div>
+  <div class="topic-row reveal">
+    <div class="topic-name">Programación Dinámica</div>
+    <div class="topic-what">Memoización de subproblemas solapados. Bottom-up vs top-down. Problemas clásicos: mochila (0/1 y fraccionaria), LCS, LIS, caminos en grillas.</div>
+    <div class="topic-where">Nivel 1500+. Fundamento de ~40% de los problemas difíciles ICPC.</div>
+  </div>
+  <div class="topic-row reveal">
+    <div class="topic-name">Matemática Combinatoria</div>
+    <div class="topic-what">Principio de multiplicación, combinaciones C(n,k), permutaciones, principio de inclusión-exclusión, números de Catalan, coeficientes binomiales módulo p.</div>
+    <div class="topic-where">Problemas de conteo, probabilidad discreta, combinatoria.</div>
+  </div>
+  <div class="topic-row reveal">
+    <div class="topic-name">Estructuras de datos avanzadas</div>
+    <div class="topic-what">Segment Tree, Fenwick Tree (BIT), Union-Find (DSU), Sparse Table. Permiten responder queries de rango en O(log n) o O(1).</div>
+    <div class="topic-where">Nivel 1800+. Presentes en finales regionales ICPC.</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- MATERIAL -->
+<!-- ════════════════════════════════════════════ -->
+<section id="material">
+  <div class="sec-label">04 · Material de Estudio</div>
+  <h2>Recursos para <span>Cada Tema</span></h2>
+
+  <div class="res-grid">
+    <div class="res-card reveal">
+      <div class="res-header"><span class="res-icon">📚</span><span class="res-type">Libro gratuito</span></div>
+      <div class="res-body">
+        <div class="res-title">Competitive Programmer's Handbook</div>
+        <div class="res-desc">Antti Laaksonen (CSES). Cubre desde aritmética básica hasta grafos avanzados y DP. El libro más recomendado para ICPC nivel regional.</div>
+        <a class="res-link" href="https://cses.fi/book/book.pdf" target="_blank">→ cses.fi/book/book.pdf</a>
+      </div>
+    </div>
+    <div class="res-card reveal">
+      <div class="res-header"><span class="res-icon">🌐</span><span class="res-type">Plataforma</span></div>
+      <div class="res-body">
+        <div class="res-title">CSES Problem Set</div>
+        <div class="res-desc">225 problemas organizados por tema (sorting, grafos, DP, strings…). Ideal para aprender cada estructura de datos con problemas enfocados.</div>
+        <a class="res-link" href="https://cses.fi/problemset/" target="_blank">→ cses.fi/problemset</a>
+      </div>
+    </div>
+    <div class="res-card reveal">
+      <div class="res-header"><span class="res-icon">🎓</span><span class="res-type">Curso online</span></div>
+      <div class="res-body">
+        <div class="res-title">CP-Algorithms (e-maxx en inglés)</div>
+        <div class="res-desc">Referencia técnica exhaustiva: cada algoritmo con demostración, complejidad y código. Imprescindible para Dijkstra, Segment Tree, FFT y más.</div>
+        <a class="res-link" href="https://cp-algorithms.com/" target="_blank">→ cp-algorithms.com</a>
+      </div>
+    </div>
+    <div class="res-card reveal">
+      <div class="res-header"><span class="res-icon">📹</span><span class="res-type">Video / Canal</span></div>
+      <div class="res-body">
+        <div class="res-title">Errichto — YouTube</div>
+        <div class="res-desc">Competidor top de Codeforces. Sus series de DP, Greedy y Graph son extraordinariamente claras. Incluye screencasts de resolución en vivo.</div>
+        <a class="res-link" href="https://www.youtube.com/@Errichto" target="_blank">→ youtube.com/@Errichto</a>
+      </div>
+    </div>
+    <div class="res-card reveal">
+      <div class="res-header"><span class="res-icon">📹</span><span class="res-type">Video / Canal</span></div>
+      <div class="res-body">
+        <div class="res-title">William Lin (tmwilliamlin168)</div>
+        <div class="res-desc">Uno de los mejores competidores del mundo explica su process de resolución. Sus videos de DP y grafos son accesibles para principiantes avanzados.</div>
+        <a class="res-link" href="https://www.youtube.com/@tmwilliamlin168" target="_blank">→ youtube.com/@tmwilliamlin168</a>
+      </div>
+    </div>
+    <div class="res-card reveal">
+      <div class="res-header"><span class="res-icon">🏆</span><span class="res-type">Plataforma</span></div>
+      <div class="res-body">
+        <div class="res-title">Codeforces EDU</div>
+        <div class="res-desc">Sección educativa oficial de CF: cursos de DSU, Segment Tree, Suffix Array con problemas graduales. Excelente para estructuras de datos avanzadas.</div>
+        <a class="res-link" href="https://codeforces.com/edu/courses" target="_blank">→ codeforces.com/edu/courses</a>
+      </div>
+    </div>
+    <div class="res-card reveal">
+      <div class="res-header"><span class="res-icon">📖</span><span class="res-type">Libro</span></div>
+      <div class="res-body">
+        <div class="res-title">Introduction to Algorithms (CLRS)</div>
+        <div class="res-desc">Cormen, Leiserson, Rivest, Stein. La biblia de algoritmos. Para entender BFS/DFS, DP, grafos y estructuras de datos con rigor matemático.</div>
+        <a class="res-link" href="https://mitpress.mit.edu/9780262046305/" target="_blank">→ MIT Press</a>
+      </div>
+    </div>
+    <div class="res-card reveal">
+      <div class="res-header"><span class="res-icon">🔧</span><span class="res-type">Herramienta</span></div>
+      <div class="res-body">
+        <div class="res-title">Codeforces Problemset — filtrado por dificultad</div>
+        <div class="res-desc">Usa el filtro de rating: empieza en 800–1000, sube 100 puntos cada semana. Mantén un sheet de problemas resueltos/pendientes con notas de técnica.</div>
+        <a class="res-link" href="https://codeforces.com/problemset" target="_blank">→ codeforces.com/problemset</a>
+      </div>
+    </div>
+    <div class="res-card reveal">
+      <div class="res-header"><span class="res-icon">📝</span><span class="res-type">Blog / Recurso</span></div>
+      <div class="res-body">
+        <div class="res-title">KACTL — KTH Algorithm Competition Template Library</div>
+        <div class="res-desc">La plantilla de códigos más famosa de ICPC. Contiene implementaciones probadas de casi todo: geometría, teoría de números, flujos, strings.</div>
+        <a class="res-link" href="https://github.com/kth-competitive-programming/kactl" target="_blank">→ github.com/kth-competitive-programming/kactl</a>
+      </div>
+    </div>
+    <div class="res-card reveal">
+      <div class="res-header"><span class="res-icon">🗺️</span><span class="res-type">Roadmap</span></div>
+      <div class="res-body">
+        <div class="res-title">Roadmap de CP de Striver</div>
+        <div class="res-desc">Hoja de ruta detallada de programación competitiva: desde Arrays hasta DP avanzada, con links a problemas LeetCode y CF por cada tema.</div>
+        <a class="res-link" href="https://takeuforward.org/interview-experience/strivers-cp-sheet/" target="_blank">→ takeuforward.org</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- ROADMAP -->
+<!-- ════════════════════════════════════════════ -->
+<section id="roadmap">
+  <div class="sec-label">05 · Hoja de Ruta</div>
+  <h2>Plan de <span>Preparación</span> por Fases</h2>
+
+  <div class="roadmap">
+    <div class="rm-item reveal">
+      <div class="rm-dot"></div>
+      <div class="rm-phase">Semanas 1–3 · Fundamentos</div>
+      <h4>Construir la base</h4>
+      <p>Resolver problemas 01–06 de esta guía. Aprender C++ STL (vector, map, set, sort, cin/cout). Entender Big-O. Objetivo: resolver 800–1000 en menos de 15 minutos.</p>
+    </div>
+    <div class="rm-item reveal">
+      <div class="rm-dot"></div>
+      <div class="rm-phase">Semanas 4–6 · Sorting & Searching</div>
+      <h4>Ordenación y búsqueda binaria</h4>
+      <p>Problemas 07–09. Implementar mergesort desde cero. Aprender búsqueda binaria como técnica (no solo en arrays ordenados). Objetivo: 1000–1300 en 20 min.</p>
+    </div>
+    <div class="rm-item reveal">
+      <div class="rm-dot"></div>
+      <div class="rm-phase">Semanas 7–10 · Grafos</div>
+      <h4>BFS, DFS y árboles</h4>
+      <p>Problemas 10–11. Implementar BFS y DFS con lista de adyacencia. Problemas CSES: Graph Basics, Tree Algorithms. Objetivo: reconocer y resolver grafos 1400–1700.</p>
+    </div>
+    <div class="rm-item reveal">
+      <div class="rm-dot"></div>
+      <div class="rm-phase">Semanas 11–14 · Programación Dinámica</div>
+      <h4>DP clásica</h4>
+      <p>Mochila 0/1, LIS, LCS, caminos en grillas, coin change. Series de Errichto en YouTube. Objetivo: identificar la función de transición en problemas 1500–1800.</p>
+    </div>
+    <div class="rm-item reveal">
+      <div class="rm-dot"></div>
+      <div class="rm-phase">Semanas 15–20 · Estructuras avanzadas</div>
+      <h4>Union-Find, Segment Tree, Fenwick Tree</h4>
+      <p>CSES EDU + CP-Algorithms. Implementar cada estructura y verificar con problemas de práctica. Objetivo: 1800–2000 con estas herramientas.</p>
+    </div>
+    <div class="rm-item reveal">
+      <div class="rm-dot"></div>
+      <div class="rm-phase">Semanas 21+ · Simulacros ICPC</div>
+      <h4>Práctica de maratón completa</h4>
+      <p>Simular concursos de 5 horas con el equipo, una sola computadora. Analizar post-mortem: qué problemas se debían haber resuelto, qué se falló, por qué. Objetivo: resolver 4–5 problemas en un concurso ICPC regional simulado.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">
+    <div class="logo-placeholder">TU<br>LOGO</div>
+    <span style="font-size:.9rem;color:rgba(255,255,255,.8);letter-spacing:.1em;font-family:'Bebas Neue',sans-serif">ICPC Preparation Guide</span>
+  </div>
+  <p>Programación Competitiva · Ingeniería de Sistemas</p>
+  <p style="margin-top:.3rem;color:rgba(255,255,255,.4)">ICPC es una marca registrada de ICPC Foundation</p>
+</footer>
+
+<script>
+const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);} }), {threshold:.07});
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+const secs = document.querySelectorAll('section[id]');
+const links = document.querySelectorAll('nav a');
+const sObs = new IntersectionObserver(es => {
+  es.forEach(e => { if(e.isIntersecting){ links.forEach(a=>a.style.color=''); const l=document.querySelector(`nav a[href="#${e.target.id}"]`); if(l)l.style.color='#fff'; }});
+},{rootMargin:'-40% 0px -50% 0px'});
+secs.forEach(s=>sObs.observe(s));
+</script>
+</body>
+</html>
