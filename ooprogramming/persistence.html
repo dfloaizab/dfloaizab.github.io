@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java · Persistencia, Excepciones & Swing UI</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #13191f;
+    --bg3: #1a2230;
+    --surface: #1e2a3a;
+    --surface2: #243244;
+    --border: #2d3f55;
+    --accent: #e8a838;
+    --accent2: #f0c060;
+    --accent-dim: rgba(232,168,56,0.12);
+    --green: #4ec9a0;
+    --green-dim: rgba(78,201,160,0.12);
+    --red: #e06c6c;
+    --red-dim: rgba(224,108,108,0.12);
+    --blue: #61afef;
+    --blue-dim: rgba(97,175,239,0.12);
+    --purple: #c792ea;
+    --text: #ccd6f6;
+    --text2: #8ba3bf;
+    --text3: #5a7a9a;
+    --code-bg: #0a0f16;
+    --heading-font: 'Lora', Georgia, serif;
+    --body-font: 'DM Sans', sans-serif;
+    --mono-font: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body-font);
+    font-size: 15.5px;
+    line-height: 1.75;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR NAV ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 260px;
+    height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 100;
+    padding: 28px 0 40px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-brand {
+    padding: 0 24px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .sidebar-brand .course-tag {
+    font-size: 10px;
+    font-family: var(--mono-font);
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .sidebar-brand h1 {
+    font-family: var(--heading-font);
+    font-size: 18px;
+    color: var(--text);
+    line-height: 1.3;
+    font-weight: 700;
+  }
+
+  .sidebar-brand .semester {
+    font-size: 11.5px;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+
+  .nav-section {
+    padding: 0 12px;
+    margin-bottom: 4px;
+  }
+
+  .nav-section-title {
+    font-size: 10px;
+    font-family: var(--mono-font);
+    color: var(--text3);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 8px 12px 4px;
+  }
+
+  .nav-section a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--text2);
+    font-size: 13px;
+    font-weight: 400;
+    transition: all .18s;
+    line-height: 1.3;
+  }
+
+  .nav-section a:hover {
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+
+  .nav-section a .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background .18s;
+  }
+
+  .nav-section a:hover .dot { background: var(--accent); }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    margin-left: 260px;
+    padding: 0;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0d1117 0%, #0f1a2b 50%, #111620 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 72px 64px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(232,168,56,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero::after {
+    content: 'JAVA';
+    position: absolute;
+    right: 64px; bottom: -20px;
+    font-family: var(--heading-font);
+    font-size: 160px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.025);
+    letter-spacing: -4px;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(232,168,56,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-family: var(--mono-font);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+
+  .hero h2 {
+    font-family: var(--heading-font);
+    font-size: 42px;
+    font-weight: 700;
+    color: #e8edf5;
+    line-height: 1.18;
+    max-width: 640px;
+    margin-bottom: 16px;
+  }
+
+  .hero h2 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero p {
+    color: var(--text2);
+    font-size: 15px;
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  .hero-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 28px;
+  }
+
+  .chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-family: var(--mono-font);
+    color: var(--text2);
+  }
+
+  /* ── SECTIONS ── */
+  .content {
+    padding: 0 64px 80px;
+  }
+
+  .module {
+    margin-top: 72px;
+  }
+
+  .module-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .module-num {
+    font-family: var(--mono-font);
+    font-size: 11px;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid rgba(232,168,56,0.3);
+    border-radius: 6px;
+    padding: 5px 10px;
+    margin-top: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .module-header h2 {
+    font-family: var(--heading-font);
+    font-size: 32px;
+    font-weight: 700;
+    color: #e8edf5;
+    line-height: 1.2;
+  }
+
+  .module-header p {
+    color: var(--text2);
+    margin-top: 6px;
+    font-size: 14.5px;
+  }
+
+  h3 {
+    font-family: var(--heading-font);
+    font-size: 21px;
+    font-weight: 600;
+    color: #d5dff0;
+    margin: 36px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  h3::before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 22px;
+    background: var(--accent);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  h4 {
+    font-family: var(--mono-font);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent2);
+    margin: 24px 0 10px;
+    letter-spacing: 0.5px;
+  }
+
+  p { color: var(--text2); margin-bottom: 12px; }
+
+  strong { color: var(--text); font-weight: 600; }
+
+  /* ── CARDS ── */
+  .cards {
+    display: grid;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .cards.cols-2 { grid-template-columns: 1fr 1fr; }
+  .cards.cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+    transition: border-color .2s;
+  }
+
+  .card:hover { border-color: var(--text3); }
+
+  .card.accent-left { border-left: 3px solid var(--accent); }
+  .card.green-left  { border-left: 3px solid var(--green); }
+  .card.blue-left   { border-left: 3px solid var(--blue); }
+  .card.red-left    { border-left: 3px solid var(--red); }
+  .card.purple-left { border-left: 3px solid var(--purple); }
+
+  .card-title {
+    font-family: var(--mono-font);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .card.green-left  .card-title { color: var(--green); }
+  .card.blue-left   .card-title { color: var(--blue); }
+  .card.red-left    .card-title { color: var(--red); }
+  .card.purple-left .card-title { color: var(--purple); }
+
+  .card p { margin: 0; font-size: 13.5px; }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 20px 0;
+    overflow: hidden;
+  }
+
+  .code-header {
+    background: var(--bg3);
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-header .filename {
+    font-family: var(--mono-font);
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .code-header .lang-badge {
+    font-family: var(--mono-font);
+    font-size: 10px;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  pre {
+    padding: 20px 22px;
+    overflow-x: auto;
+    line-height: 1.65;
+    font-size: 13px;
+  }
+
+  code {
+    font-family: var(--mono-font);
+    color: #abb2bf;
+  }
+
+  /* Java syntax highlighting */
+  .kw { color: #c792ea; }   /* keywords */
+  .tp { color: #80cbc4; }   /* types */
+  .st { color: #c3e88d; }   /* strings */
+  .cm { color: #546e7a; font-style: italic; }  /* comments */
+  .nm { color: #f78c6c; }   /* numbers */
+  .fn { color: #82aaff; }   /* function/method names */
+  .cl { color: #ffcb6b; }   /* class names */
+  .an { color: #e06c75; }   /* annotations */
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 18px 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 13.5px;
+  }
+
+  .callout.info    { background: var(--blue-dim);  border-left: 3px solid var(--blue); }
+  .callout.warn    { background: var(--accent-dim); border-left: 3px solid var(--accent); }
+  .callout.ok      { background: var(--green-dim);  border-left: 3px solid var(--green); }
+  .callout.danger  { background: var(--red-dim);    border-left: 3px solid var(--red); }
+
+  .callout .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout p { margin: 0; }
+  .callout.info    p { color: #8dc8ef; }
+  .callout.warn    p { color: #d9a84f; }
+  .callout.ok      p { color: #4fbf9a; }
+  .callout.danger  p { color: #d97070; }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  thead th {
+    background: var(--bg3);
+    color: var(--text);
+    font-family: var(--mono-font);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody td {
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(45,63,85,0.6);
+    color: var(--text2);
+    vertical-align: top;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(255,255,255,0.02); }
+
+  td code, th code {
+    background: var(--bg3);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--green);
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0;
+  }
+
+  /* ── LIST ── */
+  ul, ol {
+    padding-left: 22px;
+    color: var(--text2);
+    margin: 8px 0 12px;
+  }
+
+  li { margin-bottom: 5px; font-size: 14px; }
+
+  li code {
+    background: var(--bg3);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: var(--mono-font);
+    font-size: 12px;
+    color: var(--green);
+  }
+
+  /* ── LEVEL BARS ── */
+  .level-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .level-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .level-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .level-card.l1::after { background: var(--accent); }
+  .level-card.l2::after { background: var(--green); }
+  .level-card.l3::after { background: var(--blue); }
+
+  .level-card .lnum {
+    font-family: var(--mono-font);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .level-card.l1 .lnum { color: var(--accent); }
+  .level-card.l2 .lnum { color: var(--green); }
+  .level-card.l3 .lnum { color: var(--blue); }
+
+  .level-card h4 { margin: 0 0 6px; color: var(--text); font-size: 14px; }
+  .level-card p { margin: 0; font-size: 12.5px; color: var(--text3); }
+
+  /* ── EXCEPTION HIERARCHY ── */
+  .hier {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    font-family: var(--mono-font);
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--text2);
+    margin: 20px 0;
+  }
+
+  .hier .root  { color: var(--accent); font-weight: 600; }
+  .hier .l1cls { color: var(--red); }
+  .hier .l2cls { color: var(--blue); }
+  .hier .l3cls { color: var(--green); }
+  .hier .checked { color: var(--purple); }
+  .hier .label { font-size: 10px; color: var(--text3); margin-left: 8px; }
+
+  /* ── SWING PREVIEW ── */
+  .swing-preview {
+    background: #e8e8e8;
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 480px;
+    border: 2px solid #c0c0c0;
+    margin: 20px 0;
+    font-family: 'Dialog', Arial, sans-serif;
+    box-shadow: 4px 4px 12px rgba(0,0,0,0.3);
+  }
+
+  .swing-titlebar {
+    background: linear-gradient(to bottom, #6a6a6a, #4a4a4a);
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .swing-titlebar span {
+    color: #fff;
+    font-size: 12px;
+    font-family: 'Dialog', Arial, sans-serif;
+    font-weight: 600;
+  }
+
+  .swing-winbuttons { display: flex; gap: 4px; }
+  .swing-winbuttons button {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.3);
+    cursor: pointer;
+    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .swing-body {
+    background: #d4d0c8;
+    padding: 16px;
+  }
+
+  .swing-panel {
+    background: #d4d0c8;
+    border: 2px inset #808080;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .swing-label {
+    font-size: 12px;
+    color: #000;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .swing-input {
+    width: 100%;
+    border: 2px inset #808080;
+    padding: 3px 6px;
+    font-size: 12px;
+    background: #fff;
+    margin-bottom: 8px;
+    outline: none;
+  }
+
+  .swing-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+
+  .swing-btn {
+    background: #d4d0c8;
+    border: 2px outset #fff;
+    padding: 4px 14px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Dialog', Arial, sans-serif;
+  }
+  .swing-btn:active { border-style: inset; }
+
+  .swing-select {
+    border: 2px inset #808080;
+    background: #fff;
+    font-size: 12px;
+    padding: 2px 4px;
+    min-width: 120px;
+  }
+
+  .swing-status {
+    background: #d4d0c8;
+    border-top: 1px solid #808080;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: #333;
+  }
+
+  /* ── LAYOUT DIAGRAMS ── */
+  .layout-demos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .layout-demo {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .layout-demo h5 {
+    font-family: var(--mono-font);
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .layout-vis {
+    background: var(--code-bg);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  /* BorderLayout */
+  .bl-grid {
+    display: grid;
+    grid-template-areas:
+      "n n n"
+      "w c e"
+      "s s s";
+    grid-template-rows: 28px 52px 28px;
+    grid-template-columns: 52px 1fr 52px;
+    gap: 2px;
+    padding: 4px;
+  }
+
+  .bl-north { grid-area: n; }
+  .bl-west  { grid-area: w; }
+  .bl-center{ grid-area: c; }
+  .bl-east  { grid-area: e; }
+  .bl-south { grid-area: s; }
+
+  .bl-cell {
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono-font);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .bl-north, .bl-south { background: rgba(232,168,56,0.2); color: var(--accent); }
+  .bl-west,  .bl-east  { background: rgba(97,175,239,0.15); color: var(--blue); }
+  .bl-center { background: rgba(78,201,160,0.15); color: var(--green); }
+
+  /* FlowLayout */
+  .fl-row {
+    padding: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    min-height: 100px;
+    align-content: flex-start;
+  }
+
+  .fl-box {
+    background: rgba(199,144,234,0.2);
+    border: 1px solid var(--purple);
+    border-radius: 3px;
+    padding: 4px 10px;
+    font-family: var(--mono-font);
+    font-size: 9px;
+    color: var(--purple);
+  }
+
+  /* GridLayout */
+  .gl-grid {
+    padding: 6px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    min-height: 100px;
+  }
+
+  .gl-cell {
+    background: rgba(232,168,56,0.1);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono-font);
+    font-size: 9px;
+    color: var(--text3);
+    padding: 4px;
+  }
+
+  /* BoxLayout */
+  .bx-col {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-height: 100px;
+  }
+
+  .bx-row-item {
+    background: rgba(97,175,239,0.12);
+    border: 1px solid var(--blue);
+    border-radius: 3px;
+    padding: 5px 12px;
+    font-family: var(--mono-font);
+    font-size: 9px;
+    color: var(--blue);
+  }
+
+  /* ── UI ELEMENTS GRID ── */
+  .ui-elements {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .ui-elem {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 14px 12px;
+    text-align: center;
+    transition: border-color .2s;
+  }
+
+  .ui-elem:hover { border-color: var(--text3); }
+
+  .ui-elem .icon-preview {
+    font-size: 11px;
+    font-family: var(--mono-font);
+    color: var(--accent);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .ui-elem h5 {
+    font-family: var(--mono-font);
+    font-size: 11px;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+
+  .ui-elem p { font-size: 11px; color: var(--text3); margin: 0; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { padding: 40px 24px 36px; }
+    .content { padding: 0 24px 60px; }
+    .cards.cols-2, .cards.cols-3, .level-grid, .layout-demos, .ui-elements { grid-template-columns: 1fr; }
+    .hero::after { display: none; }
+    .hero h2 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <span class="course-tag">Ing. de Sistemas · II Sem.</span>
+    <h1>Programación en Java</h1>
+    <div class="semester">Guía de Estudio · 2025</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Módulo 01</div>
+    <a href="#persistencia"><span class="dot"></span>Persistencia en Java</a>
+    <a href="#niveles"><span class="dot"></span>Niveles de persistencia</a>
+    <a href="#archivos-planos"><span class="dot"></span>Archivos planos</a>
+    <a href="#properties"><span class="dot"></span>Properties</a>
+    <a href="#serializacion"><span class="dot"></span>Serialización</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Módulo 02</div>
+    <a href="#excepciones"><span class="dot"></span>Uso de excepciones</a>
+    <a href="#jerarquia"><span class="dot"></span>Jerarquía de excepciones</a>
+    <a href="#manejo"><span class="dot"></span>try / catch / finally</a>
+    <a href="#custom-exc"><span class="dot"></span>Excepciones propias</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Módulo 03</div>
+    <a href="#swing"><span class="dot"></span>AWT y Swing</a>
+    <a href="#contenedores"><span class="dot"></span>Contenedores</a>
+    <a href="#layouts"><span class="dot"></span>Diagramación (Layouts)</a>
+    <a href="#componentes"><span class="dot"></span>Componentes UI</a>
+    <a href="#eventos"><span class="dot"></span>Manejo de eventos</a>
+    <a href="#ejemplo"><span class="dot"></span>Ejemplo completo</a>
+  </div>
+</nav>
+
+<!-- ══════════════ MAIN ══════════════ -->
+<main class="main">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-eyebrow">☕ Java · Guía Académica</div>
+    <h2>Persistencia, Excepciones <em>&amp; Interfaces gráficas</em></h2>
+    <p>Conceptos fundamentales del segundo semestre de Ingeniería de Sistemas. Esta guía cubre persistencia de datos, manejo robusto de errores y construcción de interfaces gráficas con AWT/Swing.</p>
+    <div class="hero-chips">
+      <span class="chip">java.io.*</span>
+      <span class="chip">java.util.Properties</span>
+      <span class="chip">Serializable</span>
+      <span class="chip">try/catch/finally</span>
+      <span class="chip">javax.swing.*</span>
+      <span class="chip">java.awt.*</span>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- MÓDULO 1 · PERSISTENCIA                -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="module" id="persistencia">
+      <div class="module-header">
+        <span class="module-num">01</span>
+        <div>
+          <h2>Persistencia en Java</h2>
+          <p>Guardar el estado de una aplicación más allá de su ciclo de vida en memoria.</p>
+        </div>
+      </div>
+
+      <p>La <strong>persistencia</strong> es la capacidad de un programa para almacenar datos de forma que sobrevivan al cierre de la aplicación. En Java existen múltiples mecanismos con distintos niveles de complejidad, desde simples archivos de texto hasta bases de datos relacionales y sistemas ORM.</p>
+
+      <!-- ── Niveles ── -->
+      <h3 id="niveles">Niveles de persistencia</h3>
+      <p>Se puede clasificar la persistencia en tres grandes niveles según la durabilidad, complejidad y escala de los datos:</p>
+
+      <div class="level-grid">
+        <div class="level-card l1">
+          <div class="lnum">N1</div>
+          <h4>Persistencia básica</h4>
+          <p>Archivos planos (.txt, .csv), archivos de propiedades (.properties) y serialización de objetos. Ideal para configuraciones, prototipos y datos simples de una sola aplicación.</p>
+        </div>
+        <div class="level-card l2">
+          <div class="lnum">N2</div>
+          <h4>Persistencia estructurada</h4>
+          <p>Bases de datos relacionales (MySQL, PostgreSQL) accedidas con JDBC. Soporta múltiples usuarios, transacciones e integridad referencial.</p>
+        </div>
+        <div class="level-card l3">
+          <div class="lnum">N3</div>
+          <h4>Persistencia avanzada / ORM</h4>
+          <p>Frameworks como JPA/Hibernate, Spring Data. Mapean objetos Java a tablas automáticamente. Adecuados para aplicaciones empresariales a gran escala.</p>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <span class="icon">ℹ️</span>
+        <p>En este semestre nos enfocamos en el <strong>Nivel 1</strong>: archivos planos, Properties y serialización. Estos mecanismos no requieren instalar servidores de base de datos y permiten aprender los conceptos esenciales de I/O en Java.</p>
+      </div>
+
+      <!-- ── Archivos planos ── -->
+      <h3 id="archivos-planos">Archivos planos (Text I/O)</h3>
+
+      <p>Un <strong>archivo plano</strong> almacena información como texto legible (caracteres Unicode). Java proporciona clases en <code>java.io</code> para escribir y leer estos archivos. Las clases más utilizadas en segundo semestre son <code>FileWriter</code>, <code>BufferedWriter</code>, <code>FileReader</code> y <code>BufferedReader</code>.</p>
+
+      <div class="cards cols-3">
+        <div class="card green-left">
+          <div class="card-title">✅ Beneficios</div>
+          <p>Simplicidad, portabilidad, legibilidad humana directa, no requiere dependencias externas ni instalación.</p>
+        </div>
+        <div class="card accent-left">
+          <div class="card-title">📌 Cuándo usarlo</div>
+          <p>Logs de aplicación, exportación a CSV, listas de datos pequeñas, archivos de salida para reportes.</p>
+        </div>
+        <div class="card red-left">
+          <div class="card-title">⚠️ Limitaciones</div>
+          <p>No tiene estructura de consulta, es vulnerable a errores de formato y poco eficiente para grandes volúmenes.</p>
+        </div>
+      </div>
+
+      <h4>Ejemplo: Guardar y leer lista de estudiantes</h4>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">GestorEstudiantes.java</span>
+          <span class="lang-badge">Java</span>
+        </div>
+        <pre><code><span class="kw">import</span> java.io.*;
+<span class="kw">import</span> java.util.*;
+
+<span class="kw">public class</span> <span class="cl">GestorEstudiantes</span> {
+
+    <span class="kw">private static final</span> <span class="tp">String</span> ARCHIVO = <span class="st">"estudiantes.txt"</span>;
+
+    <span class="cm">// Escribe una lista de estudiantes en el archivo (una por línea)</span>
+    <span class="kw">public static void</span> <span class="fn">guardar</span>(<span class="tp">List</span>&lt;<span class="tp">String</span>&gt; estudiantes) {
+        <span class="kw">try</span> (<span class="tp">BufferedWriter</span> bw = <span class="kw">new</span> <span class="tp">BufferedWriter</span>(<span class="kw">new</span> <span class="tp">FileWriter</span>(ARCHIVO))) {
+            <span class="kw">for</span> (<span class="tp">String</span> nombre : estudiantes) {
+                bw.<span class="fn">write</span>(nombre);
+                bw.<span class="fn">newLine</span>();   <span class="cm">// separador de registro</span>
+            }
+            <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"✔ Estudiantes guardados en "</span> + ARCHIVO);
+        } <span class="kw">catch</span> (<span class="tp">IOException</span> e) {
+            <span class="tp">System</span>.err.<span class="fn">println</span>(<span class="st">"Error al escribir: "</span> + e.<span class="fn">getMessage</span>());
+        }
+    }
+
+    <span class="cm">// Lee y devuelve la lista almacenada</span>
+    <span class="kw">public static</span> <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; <span class="fn">cargar</span>() {
+        <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; lista = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+        <span class="tp">File</span> f = <span class="kw">new</span> <span class="tp">File</span>(ARCHIVO);
+        <span class="kw">if</span> (!f.<span class="fn">exists</span>()) <span class="kw">return</span> lista;   <span class="cm">// archivo no existe aún</span>
+
+        <span class="kw">try</span> (<span class="tp">BufferedReader</span> br = <span class="kw">new</span> <span class="tp">BufferedReader</span>(<span class="kw">new</span> <span class="tp">FileReader</span>(f))) {
+            <span class="tp">String</span> linea;
+            <span class="kw">while</span> ((linea = br.<span class="fn">readLine</span>()) != <span class="kw">null</span>) {
+                <span class="kw">if</span> (!linea.<span class="fn">isBlank</span>()) lista.<span class="fn">add</span>(linea.<span class="fn">trim</span>());
+            }
+        } <span class="kw">catch</span> (<span class="tp">IOException</span> e) {
+            <span class="tp">System</span>.err.<span class="fn">println</span>(<span class="st">"Error al leer: "</span> + e.<span class="fn">getMessage</span>());
+        }
+        <span class="kw">return</span> lista;
+    }
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; lista = <span class="tp">Arrays</span>.<span class="fn">asList</span>(<span class="st">"Ana Torres"</span>, <span class="st">"Carlos Ríos"</span>, <span class="st">"Lucía Paz"</span>);
+        <span class="fn">guardar</span>(lista);
+
+        <span class="tp">List</span>&lt;<span class="tp">String</span>&gt; recuperados = <span class="fn">cargar</span>();
+        recuperados.<span class="fn">forEach</span>(<span class="tp">System</span>.out::println);
+    }
+}</code></pre>
+      </div>
+
+      <div class="callout warn">
+        <span class="icon">💡</span>
+        <p>El bloque <code>try-with-resources</code> cierra automáticamente el flujo de I/O al terminar, evitando fugas de recursos. Siempre úsalo con clases que implementen <code>AutoCloseable</code>.</p>
+      </div>
+
+      <!-- ── Properties ── -->
+      <h3 id="properties">Archivos de propiedades (.properties)</h3>
+
+      <p>La clase <code>java.util.Properties</code> permite leer y escribir pares <strong>clave=valor</strong> en archivos <code>.properties</code>. Es el mecanismo estándar de Java para almacenar configuración de aplicaciones: URLs, credenciales, parámetros de negocio, mensajes internacionalizados, etc.</p>
+
+      <div class="cards cols-2">
+        <div class="card green-left">
+          <div class="card-title">✅ Beneficios</div>
+          <p>Separación de la configuración del código fuente. Fácil de editar sin recompilar. Soporta internacionalización (i18n). Formato estandarizado y legible.</p>
+        </div>
+        <div class="card accent-left">
+          <div class="card-title">📌 Cuándo usarlo</div>
+          <p>Configuración de conexiones a BD, idiomas de la UI, rutas de directorios, parámetros de despliegue, mensajes de error personalizados.</p>
+        </div>
+      </div>
+
+      <h4>Archivo: config.properties</h4>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">config.properties</span>
+          <span class="lang-badge">properties</span>
+        </div>
+        <pre><code><span class="cm"># Configuración de la aplicación académica</span>
+app.nombre=SistemaNotas
+app.version=1.0.0
+app.autor=Dpto. de Sistemas
+
+db.host=localhost
+db.puerto=3306
+db.nombre=notas_db
+
+ui.tema=oscuro
+ui.idioma=es_CO</code></pre>
+      </div>
+
+      <h4>Clase Java: LectorConfig.java</h4>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">LectorConfig.java</span>
+          <span class="lang-badge">Java</span>
+        </div>
+        <pre><code><span class="kw">import</span> java.io.*;
+<span class="kw">import</span> java.util.Properties;
+
+<span class="kw">public class</span> <span class="cl">LectorConfig</span> {
+
+    <span class="kw">private</span> <span class="tp">Properties</span> props = <span class="kw">new</span> <span class="tp">Properties</span>();
+
+    <span class="cm">/** Carga el archivo de propiedades desde el classpath */</span>
+    <span class="kw">public void</span> <span class="fn">cargar</span>(<span class="tp">String</span> rutaArchivo) <span class="kw">throws</span> <span class="tp">IOException</span> {
+        <span class="kw">try</span> (<span class="tp">InputStream</span> is = <span class="kw">new</span> <span class="tp">FileInputStream</span>(rutaArchivo)) {
+            props.<span class="fn">load</span>(is);
+        }
+    }
+
+    <span class="cm">/** Obtiene un valor; retorna valorDefecto si la clave no existe */</span>
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">get</span>(<span class="tp">String</span> clave, <span class="tp">String</span> valorDefecto) {
+        <span class="kw">return</span> props.<span class="fn">getProperty</span>(clave, valorDefecto);
+    }
+
+    <span class="cm">/** Actualiza un valor y persiste los cambios */</span>
+    <span class="kw">public void</span> <span class="fn">set</span>(<span class="tp">String</span> clave, <span class="tp">String</span> valor, <span class="tp">String</span> rutaArchivo) <span class="kw">throws</span> <span class="tp">IOException</span> {
+        props.<span class="fn">setProperty</span>(clave, valor);
+        <span class="kw">try</span> (<span class="tp">OutputStream</span> os = <span class="kw">new</span> <span class="tp">FileOutputStream</span>(rutaArchivo)) {
+            props.<span class="fn">store</span>(os, <span class="st">"Configuración actualizada automáticamente"</span>);
+        }
+    }
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) <span class="kw">throws</span> <span class="tp">IOException</span> {
+        <span class="cl">LectorConfig</span> cfg = <span class="kw">new</span> <span class="cl">LectorConfig</span>();
+        cfg.<span class="fn">cargar</span>(<span class="st">"config.properties"</span>);
+
+        <span class="tp">String</span> app  = cfg.<span class="fn">get</span>(<span class="st">"app.nombre"</span>, <span class="st">"App"</span>);
+        <span class="tp">String</span> host = cfg.<span class="fn">get</span>(<span class="st">"db.host"</span>, <span class="st">"localhost"</span>);
+        <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"Aplicación: %s | BD en: %s%n"</span>, app, host);
+
+        <span class="cm">// Cambiar el idioma y guardar</span>
+        cfg.<span class="fn">set</span>(<span class="st">"ui.idioma"</span>, <span class="st">"en_US"</span>, <span class="st">"config.properties"</span>);
+    }
+}</code></pre>
+      </div>
+
+      <!-- ── Serialización ── -->
+      <h3 id="serializacion">Serialización de objetos</h3>
+
+      <p>La <strong>serialización</strong> convierte un objeto Java completo (incluida su estructura interna) en una secuencia de bytes que se almacena en un archivo binario (<code>.dat</code>). La <strong>deserialización</strong> es el proceso inverso: reconstruye el objeto desde esos bytes.</p>
+
+      <p>Para serializar una clase, esta debe implementar la interfaz <code>java.io.Serializable</code> (marcador, sin métodos). Se recomienda declarar un campo <code>serialVersionUID</code> para control de versiones.</p>
+
+      <div class="cards cols-3">
+        <div class="card green-left">
+          <div class="card-title">✅ Beneficios</div>
+          <p>Persiste el objeto completo con todos sus campos sin necesidad de mapeo manual. Muy práctico para guardar el estado de la aplicación.</p>
+        </div>
+        <div class="card accent-left">
+          <div class="card-title">📌 Cuándo usarlo</div>
+          <p>Sesiones de usuario, caché local, juegos (guardar partida), configuraciones de objetos complejos, transferencia de objetos en red (RMI).</p>
+        </div>
+        <div class="card red-left">
+          <div class="card-title">⚠️ Limitaciones</div>
+          <p>El archivo binario no es legible por humanos. Cambios en la clase pueden invalidar archivos antiguos. No recomendado para interoperabilidad entre sistemas.</p>
+        </div>
+      </div>
+
+      <h4>Ejemplo: Serializar y recuperar un objeto Estudiante</h4>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">Estudiante.java</span>
+          <span class="lang-badge">Java</span>
+        </div>
+        <pre><code><span class="kw">import</span> java.io.Serializable;
+
+<span class="kw">public class</span> <span class="cl">Estudiante</span> <span class="kw">implements</span> <span class="tp">Serializable</span> {
+
+    <span class="cm">// Identificador de versión — evita incompatibilidades entre versiones de la clase</span>
+    <span class="kw">private static final long</span> serialVersionUID = <span class="nm">1L</span>;
+
+    <span class="kw">private</span> <span class="tp">String</span>  nombre;
+    <span class="kw">private</span> <span class="tp">int</span>     codigo;
+    <span class="kw">private</span> <span class="tp">double</span>  promedio;
+
+    <span class="kw">public</span> <span class="cl">Estudiante</span>(<span class="tp">String</span> nombre, <span class="tp">int</span> codigo, <span class="tp">double</span> promedio) {
+        <span class="kw">this</span>.nombre   = nombre;
+        <span class="kw">this</span>.codigo   = codigo;
+        <span class="kw">this</span>.promedio = promedio;
+    }
+
+    <span class="an">@Override</span>
+    <span class="kw">public</span> <span class="tp">String</span> <span class="fn">toString</span>() {
+        <span class="kw">return</span> <span class="tp">String</span>.<span class="fn">format</span>(<span class="st">"[%d] %s — Promedio: %.1f"</span>, codigo, nombre, promedio);
+    }
+
+    <span class="cm">// Getters...</span>
+}</code></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">GestorSerializacion.java</span>
+          <span class="lang-badge">Java</span>
+        </div>
+        <pre><code><span class="kw">import</span> java.io.*;
+
+<span class="kw">public class</span> <span class="cl">GestorSerializacion</span> {
+
+    <span class="kw">private static final</span> <span class="tp">String</span> ARCHIVO = <span class="st">"estudiante.dat"</span>;
+
+    <span class="cm">/** Serializa (guarda) el objeto en un archivo binario */</span>
+    <span class="kw">public static void</span> <span class="fn">guardar</span>(<span class="cl">Estudiante</span> e) {
+        <span class="kw">try</span> (<span class="tp">ObjectOutputStream</span> oos =
+                <span class="kw">new</span> <span class="tp">ObjectOutputStream</span>(<span class="kw">new</span> <span class="tp">FileOutputStream</span>(ARCHIVO))) {
+            oos.<span class="fn">writeObject</span>(e);
+            <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Objeto serializado correctamente."</span>);
+        } <span class="kw">catch</span> (<span class="tp">IOException</span> ex) {
+            ex.<span class="fn">printStackTrace</span>();
+        }
+    }
+
+    <span class="cm">/** Deserializa (recupera) el objeto desde el archivo */</span>
+    <span class="kw">public static</span> <span class="cl">Estudiante</span> <span class="fn">cargar</span>() {
+        <span class="kw">try</span> (<span class="tp">ObjectInputStream</span> ois =
+                <span class="kw">new</span> <span class="tp">ObjectInputStream</span>(<span class="kw">new</span> <span class="tp">FileInputStream</span>(ARCHIVO))) {
+            <span class="kw">return</span> (<span class="cl">Estudiante</span>) ois.<span class="fn">readObject</span>();
+        } <span class="kw">catch</span> (<span class="tp">IOException</span> | <span class="tp">ClassNotFoundException</span> ex) {
+            ex.<span class="fn">printStackTrace</span>();
+            <span class="kw">return null</span>;
+        }
+    }
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="cl">Estudiante</span> e1 = <span class="kw">new</span> <span class="cl">Estudiante</span>(<span class="st">"Valentina Gómez"</span>, <span class="nm">2023001</span>, <span class="nm">4.2</span>);
+        <span class="fn">guardar</span>(e1);
+
+        <span class="cl">Estudiante</span> recuperado = <span class="fn">cargar</span>();
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Recuperado → "</span> + recuperado);
+    }
+}</code></pre>
+      </div>
+
+      <!-- Tabla comparativa -->
+      <h3>Comparativa de mecanismos</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Característica</th>
+              <th>Archivos planos</th>
+              <th>Properties</th>
+              <th>Serialización</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Formato</strong></td><td>Texto (.txt, .csv)</td><td>Clave=Valor (.properties)</td><td>Binario (.dat)</td></tr>
+            <tr><td><strong>Legibilidad</strong></td><td>✅ Legible</td><td>✅ Legible</td><td>❌ Binario</td></tr>
+            <tr><td><strong>Estructura</strong></td><td>Manual (por líneas)</td><td>Par clave-valor</td><td>Objeto completo</td></tr>
+            <tr><td><strong>Facilidad</strong></td><td>Alta</td><td>Alta</td><td>Media</td></tr>
+            <tr><td><strong>Uso principal</strong></td><td>Logs, CSV, reportes</td><td>Configuración</td><td>Estado de objetos</td></tr>
+            <tr><td><strong>Clases clave</strong></td><td><code>BufferedReader/Writer</code></td><td><code>Properties</code></td><td><code>ObjectOutputStream</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- MÓDULO 2 · EXCEPCIONES                  -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="module" id="excepciones">
+      <div class="module-header">
+        <span class="module-num">02</span>
+        <div>
+          <h2>Uso de Excepciones</h2>
+          <p>Mecanismo de Java para detectar, propagar y manejar errores en tiempo de ejecución de forma estructurada.</p>
+        </div>
+      </div>
+
+      <p>Una <strong>excepción</strong> es un evento que interrumpe el flujo normal del programa. Java separa la lógica de negocio del manejo de errores mediante un sistema de excepciones basado en clases. Esto hace el código más robusto, legible y mantenible.</p>
+
+      <!-- Jerarquía -->
+      <h3 id="jerarquia">Jerarquía de excepciones</h3>
+      <div class="hier">
+        <span class="root">java.lang.Throwable</span><br>
+        ├── <span class="l1cls">Error</span>  <span class="label">← Errores graves del sistema (no capturar)</span><br>
+        │   ├── <span class="l2cls">OutOfMemoryError</span><br>
+        │   └── <span class="l2cls">StackOverflowError</span><br>
+        └── <span class="l1cls">Exception</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;├── <span class="checked">IOException</span>  <span class="label">← Checked: obligatorio manejarlas</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;│   ├── <span class="l3cls">FileNotFoundException</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;│   └── <span class="l3cls">EOFException</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;├── <span class="checked">SQLException</span>  <span class="label">← Checked</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;├── <span class="checked">ClassNotFoundException</span>  <span class="label">← Checked</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;└── <span class="l2cls">RuntimeException</span>  <span class="label">← Unchecked: opcionales de capturar</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="l3cls">NullPointerException</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="l3cls">ArrayIndexOutOfBoundsException</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="l3cls">NumberFormatException</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="l3cls">ArithmeticException</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="l3cls">IllegalArgumentException</span>
+      </div>
+
+      <div class="cards cols-2">
+        <div class="card blue-left">
+          <div class="card-title">🔵 Checked Exceptions</div>
+          <p>El compilador obliga a manejarlas con <code>try-catch</code> o declararlas con <code>throws</code>. Representan situaciones esperadas pero anormales (ej: archivo no encontrado, error de red).</p>
+        </div>
+        <div class="card accent-left">
+          <div class="card-title">🟡 Unchecked Exceptions</div>
+          <p>Son subclases de <code>RuntimeException</code>. El compilador <em>no</em> las exige manejar. Generalmente indican errores de programación (null pointer, índice inválido, división por cero).</p>
+        </div>
+      </div>
+
+      <!-- try-catch-finally -->
+      <h3 id="manejo">try / catch / finally / throws / throw</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Palabra clave</th><th>Uso</th><th>Descripción</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>try</code></td><td>Bloque protegido</td><td>Contiene el código que puede lanzar una excepción.</td></tr>
+            <tr><td><code>catch</code></td><td>Captura y maneja</td><td>Ejecuta código de recuperación si ocurre la excepción indicada.</td></tr>
+            <tr><td><code>finally</code></td><td>Siempre se ejecuta</td><td>Se ejecuta haya o no excepción. Ideal para cerrar recursos.</td></tr>
+            <tr><td><code>throws</code></td><td>Declaración</td><td>Declara que un método puede lanzar una checked exception (responsabilidad al llamador).</td></tr>
+            <tr><td><code>throw</code></td><td>Lanzamiento</td><td>Lanza explícitamente una excepción desde código.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Ejemplo completo: manejo de excepciones múltiples</h4>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">CalculadoraSegura.java</span>
+          <span class="lang-badge">Java</span>
+        </div>
+        <pre><code><span class="kw">public class</span> <span class="cl">CalculadoraSegura</span> {
+
+    <span class="cm">/**
+     * Divide dos enteros con manejo robusto de errores.
+     * @throws ArithmeticException  si el divisor es cero
+     */</span>
+    <span class="kw">public static double</span> <span class="fn">dividir</span>(<span class="tp">int</span> a, <span class="tp">int</span> b) {
+        <span class="kw">if</span> (b == <span class="nm">0</span>) {
+            <span class="kw">throw new</span> <span class="tp">ArithmeticException</span>(<span class="st">"División por cero: el divisor no puede ser 0"</span>);
+        }
+        <span class="kw">return</span> (<span class="kw">double</span>) a / b;
+    }
+
+    <span class="cm">/** Convierte un String a entero de forma segura */</span>
+    <span class="kw">public static int</span> <span class="fn">parsearEntero</span>(<span class="tp">String</span> texto) {
+        <span class="kw">try</span> {
+            <span class="kw">return</span> <span class="tp">Integer</span>.<span class="fn">parseInt</span>(texto);
+        } <span class="kw">catch</span> (<span class="tp">NumberFormatException</span> e) {
+            <span class="tp">System</span>.err.<span class="fn">println</span>(<span class="st">"Valor no numérico: '"</span> + texto + <span class="st">"' → se asume 0"</span>);
+            <span class="kw">return</span> <span class="nm">0</span>;
+        }
+    }
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="cm">// ── 1. Multi-catch (Java 7+) ──────────────────────────</span>
+        <span class="kw">try</span> {
+            <span class="tp">String</span>[] arreglo = <span class="kw">new</span> <span class="tp">String</span>[<span class="nm">3</span>];
+            <span class="tp">System</span>.out.<span class="fn">println</span>(arreglo[<span class="nm">5</span>]);  <span class="cm">// índice inválido</span>
+        } <span class="kw">catch</span> (<span class="tp">ArrayIndexOutOfBoundsException</span> | <span class="tp">NullPointerException</span> e) {
+            <span class="tp">System</span>.err.<span class="fn">println</span>(<span class="st">"Error de arreglo o nulo: "</span> + e.<span class="fn">getMessage</span>());
+        } <span class="kw">finally</span> {
+            <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Bloque finally — siempre se ejecuta"</span>);
+        }
+
+        <span class="cm">// ── 2. Captura de excepción lanzada manualmente ───────</span>
+        <span class="kw">try</span> {
+            <span class="kw">double</span> resultado = <span class="fn">dividir</span>(<span class="nm">10</span>, <span class="nm">0</span>);
+        } <span class="kw">catch</span> (<span class="tp">ArithmeticException</span> e) {
+            <span class="tp">System</span>.err.<span class="fn">println</span>(<span class="st">"⚠ "</span> + e.<span class="fn">getMessage</span>());
+        }
+
+        <span class="cm">// ── 3. Conversión segura ──────────────────────────────</span>
+        <span class="kw">int</span> num = <span class="fn">parsearEntero</span>(<span class="st">"abc"</span>);  <span class="cm">// retornará 0</span>
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="st">"Número parseado: "</span> + num);
+    }
+}</code></pre>
+      </div>
+
+      <!-- Excepciones propias -->
+      <h3 id="custom-exc">Excepciones personalizadas</h3>
+      <p>Se pueden crear excepciones propias extendiendo <code>Exception</code> (checked) o <code>RuntimeException</code> (unchecked) para representar errores específicos del dominio de la aplicación.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">NotaInvalidaException.java</span>
+          <span class="lang-badge">Java</span>
+        </div>
+        <pre><code><span class="cm">/** Excepción de dominio: nota fuera del rango 0.0 – 5.0 */</span>
+<span class="kw">public class</span> <span class="cl">NotaInvalidaException</span> <span class="kw">extends</span> <span class="tp">Exception</span> {
+
+    <span class="kw">private final double</span> notaRecibida;
+
+    <span class="kw">public</span> <span class="cl">NotaInvalidaException</span>(<span class="kw">double</span> nota) {
+        <span class="kw">super</span>(<span class="st">"Nota inválida: "</span> + nota + <span class="st">". El rango permitido es [0.0, 5.0]"</span>);
+        <span class="kw">this</span>.notaRecibida = nota;
+    }
+
+    <span class="kw">public double</span> <span class="fn">getNotaRecibida</span>() { <span class="kw">return</span> notaRecibida; }
+}
+
+<span class="cm">// ── Uso en otra clase ─────────────────────────────────────</span>
+<span class="kw">public class</span> <span class="cl">RegistroNotas</span> {
+
+    <span class="kw">public void</span> <span class="fn">registrarNota</span>(<span class="tp">String</span> estudiante, <span class="kw">double</span> nota)
+            <span class="kw">throws</span> <span class="cl">NotaInvalidaException</span> {
+        <span class="kw">if</span> (nota &lt; <span class="nm">0.0</span> || nota &gt; <span class="nm">5.0</span>) {
+            <span class="kw">throw new</span> <span class="cl">NotaInvalidaException</span>(nota);
+        }
+        <span class="tp">System</span>.out.<span class="fn">printf</span>(<span class="st">"✔ Nota %.1f registrada para %s%n"</span>, nota, estudiante);
+    }
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="cl">RegistroNotas</span> rn = <span class="kw">new</span> <span class="cl">RegistroNotas</span>();
+        <span class="kw">try</span> {
+            rn.<span class="fn">registrarNota</span>(<span class="st">"Juan Pérez"</span>, <span class="nm">4.5</span>);   <span class="cm">// ✔</span>
+            rn.<span class="fn">registrarNota</span>(<span class="st">"María Leal"</span>, <span class="nm">6.0</span>);   <span class="cm">// ✗ lanza excepción</span>
+        } <span class="kw">catch</span> (<span class="cl">NotaInvalidaException</span> e) {
+            <span class="tp">System</span>.err.<span class="fn">println</span>(<span class="st">"Error: "</span> + e.<span class="fn">getMessage</span>());
+        }
+    }
+}</code></pre>
+      </div>
+
+      <div class="callout ok">
+        <span class="icon">✅</span>
+        <p><strong>Buenas prácticas:</strong> captura siempre la excepción más específica primero; no captures <code>Exception</code> genéricamente si puedes evitarlo; nunca dejes un bloque <code>catch</code> vacío; usa el mensaje de excepción para dar contexto útil al desarrollador.</p>
+      </div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- MÓDULO 3 · AWT Y SWING                 -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="module" id="swing">
+      <div class="module-header">
+        <span class="module-num">03</span>
+        <div>
+          <h2>Interfaces de Usuario: AWT y Swing</h2>
+          <p>Construcción de ventanas, formularios y controles gráficos en aplicaciones de escritorio con Java.</p>
+        </div>
+      </div>
+
+      <div class="cards cols-2">
+        <div class="card blue-left">
+          <div class="card-title">AWT · Abstract Window Toolkit</div>
+          <p>Primera librería gráfica de Java (<code>java.awt.*</code>). Los componentes son <em>pesados</em>: delegan el renderizado al sistema operativo. Limitados en personalización y aspecto visual.</p>
+        </div>
+        <div class="card green-left">
+          <div class="card-title">Swing · javax.swing.*</div>
+          <p>Construido sobre AWT, pero con componentes <em>ligeros</em> dibujados 100% por Java. Mayor portabilidad, más componentes y aspecto unificado. Es el estándar para aplicaciones de escritorio en este semestre.</p>
+        </div>
+      </div>
+
+      <!-- Contenedores -->
+      <h3 id="contenedores">Contenedores principales</h3>
+      <p>Un <strong>contenedor</strong> es un componente que puede albergar otros componentes (botones, campos de texto, paneles, etc.). Forman una jerarquía: el contenedor raíz es siempre un <code>JFrame</code>.</p>
+
+      <div class="cards cols-2">
+        <div class="card accent-left">
+          <div class="card-title">🖼 JFrame — Ventana principal</div>
+          <p>Representa la ventana del sistema operativo con barra de título, bordes y botones de sistema. Es el punto de entrada de la interfaz gráfica. Contiene un <strong>ContentPane</strong> donde se agregan los demás componentes.</p>
+        </div>
+        <div class="card accent-left">
+          <div class="card-title">📦 JPanel — Panel de agrupación</div>
+          <p>Contenedor genérico y liviano. Se usa para organizar subgrupos de componentes dentro del <code>JFrame</code> u otros paneles. Puede tener su propio <code>LayoutManager</code> y fondo.</p>
+        </div>
+        <div class="card blue-left">
+          <div class="card-title">💬 JDialog — Cuadro de diálogo</div>
+          <p>Ventana secundaria modal o no modal, hija de un <code>JFrame</code>. Útil para formularios de confirmación, mensajes de error, entradas de datos auxiliares.</p>
+        </div>
+        <div class="card blue-left">
+          <div class="card-title">📜 JScrollPane — Área con scroll</div>
+          <p>Contenedor que agrega barras de desplazamiento a cualquier componente (listas, tablas, áreas de texto) cuando su contenido supera el espacio visible.</p>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">EstructuraJFrame.java</span>
+          <span class="lang-badge">Java</span>
+        </div>
+        <pre><code><span class="kw">import</span> javax.swing.*;
+<span class="kw">import</span> java.awt.*;
+
+<span class="kw">public class</span> <span class="cl">EstructuraJFrame</span> {
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="cm">// Crear ventana principal</span>
+        <span class="tp">JFrame</span> ventana = <span class="kw">new</span> <span class="tp">JFrame</span>(<span class="st">"Mi Primera Ventana"</span>);
+        ventana.<span class="fn">setSize</span>(<span class="nm">400</span>, <span class="nm">300</span>);
+        ventana.<span class="fn">setLocationRelativeTo</span>(<span class="kw">null</span>);            <span class="cm">// centrar en pantalla</span>
+        ventana.<span class="fn">setDefaultCloseOperation</span>(<span class="tp">JFrame</span>.EXIT_ON_CLOSE);
+
+        <span class="cm">// Crear panel y agregar al ContentPane</span>
+        <span class="tp">JPanel</span> panel = <span class="kw">new</span> <span class="tp">JPanel</span>();
+        panel.<span class="fn">setBackground</span>(<span class="tp">Color</span>.WHITE);
+        panel.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">JLabel</span>(<span class="st">"¡Hola, Swing!"</span>));
+
+        ventana.<span class="fn">getContentPane</span>().<span class="fn">add</span>(panel);
+        ventana.<span class="fn">setVisible</span>(<span class="kw">true</span>);
+    }
+}</code></pre>
+      </div>
+
+      <!-- Layouts -->
+      <h3 id="layouts">Formas de diagramación (Layout Managers)</h3>
+      <p>Un <strong>LayoutManager</strong> controla cómo se posicionan y redimensionan los componentes dentro de un contenedor. Java no usa coordenadas absolutas por defecto; los layouts garantizan que la UI se adapte a distintos tamaños de pantalla.</p>
+
+      <div class="layout-demos">
+
+        <div class="layout-demo">
+          <h5>BorderLayout</h5>
+          <div class="layout-vis">
+            <div class="bl-grid">
+              <div class="bl-cell bl-north">NORTH</div>
+              <div class="bl-cell bl-west">WEST</div>
+              <div class="bl-cell bl-center">CENTER</div>
+              <div class="bl-cell bl-east">EAST</div>
+              <div class="bl-cell bl-south">SOUTH</div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--text3);margin-top:8px;">Divide en 5 regiones. CENTER ocupa el espacio sobrante. Ideal para estructura: menú arriba, panel lateral, contenido principal.</p>
+        </div>
+
+        <div class="layout-demo">
+          <h5>FlowLayout</h5>
+          <div class="layout-vis">
+            <div class="fl-row">
+              <div class="fl-box">Btn1</div>
+              <div class="fl-box">Btn2</div>
+              <div class="fl-box">Btn3</div>
+              <div class="fl-box">Btn4</div>
+              <div class="fl-box">Btn5</div>
+              <div class="fl-box">Btn6</div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--text3);margin-top:8px;">Coloca componentes en fila horizontal. Cuando no caben, continúa en la siguiente línea. Layout por defecto en JPanel.</p>
+        </div>
+
+        <div class="layout-demo">
+          <h5>GridLayout</h5>
+          <div class="layout-vis">
+            <div class="gl-grid">
+              <div class="gl-cell">7</div><div class="gl-cell">8</div><div class="gl-cell">9</div>
+              <div class="gl-cell">4</div><div class="gl-cell">5</div><div class="gl-cell">6</div>
+              <div class="gl-cell">1</div><div class="gl-cell">2</div><div class="gl-cell">3</div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--text3);margin-top:8px;">Cuadrícula de filas × columnas. Todos los componentes tienen el mismo tamaño. Ideal para calculadoras, teclados, formularios simétricos.</p>
+        </div>
+
+        <div class="layout-demo">
+          <h5>BoxLayout</h5>
+          <div class="layout-vis">
+            <div class="bx-col">
+              <div class="bx-row-item">Nombre</div>
+              <div class="bx-row-item">Correo</div>
+              <div class="bx-row-item">Contraseña</div>
+              <div class="bx-row-item">Aceptar</div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--text3);margin-top:8px;">Apila componentes en un solo eje: vertical (Y_AXIS) u horizontal (X_AXIS). Flexible con glue y struts para espaciado.</p>
+        </div>
+
+      </div>
+
+      <div class="callout info">
+        <span class="icon">💡</span>
+        <p>También existe <strong>GridBagLayout</strong> (el más potente y complejo) y <strong>CardLayout</strong> (para paneles de pestañas). En proyectos reales se combinan varios layouts anidando <code>JPanel</code> con distintos managers.</p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">EjemploLayouts.java</span>
+          <span class="lang-badge">Java</span>
+        </div>
+        <pre><code><span class="kw">import</span> javax.swing.*; <span class="kw">import</span> java.awt.*;
+
+<span class="kw">public class</span> <span class="cl">EjemploLayouts</span> {
+    <span class="kw">public static void</span> <span class="fn">demo</span>() {
+        <span class="tp">JFrame</span> f = <span class="kw">new</span> <span class="tp">JFrame</span>(); f.<span class="fn">setSize</span>(<span class="nm">500</span>, <span class="nm">400</span>);
+
+        <span class="cm">// ── BorderLayout (layout del JFrame por defecto) ──────</span>
+        f.<span class="fn">setLayout</span>(<span class="kw">new</span> <span class="tp">BorderLayout</span>(<span class="nm">5</span>, <span class="nm">5</span>));
+        f.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">JButton</span>(<span class="st">"Menú"</span>),    <span class="tp">BorderLayout</span>.NORTH);
+        f.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">JButton</span>(<span class="st">"Opciones"</span>), <span class="tp">BorderLayout</span>.WEST);
+        f.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">JTextArea</span>(),         <span class="tp">BorderLayout</span>.CENTER);
+        f.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">JButton</span>(<span class="st">"Estado"</span>),   <span class="tp">BorderLayout</span>.SOUTH);
+
+        <span class="cm">// ── GridLayout para teclado numérico ──────────────────</span>
+        <span class="tp">JPanel</span> teclado = <span class="kw">new</span> <span class="tp">JPanel</span>(<span class="kw">new</span> <span class="tp">GridLayout</span>(<span class="nm">4</span>, <span class="nm">3</span>, <span class="nm">4</span>, <span class="nm">4</span>));
+        <span class="tp">String</span>[] teclas = {<span class="st">"7"</span>,<span class="st">"8"</span>,<span class="st">"9"</span>,<span class="st">"4"</span>,<span class="st">"5"</span>,<span class="st">"6"</span>,<span class="st">"1"</span>,<span class="st">"2"</span>,<span class="st">"3"</span>,<span class="st">"0"</span>,<span class="st">"C"</span>,<span class="st">"="</span>};
+        <span class="kw">for</span> (<span class="tp">String</span> t : teclas) teclado.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">JButton</span>(t));
+
+        <span class="cm">// ── BoxLayout para formulario vertical ───────────────</span>
+        <span class="tp">JPanel</span> formulario = <span class="kw">new</span> <span class="tp">JPanel</span>();
+        formulario.<span class="fn">setLayout</span>(<span class="kw">new</span> <span class="tp">BoxLayout</span>(formulario, <span class="tp">BoxLayout</span>.Y_AXIS));
+        formulario.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">JLabel</span>(<span class="st">"Nombre:"</span>));
+        formulario.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">JTextField</span>(<span class="nm">20</span>));
+        formulario.<span class="fn">add</span>(<span class="tp">Box</span>.<span class="fn">createVerticalStrut</span>(<span class="nm">10</span>));  <span class="cm">// espacio fijo</span>
+        formulario.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">JButton</span>(<span class="st">"Guardar"</span>));
+    }
+}</code></pre>
+      </div>
+
+      <!-- Componentes UI -->
+      <h3 id="componentes">Componentes de UI más comunes</h3>
+      <div class="ui-elements">
+        <div class="ui-elem"><span class="icon-preview">JLabel</span><h5>JLabel</h5><p>Etiqueta de texto o imagen. No editable.</p></div>
+        <div class="ui-elem"><span class="icon-preview">JButton</span><h5>JButton</h5><p>Botón clic. Lanza ActionEvent.</p></div>
+        <div class="ui-elem"><span class="icon-preview">JTextField</span><h5>JTextField</h5><p>Entrada de texto de una línea.</p></div>
+        <div class="ui-elem"><span class="icon-preview">JTextArea</span><h5>JTextArea</h5><p>Entrada multilínea. Usar con JScrollPane.</p></div>
+        <div class="ui-elem"><span class="icon-preview">JPasswordField</span><h5>JPasswordField</h5><p>Campo de contraseña (enmascara texto).</p></div>
+        <div class="ui-elem"><span class="icon-preview">JComboBox</span><h5>JComboBox</h5><p>Lista desplegable de opciones.</p></div>
+        <div class="ui-elem"><span class="icon-preview">JCheckBox</span><h5>JCheckBox</h5><p>Casilla de verificación (true/false).</p></div>
+        <div class="ui-elem"><span class="icon-preview">JRadioButton</span><h5>JRadioButton</h5><p>Opción de grupo (ButtonGroup).</p></div>
+        <div class="ui-elem"><span class="icon-preview">JList</span><h5>JList</h5><p>Lista de ítems seleccionables.</p></div>
+        <div class="ui-elem"><span class="icon-preview">JTable</span><h5>JTable</h5><p>Tabla con filas y columnas.</p></div>
+        <div class="ui-elem"><span class="icon-preview">JSlider</span><h5>JSlider</h5><p>Control de rango numérico.</p></div>
+        <div class="ui-elem"><span class="icon-preview">JMenuBar</span><h5>JMenuBar / JMenu</h5><p>Barra de menú y submenús.</p></div>
+      </div>
+
+      <!-- Eventos -->
+      <h3 id="eventos">Manejo de eventos</h3>
+      <p>Java usa el patrón <strong>Observer</strong> para los eventos de UI. Cuando el usuario interactúa con un componente, este genera un <em>evento</em>. Los objetos <strong>Listener</strong> registrados en el componente reciben y procesan ese evento.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Interfaz Listener</th><th>Evento</th><th>Componentes típicos</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>ActionListener</code></td><td>Clic en botón, Enter en campo</td><td>JButton, JMenuItem, JTextField</td></tr>
+            <tr><td><code>MouseListener</code></td><td>Clic, doble clic, enter/exit del mouse</td><td>Cualquier componente</td></tr>
+            <tr><td><code>KeyListener</code></td><td>Tecla presionada / soltada</td><td>JTextField, JTextArea, JFrame</td></tr>
+            <tr><td><code>ItemListener</code></td><td>Selección de ítem</td><td>JComboBox, JCheckBox, JRadioButton</td></tr>
+            <tr><td><code>WindowListener</code></td><td>Abrir, cerrar, minimizar ventana</td><td>JFrame, JDialog</td></tr>
+            <tr><td><code>FocusListener</code></td><td>Ganar / perder el foco</td><td>JTextField, JButton</td></tr>
+            <tr><td><code>ChangeListener</code></td><td>Cambio de valor</td><td>JSlider, JSpinner</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- EJEMPLO COMPLETO -->
+      <h3 id="ejemplo">Ejemplo completo: Ventana de Registro de Estudiante</h3>
+
+      <p>La siguiente ventana demuestra: <code>JFrame</code>, <code>JPanel</code> anidados con <code>BorderLayout</code> y <code>GridLayout</code>, campos de texto, combo, botones y manejo de eventos con <code>ActionListener</code> mediante expresiones lambda.</p>
+
+      <h4>Vista previa (simulada):</h4>
+
+      <div class="swing-preview">
+        <div class="swing-titlebar">
+          <span>🎓 Registro de Estudiante</span>
+          <div class="swing-winbuttons">
+            <button style="background:#ff5f57;">✕</button>
+            <button style="background:#febc2e;">−</button>
+            <button style="background:#28c840;">⊡</button>
+          </div>
+        </div>
+        <div class="swing-body">
+          <div class="swing-panel">
+            <label class="swing-label">Nombre completo:</label>
+            <input class="swing-input" type="text" value="Ana Torres Gómez" readonly>
+            <div class="swing-row">
+              <div style="flex:1">
+                <label class="swing-label">Código:</label>
+                <input class="swing-input" type="text" value="2024012" readonly style="width:100%">
+              </div>
+              <div style="flex:1">
+                <label class="swing-label">Semestre:</label>
+                <select class="swing-select">
+                  <option>Segundo (II)</option>
+                </select>
+              </div>
+            </div>
+            <label class="swing-label">Correo institucional:</label>
+            <input class="swing-input" type="text" value="ana.torres@estudiante.edu.co" readonly>
+          </div>
+          <div class="swing-row" style="justify-content:flex-end;gap:8px;padding-right:4px">
+            <button class="swing-btn">Limpiar</button>
+            <button class="swing-btn" style="font-weight:bold">Registrar</button>
+          </div>
+        </div>
+        <div class="swing-status">✔ Formulario listo para ingresar datos</div>
+      </div>
+
+      <h4>Código fuente:</h4>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">VentanaRegistro.java</span>
+          <span class="lang-badge">Java</span>
+        </div>
+        <pre><code><span class="kw">import</span> javax.swing.*;
+<span class="kw">import</span> java.awt.*;
+
+<span class="kw">public class</span> <span class="cl">VentanaRegistro</span> <span class="kw">extends</span> <span class="tp">JFrame</span> {
+
+    <span class="cm">// ── Declaración de componentes ───────────────────────────────────</span>
+    <span class="kw">private</span> <span class="tp">JTextField</span>  txNombre, txCodigo, txCorreo;
+    <span class="kw">private</span> <span class="tp">JComboBox</span>&lt;<span class="tp">String</span>&gt; cbSemestre;
+    <span class="kw">private</span> <span class="tp">JButton</span>     btnRegistrar, btnLimpiar;
+    <span class="kw">private</span> <span class="tp">JLabel</span>      lblEstado;
+
+    <span class="kw">public</span> <span class="cl">VentanaRegistro</span>() {
+        <span class="fn">initUI</span>();
+        <span class="fn">registrarEventos</span>();
+    }
+
+    <span class="kw">private void</span> <span class="fn">initUI</span>() {
+        <span class="fn">setTitle</span>(<span class="st">"🎓 Registro de Estudiante"</span>);
+        <span class="fn">setSize</span>(<span class="nm">420</span>, <span class="nm">300</span>);
+        <span class="fn">setLocationRelativeTo</span>(<span class="kw">null</span>);
+        <span class="fn">setDefaultCloseOperation</span>(<span class="tp">JFrame</span>.EXIT_ON_CLOSE);
+        <span class="fn">setLayout</span>(<span class="kw">new</span> <span class="tp">BorderLayout</span>(<span class="nm">8</span>, <span class="nm">8</span>));
+
+        <span class="cm">// ── Panel del formulario (GridLayout 4 filas × 2 cols) ───────</span>
+        <span class="tp">JPanel</span> pnlForm = <span class="kw">new</span> <span class="tp">JPanel</span>(<span class="kw">new</span> <span class="tp">GridLayout</span>(<span class="nm">4</span>, <span class="nm">2</span>, <span class="nm">6</span>, <span class="nm">6</span>));
+        pnlForm.<span class="fn">setBorder</span>(<span class="tp">BorderFactory</span>.<span class="fn">createTitledBorder</span>(<span class="st">"Datos del estudiante"</span>));
+
+        txNombre   = <span class="kw">new</span> <span class="tp">JTextField</span>();
+        txCodigo   = <span class="kw">new</span> <span class="tp">JTextField</span>();
+        txCorreo   = <span class="kw">new</span> <span class="tp">JTextField</span>();
+        cbSemestre = <span class="kw">new</span> <span class="tp">JComboBox</span>&lt;&gt;(<span class="kw">new</span> <span class="tp">String</span>[]{
+            <span class="st">"Primero (I)"</span>, <span class="st">"Segundo (II)"</span>, <span class="st">"Tercero (III)"</span>, <span class="st">"Cuarto (IV)"</span>
+        });
+
+        pnlForm.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">JLabel</span>(<span class="st">"Nombre:"</span>));    pnlForm.<span class="fn">add</span>(txNombre);
+        pnlForm.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">JLabel</span>(<span class="st">"Código:"</span>));    pnlForm.<span class="fn">add</span>(txCodigo);
+        pnlForm.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">JLabel</span>(<span class="st">"Semestre:"</span>));  pnlForm.<span class="fn">add</span>(cbSemestre);
+        pnlForm.<span class="fn">add</span>(<span class="kw">new</span> <span class="tp">JLabel</span>(<span class="st">"Correo:"</span>));    pnlForm.<span class="fn">add</span>(txCorreo);
+
+        <span class="cm">// ── Panel de botones (FlowLayout alineado a la derecha) ──────</span>
+        <span class="tp">JPanel</span> pnlBotones = <span class="kw">new</span> <span class="tp">JPanel</span>(<span class="kw">new</span> <span class="tp">FlowLayout</span>(<span class="tp">FlowLayout</span>.RIGHT));
+        btnLimpiar   = <span class="kw">new</span> <span class="tp">JButton</span>(<span class="st">"Limpiar"</span>);
+        btnRegistrar = <span class="kw">new</span> <span class="tp">JButton</span>(<span class="st">"Registrar"</span>);
+        pnlBotones.<span class="fn">add</span>(btnLimpiar);
+        pnlBotones.<span class="fn">add</span>(btnRegistrar);
+
+        <span class="cm">// ── Barra de estado (South) ───────────────────────────────────</span>
+        lblEstado = <span class="kw">new</span> <span class="tp">JLabel</span>(<span class="st">" Formulario listo"</span>);
+        lblEstado.<span class="fn">setBorder</span>(<span class="tp">BorderFactory</span>.<span class="fn">createEtchedBorder</span>());
+
+        <span class="cm">// ── Armar la ventana ──────────────────────────────────────────</span>
+        <span class="fn">add</span>(pnlForm,    <span class="tp">BorderLayout</span>.CENTER);
+        <span class="fn">add</span>(pnlBotones, <span class="tp">BorderLayout</span>.SOUTH);
+        <span class="fn">add</span>(lblEstado,  <span class="tp">BorderLayout</span>.NORTH);
+    }
+
+    <span class="kw">private void</span> <span class="fn">registrarEventos</span>() {
+        <span class="cm">// ActionListener con expresión lambda (Java 8+)</span>
+        btnRegistrar.<span class="fn">addActionListener</span>(e -> {
+            <span class="tp">String</span> nombre = txNombre.<span class="fn">getText</span>().<span class="fn">trim</span>();
+            <span class="tp">String</span> codigo = txCodigo.<span class="fn">getText</span>().<span class="fn">trim</span>();
+
+            <span class="kw">if</span> (nombre.<span class="fn">isEmpty</span>() || codigo.<span class="fn">isEmpty</span>()) {
+                <span class="tp">JOptionPane</span>.<span class="fn">showMessageDialog</span>(
+                    <span class="kw">this</span>,
+                    <span class="st">"Por favor completa todos los campos."</span>,
+                    <span class="st">"Campos requeridos"</span>,
+                    <span class="tp">JOptionPane</span>.WARNING_MESSAGE
+                );
+                <span class="kw">return</span>;
+            }
+            lblEstado.<span class="fn">setText</span>(<span class="st">" ✔ Registrado: "</span> + nombre + <span class="st">" ["</span> + codigo + <span class="st">"]"</span>);
+        });
+
+        btnLimpiar.<span class="fn">addActionListener</span>(e -> {
+            txNombre.<span class="fn">setText</span>(<span class="st">""</span>);
+            txCodigo.<span class="fn">setText</span>(<span class="st">""</span>);
+            txCorreo.<span class="fn">setText</span>(<span class="st">""</span>);
+            cbSemestre.<span class="fn">setSelectedIndex</span>(<span class="nm">0</span>);
+            lblEstado.<span class="fn">setText</span>(<span class="st">" Formulario limpiado"</span>);
+            txNombre.<span class="fn">requestFocus</span>();
+        });
+    }
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="cm">// Ejecutar la UI en el Event Dispatch Thread (EDT)</span>
+        <span class="tp">SwingUtilities</span>.<span class="fn">invokeLater</span>(() -> {
+            <span class="kw">new</span> <span class="cl">VentanaRegistro</span>().<span class="fn">setVisible</span>(<span class="kw">true</span>);
+        });
+    }
+}</code></pre>
+      </div>
+
+      <div class="callout ok">
+        <span class="icon">🧵</span>
+        <p><strong>Thread de UI:</strong> todas las actualizaciones a componentes Swing deben ejecutarse en el <strong>Event Dispatch Thread (EDT)</strong>. Por eso se usa <code>SwingUtilities.invokeLater()</code> en el <code>main</code>. Operar la UI desde otros hilos puede causar errores difíciles de reproducir.</p>
+      </div>
+
+      <div class="callout warn">
+        <span class="icon">📝</span>
+        <p><strong>Concepto clave — Herencia vs. Delegación:</strong> el ejemplo extiende <code>JFrame</code> directamente. Otra práctica común es crear una instancia de <code>JFrame</code> como campo de la clase (delegación). Para proyectos pequeños la herencia es más directa; para diseños más complejos, la delegación mejora la encapsulación.</p>
+      </div>
+
+    </section>
+
+    <!-- FOOTER -->
+    <footer style="margin-top:72px;padding-top:32px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;">
+      <div>
+        <div style="font-family:var(--heading-font);font-size:16px;color:var(--text);margin-bottom:4px;">Programación en Java · Guía de Estudio</div>
+        <div style="font-size:12px;color:var(--text3);">Ingeniería de Sistemas · Segundo Semestre · 2025</div>
+      </div>
+      <div style="font-family:var(--mono-font);font-size:11px;color:var(--text3);text-align:right;">
+        java.io · java.util · javax.swing · java.awt<br>
+        <span style="color:var(--accent);">☕ Java SE 17+</span>
+      </div>
+    </footer>
+
+  </div><!-- /content -->
+</main>
+
+</body>
+</html>
