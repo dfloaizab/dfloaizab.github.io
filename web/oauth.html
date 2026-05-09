@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OAuth 2.0 — Guía de Autenticación Web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1117;
+    --bg2: #161b27;
+    --bg3: #1e2535;
+    --border: #2a3145;
+    --amber: #f59e0b;
+    --amber-dim: #d97706;
+    --amber-bg: #1c1607;
+    --amber-border: #3d2f00;
+    --teal: #14b8a6;
+    --teal-bg: #061514;
+    --red: #f87171;
+    --red-bg: #1a0a0a;
+    --green: #4ade80;
+    --green-bg: #061409;
+    --blue: #60a5fa;
+    --blue-bg: #060e1a;
+    --text: #e8eaf0;
+    --text2: #9aa3b8;
+    --text3: #5c6580;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Sora', sans-serif;
+    --serif: 'Fraunces', serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    height: 56px;
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--amber);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  nav {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    flex: 1;
+  }
+
+  nav a {
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 12px;
+    padding: 0 14px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  nav a:hover { color: var(--text); border-color: var(--border); }
+  nav a.active { color: var(--amber); border-color: var(--amber); }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: var(--amber-bg);
+    border: 1px solid var(--amber-border);
+    color: var(--amber);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    padding: 4px 14px;
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 em {
+    color: var(--amber);
+    font-style: italic;
+  }
+
+  .hero p {
+    color: var(--text2);
+    max-width: 560px;
+    margin: 0 auto 2rem;
+    font-size: 15px;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+
+  /* ── LAYOUT ── */
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem 6rem;
+  }
+
+  /* ── SECTION HEADING ── */
+  .section-header {
+    padding: 4rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--amber);
+    letter-spacing: 0.15em;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .section-header h2 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 2rem;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  .section-header p {
+    color: var(--text2);
+    margin-top: 0.6rem;
+    max-width: 620px;
+  }
+
+  /* ── PROSE ── */
+  .prose h3 {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 2rem 0 0.6rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .prose p { color: var(--text2); margin-bottom: 1rem; }
+  .prose strong { color: var(--text); font-weight: 600; }
+
+  /* ── DEFINITION BOX ── */
+  .def-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--amber);
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .def-box .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--amber);
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .def-box p { color: var(--text); margin: 0; font-size: 15px; }
+
+  /* ── PRO/CON GRID ── */
+  .pro-con {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .pro-card, .con-card {
+    border-radius: 6px;
+    padding: 1.25rem;
+    border: 1px solid;
+  }
+
+  .pro-card {
+    background: var(--green-bg);
+    border-color: #1a3d22;
+  }
+
+  .con-card {
+    background: var(--red-bg);
+    border-color: #3d1a1a;
+  }
+
+  .pro-card h4 { color: var(--green); font-size: 12px; font-family: var(--mono); letter-spacing: 0.1em; margin-bottom: 0.75rem; }
+  .con-card h4 { color: var(--red); font-size: 12px; font-family: var(--mono); letter-spacing: 0.1em; margin-bottom: 0.75rem; }
+
+  .pro-card li, .con-card li {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 0.4rem;
+    list-style: none;
+    padding-left: 1.2rem;
+    position: relative;
+  }
+
+  .pro-card li::before { content: '+'; position: absolute; left: 0; color: var(--green); font-weight: 700; }
+  .con-card li::before { content: '−'; position: absolute; left: 0; color: var(--red); font-weight: 700; }
+
+  /* ── CONCEPT CARDS ── */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .concept-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem;
+    transition: border-color 0.2s;
+  }
+
+  .concept-card:hover { border-color: var(--amber-dim); }
+
+  .concept-card .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--amber);
+    letter-spacing: 0.12em;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .concept-card h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+
+  .concept-card p { font-size: 13px; color: var(--text2); margin: 0; line-height: 1.6; }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+
+  .flow-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.12em;
+    margin-bottom: 1.5rem;
+  }
+
+  .flow-steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: nowrap;
+    min-width: 600px;
+  }
+
+  .flow-node {
+    flex: 1;
+    text-align: center;
+  }
+
+  .flow-box {
+    display: inline-block;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text2);
+    min-width: 90px;
+    position: relative;
+  }
+
+  .flow-box.highlight {
+    border-color: var(--amber-dim);
+    color: var(--amber);
+  }
+
+  .flow-arrow {
+    color: var(--text3);
+    font-size: 18px;
+    padding: 0 4px;
+    flex-shrink: 0;
+  }
+
+  .flow-label {
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 6px;
+    font-family: var(--mono);
+  }
+
+  /* ── STEP ── */
+  .step-block {
+    margin: 2.5rem 0;
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 0 1.5rem;
+    align-items: start;
+  }
+
+  .step-num {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--amber-bg);
+    border: 1px solid var(--amber-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--amber);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .step-content h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+
+  .step-content p { color: var(--text2); font-size: 14px; margin-bottom: 0.75rem; }
+  .step-content strong { color: var(--text); }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: #0a0c12;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 1rem 0;
+    overflow: hidden;
+    font-size: 13px;
+  }
+
+  .code-header {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    padding: 7px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .code-header .filename {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+  }
+
+  .code-header .lang {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+    background: var(--amber-bg);
+    padding: 2px 8px;
+    border-radius: 2px;
+    border: 1px solid var(--amber-border);
+  }
+
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover { color: var(--text2); border-color: var(--text3); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+  pre {
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    margin: 0;
+    font-family: var(--mono);
+    line-height: 1.65;
+    color: #c9d1e0;
+  }
+
+  /* Syntax coloring */
+  .kw { color: #c792ea; }
+  .fn { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .cmt { color: #546e7a; font-style: italic; }
+  .dec { color: #ffcb6b; }
+  .num { color: #f78c6c; }
+  .typ { color: #89ddff; }
+  .var { color: #eeffff; }
+  .pun { color: #89ddff; }
+
+  /* ── CALLOUT ── */
+  .callout {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+    font-size: 13px;
+    border: 1px solid;
+  }
+
+  .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .callout-body { color: var(--text2); }
+  .callout-body strong { display: block; font-size: 12px; font-family: var(--mono); letter-spacing: 0.08em; margin-bottom: 3px; }
+
+  .callout.warning {
+    background: var(--amber-bg);
+    border-color: var(--amber-border);
+  }
+  .callout.warning .callout-icon { color: var(--amber); }
+  .callout.warning .callout-body strong { color: var(--amber); }
+
+  .callout.info {
+    background: var(--blue-bg);
+    border-color: #0d2040;
+  }
+  .callout.info .callout-icon { color: var(--blue); }
+  .callout.info .callout-body strong { color: var(--blue); }
+
+  .callout.tip {
+    background: var(--teal-bg);
+    border-color: #0a2e2b;
+  }
+  .callout.tip .callout-icon { color: var(--teal); }
+  .callout.tip .callout-body strong { color: var(--teal); }
+
+  /* ── LIST ── */
+  .check-list { list-style: none; margin: 0.5rem 0 1rem; }
+  .check-list li {
+    font-size: 13px;
+    color: var(--text2);
+    padding: 5px 0 5px 1.5rem;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+  }
+  .check-list li:last-child { border-bottom: none; }
+  .check-list li::before { content: '▸'; position: absolute; left: 0; color: var(--amber); }
+
+  /* ── IMAGE PLACEHOLDER ── */
+  .img-placeholder {
+    background: var(--bg3);
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    padding: 2rem;
+    text-align: center;
+    color: var(--text3);
+    font-size: 12px;
+    font-family: var(--mono);
+    margin: 1rem 0;
+  }
+
+  /* ── TABS ── */
+  .tab-nav {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin: 1.5rem 0 0;
+    gap: 0;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 10px 18px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    letter-spacing: 0.05em;
+    transition: all 0.15s;
+  }
+
+  .tab-btn.active { color: var(--amber); border-bottom-color: var(--amber); }
+  .tab-btn:hover:not(.active) { color: var(--text2); }
+
+  .tab-content { display: none; padding: 1.5rem 0 0; }
+  .tab-content.active { display: block; }
+
+  /* ── SEPARATOR ── */
+  .section-sep {
+    height: 1px;
+    background: var(--border);
+    margin: 4rem 0 0;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .pro-con { grid-template-columns: 1fr; }
+    .step-block { grid-template-columns: 1fr; }
+    .step-num { margin-bottom: 0.5rem; }
+    nav a { padding: 0 10px; font-size: 11px; }
+  }
+
+  /* ── SCROLL INDICATOR ── */
+  .scroll-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background: var(--amber);
+    z-index: 200;
+    transition: width 0.1s linear;
+  }
+
+  /* ── INLINE CODE ── */
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: var(--amber);
+  }
+
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+  }
+
+  /* env badge */
+  .env-badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin: 0 2px;
+  }
+  .env-badge.shell { background: #0e1a0e; color: var(--green); border: 1px solid #1a3d1a; }
+  .env-badge.file  { background: var(--blue-bg); color: var(--blue); border: 1px solid #0d2040; }
+
+</style>
+</head>
+<body>
+
+<div class="scroll-bar" id="scrollBar"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">// PROG·WEB — AUTH</div>
+  <nav id="mainNav">
+    <a href="#que-es" class="active">¿Qué es OAuth?</a>
+    <a href="#conceptos">Conceptos</a>
+    <a href="#flujo">Flujo</a>
+    <a href="#google-setup">Google API</a>
+    <a href="#nestjs">NestJS</a>
+    <a href="#frontend">Frontend HTML</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">MÓDULO · AUTENTICACIÓN WEB</div>
+  <h1>Autenticación con <em>OAuth 2.0</em><br>en NestJS + Google</h1>
+  <p>Guía completa para estudiantes de programación web: desde los fundamentos del protocolo hasta una implementación funcional paso a paso.</p>
+  <div class="hero-meta">
+    <span>📦 NestJS + Passport.js</span>
+    <span>🔑 Google OAuth 2.0</span>
+    <span>🌐 Frontend en HTML/JS</span>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ══════════════════════════════ SECCIÓN 1 ══════════════════════════════ -->
+  <div id="que-es" class="section-header">
+    <span class="section-num">SECCIÓN 01</span>
+    <h2>¿Qué es OAuth 2.0?</h2>
+    <p>Un estándar abierto de autorización que permite a las aplicaciones acceder a recursos de un usuario sin que éste entregue su contraseña.</p>
+  </div>
+
+  <div class="def-box">
+    <span class="label">DEFINICIÓN FORMAL</span>
+    <p><strong>OAuth 2.0</strong> (Open Authorization) es un protocolo de autorización definido en el <strong>RFC 6749</strong> que permite a una aplicación de terceros (<em>cliente</em>) obtener acceso limitado a un servicio web en nombre del usuario, ya sea directamente o por delegación. No es un protocolo de <em>autenticación</em> por sí solo, aunque en la práctica se combina con <strong>OpenID Connect</strong> (OIDC) para lograrlo.</p>
+  </div>
+
+  <div class="prose">
+    <p>Piensa en esto con una analogía simple: cuando te hospedas en un hotel, el recepcionista te da una <strong>tarjeta llave</strong> que solo abre tu habitación, no el resto del edificio. OAuth funciona igual: tu aplicación recibe un <strong>token</strong> que da acceso solo a los recursos que el usuario autorizó, sin necesidad de conocer la contraseña real.</p>
+    <p>En el contexto de este curso: cuando tu aplicación permite <em>"Iniciar sesión con Google"</em>, tu backend nunca ve la contraseña de Google del usuario. En cambio, Google emite un token que tu app puede usar para obtener el perfil del usuario.</p>
+  </div>
+
+  <div class="pro-con">
+    <div class="pro-card">
+      <h4>✦ VENTAJAS</h4>
+      <ul>
+        <li>El usuario <strong>nunca</strong> comparte su contraseña con tu app</li>
+        <li>Acceso <strong>granular</strong>: solo los permisos estrictamente necesarios</li>
+        <li>Los tokens pueden <strong>revocarse</strong> sin cambiar contraseñas</li>
+        <li>Reduce la <strong>carga de seguridad</strong> en tu backend (no almacenas passwords)</li>
+        <li>Mejora la <strong>experiencia de usuario</strong>: un clic para autenticarse</li>
+        <li>Estándar abierto, soporte en todos los lenguajes y frameworks</li>
+        <li>Compatible con aplicaciones móviles, SPA y servicios de terceros</li>
+      </ul>
+    </div>
+    <div class="con-card">
+      <h4>✦ DESVENTAJAS</h4>
+      <ul>
+        <li>Curva de aprendizaje inicial <strong>pronunciada</strong></li>
+        <li>Dependencia de un <strong>proveedor externo</strong> (si Google falla, tú fallas)</li>
+        <li>Configuración inicial <strong>más compleja</strong> que auth tradicional</li>
+        <li>Los tokens robados son difíciles de invalidar si no se implementa revocación</li>
+        <li>Flujos distintos para web, móvil y server-to-server pueden confundir</li>
+        <li>Usuarios <strong>sin cuenta</strong> en el proveedor no pueden acceder</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SECCIÓN 2 ══════════════════════════════ -->
+  <div class="section-sep"></div>
+  <div id="conceptos" class="section-header">
+    <span class="section-num">SECCIÓN 02</span>
+    <h2>Conceptos esenciales</h2>
+    <p>Antes de implementar, necesitamos manejar el vocabulario del protocolo. Estos son los actores y elementos clave.</p>
+  </div>
+
+  <div class="concept-grid">
+    <div class="concept-card">
+      <span class="tag">ACTOR</span>
+      <h4>Resource Owner (Propietario)</h4>
+      <p>El <strong>usuario final</strong>. Es quien posee los datos y otorga el permiso de acceso a tu aplicación. Ejemplo: la persona que hace clic en "Iniciar sesión con Google".</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">ACTOR</span>
+      <h4>Client (Cliente)</h4>
+      <p>Tu <strong>aplicación</strong> (el backend NestJS). Es quien solicita acceso a los recursos del usuario. Debe registrarse primero en el proveedor.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">ACTOR</span>
+      <h4>Authorization Server</h4>
+      <p>El servidor que <strong>autentica al usuario</strong> y emite los tokens. En este caso es <strong>Google</strong>. Verifica la identidad y otorga el acceso.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">ACTOR</span>
+      <h4>Resource Server</h4>
+      <p>El servidor que <strong>aloja los datos protegidos</strong>. Puede ser la API de Google (perfil, Gmail, etc.) o tu propio backend con datos del usuario.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">TOKEN</span>
+      <h4>Access Token</h4>
+      <p>Token de <strong>corta duración</strong> (minutos/horas) que da acceso a los recursos. Se envía en el encabezado <code>Authorization: Bearer &lt;token&gt;</code> de cada petición.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">TOKEN</span>
+      <h4>Refresh Token</h4>
+      <p>Token de <strong>larga duración</strong> usado para obtener un nuevo Access Token sin que el usuario vuelva a autenticarse. Se guarda de forma segura en el servidor.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">TOKEN</span>
+      <h4>ID Token (OIDC)</h4>
+      <p>Un <strong>JWT</strong> emitido por OpenID Connect que contiene información del usuario (nombre, email, foto). OAuth puro no lo incluye; OIDC lo añade.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">CONCEPTO</span>
+      <h4>Scopes (Alcances)</h4>
+      <p>Permisos específicos que tu app solicita. Ejemplo: <code>openid</code>, <code>email</code>, <code>profile</code>. El usuario ve y aprueba exactamente qué puede acceder tu app.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">CONCEPTO</span>
+      <h4>Redirect URI / Callback</h4>
+      <p>La URL de tu backend a la que Google redirige al usuario <strong>después</strong> de que aprueba el acceso. Debe registrarse en Google Console exactamente.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">CONCEPTO</span>
+      <h4>Client ID & Secret</h4>
+      <p>Credenciales que identifican <strong>tu aplicación</strong> ante Google. El Client ID es público; el Client Secret es confidencial y nunca va al frontend.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">CONCEPTO</span>
+      <h4>Authorization Code</h4>
+      <p>Código temporal de <strong>un solo uso</strong> que Google devuelve al callback. Tu backend lo intercambia por los tokens reales. Dura solo unos minutos.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">CONCEPTO</span>
+      <h4>Grant Type</h4>
+      <p>El <strong>flujo</strong> OAuth a usar. El más común para web es <em>Authorization Code</em>. Otros: Implicit (obsoleto), Client Credentials (server-to-server), Device Code.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SECCIÓN 3 ══════════════════════════════ -->
+  <div class="section-sep"></div>
+  <div id="flujo" class="section-header">
+    <span class="section-num">SECCIÓN 03</span>
+    <h2>Flujo de autorización</h2>
+    <p>El flujo "Authorization Code" es el más seguro para aplicaciones web con backend. Así funciona paso a paso.</p>
+  </div>
+
+  <div class="flow">
+    <div class="flow-title">// AUTHORIZATION CODE FLOW — VISIÓN GENERAL</div>
+    <div class="flow-steps">
+      <div class="flow-node">
+        <div class="flow-box highlight">Usuario</div>
+        <div class="flow-label">browser</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="flow-box">Tu App</div>
+        <div class="flow-label">NestJS</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="flow-box highlight">Google</div>
+        <div class="flow-label">auth server</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="flow-box">Callback</div>
+        <div class="flow-label">/auth/google/callback</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="flow-box highlight">JWT propio</div>
+        <div class="flow-label">sesión local</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="prose">
+    <h3>Descripción detallada del flujo</h3>
+  </div>
+
+  <div class="step-block">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <h3>El usuario hace clic en "Iniciar sesión con Google"</h3>
+      <p>Tu frontend redirige o hace una petición a tu backend en <code>GET /auth/google</code>. Tu backend (usando Passport.js) construye la URL de autorización de Google e <strong>redirige</strong> al usuario hacia ella, incluyendo tu <code>client_id</code>, los <code>scopes</code> solicitados y tu <code>redirect_uri</code>.</p>
+    </div>
+  </div>
+
+  <div class="step-block">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <h3>Google muestra la pantalla de consentimiento</h3>
+      <p>El usuario ve exactamente qué permisos solicita tu app (email, perfil, etc.) y decide si aprobar o denegar. <strong>Nunca interactúa con tu backend en este paso.</strong></p>
+    </div>
+  </div>
+
+  <div class="step-block">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <h3>Google redirige al Callback con un código</h3>
+      <p>Si el usuario aprueba, Google redirige al navegador hacia tu <code>redirect_uri</code> (ej: <code>http://localhost:3000/auth/google/callback?code=4/0AX4XfWi...</code>). Este <code>code</code> es temporal y de un solo uso.</p>
+    </div>
+  </div>
+
+  <div class="step-block">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <h3>Tu backend intercambia el código por tokens</h3>
+      <p>Passport.js maneja esto automáticamente: hace una petición <strong>server-to-server</strong> a Google entregando el código, el <code>client_id</code> y el <code>client_secret</code>. Google responde con un <code>access_token</code>, un <code>refresh_token</code> y un <code>id_token</code> (JWT con datos del perfil).</p>
+    </div>
+  </div>
+
+  <div class="step-block">
+    <div class="step-num">5</div>
+    <div class="step-content">
+      <h3>Tu backend crea una sesión propia y redirige al frontend</h3>
+      <p>Con el perfil del usuario (nombre, email, foto) puedes crear o actualizar un registro en tu base de datos, generar tu propio <strong>JWT de sesión</strong>, y redirigir al frontend pasándole ese token para que lo guarde localmente.</p>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">ℹ</div>
+    <div class="callout-body">
+      <strong>NOTA IMPORTANTE</strong>
+      En producción, nunca pases el JWT por URL (<code>?token=...</code>). Usa cookies <code>HttpOnly</code> o un canal seguro. Para este ejercicio educativo lo haremos por URL para simplificar.
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SECCIÓN 4 ══════════════════════════════ -->
+  <div class="section-sep"></div>
+  <div id="google-setup" class="section-header">
+    <span class="section-num">SECCIÓN 04</span>
+    <h2>Configurar Google Developer Console</h2>
+    <p>Antes de escribir código, necesitas registrar tu aplicación en Google Cloud para obtener las credenciales OAuth.</p>
+  </div>
+
+  <div class="callout warning">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body">
+      <strong>PREREQUISITO</strong>
+      Necesitas una cuenta de Google. El proceso tarda unos 5 minutos. Las credenciales que generes son gratuitas para uso de desarrollo y proyectos con límites razonables.
+    </div>
+  </div>
+
+  <!-- PASO 1 -->
+  <div class="step-block">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <h3>Crear un proyecto en Google Cloud Console</h3>
+      <p>Ve a <strong>console.cloud.google.com</strong> e inicia sesión con tu cuenta de Google.</p>
+      <ul class="check-list">
+        <li>En la barra superior, haz clic en el selector de proyectos (generalmente dice "My First Project" o similar)</li>
+        <li>Haz clic en <strong>Nuevo Proyecto</strong> en la esquina superior derecha del modal</li>
+        <li>Asigna un nombre descriptivo, ej: <code>mi-app-oauth-nestjs</code></li>
+        <li>Haz clic en <strong>Crear</strong> y espera unos segundos</li>
+        <li>Asegúrate de que el nuevo proyecto quede seleccionado en el selector</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PASO 2 -->
+  <div class="step-block">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <h3>Configurar la pantalla de consentimiento OAuth</h3>
+      <p>Esta es la pantalla que verán tus usuarios cuando tu app les pida permisos.</p>
+      <ul class="check-list">
+        <li>En el menú lateral izquierdo, navega a <strong>APIs y Servicios → Pantalla de consentimiento de OAuth</strong></li>
+        <li>Selecciona el tipo de usuario: elige <strong>Externo</strong> (permite cualquier cuenta de Google)</li>
+        <li>Haz clic en <strong>Crear</strong></li>
+        <li>Rellena los campos obligatorios: <strong>Nombre de la app</strong> (ej: "Mi App Web"), <strong>Email de soporte</strong> (tu correo), e <strong>Email del desarrollador</strong></li>
+        <li>En la sección de <strong>Dominios autorizados</strong>, para desarrollo no necesitas agregar nada</li>
+        <li>Haz clic en <strong>Guardar y continuar</strong></li>
+      </ul>
+
+      <div class="callout tip" style="margin-top:0.75rem">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">
+          <strong>SCOPES (Alcances)</strong>
+          En la siguiente pantalla (Permisos/Scopes), haz clic en <em>Agregar o quitar permisos</em> y añade: <code>openid</code>, <code>email</code> y <code>profile</code>. Guarda y continúa.
+        </div>
+      </div>
+
+      <ul class="check-list" style="margin-top:0.5rem">
+        <li>En la pantalla de <strong>Usuarios de prueba</strong> (importante mientras estés en modo prueba): haz clic en <strong>+ Add Users</strong> y agrega tu propio correo de Google</li>
+        <li>Finaliza el asistente haciendo clic en <strong>Guardar y continuar</strong> hasta llegar al resumen</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PASO 3 -->
+  <div class="step-block">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <h3>Crear las credenciales OAuth 2.0 (Client ID y Secret)</h3>
+      <p>Aquí se generan las llaves que usará tu backend.</p>
+      <ul class="check-list">
+        <li>Ve a <strong>APIs y Servicios → Credenciales</strong></li>
+        <li>Haz clic en <strong>+ Crear credenciales</strong> → selecciona <strong>ID de cliente de OAuth</strong></li>
+        <li>En <em>Tipo de aplicación</em>, selecciona <strong>Aplicación web</strong></li>
+        <li>Ponle un nombre, ej: <code>nestjs-backend</code></li>
+        <li>En <strong>Orígenes de JavaScript autorizados</strong>, agrega: <code>http://localhost:3000</code></li>
+        <li>En <strong>URIs de redireccionamiento autorizados</strong>, agrega exactamente: <code>http://localhost:3000/auth/google/callback</code></li>
+        <li>Haz clic en <strong>Crear</strong></li>
+      </ul>
+
+      <div class="callout warning" style="margin-top:0.75rem">
+        <div class="callout-icon">⚠</div>
+        <div class="callout-body">
+          <strong>¡GUARDA ESTAS CREDENCIALES!</strong>
+          Google te mostrará una ventana con el <code>Client ID</code> y el <code>Client Secret</code>. Cópialos y guárdalos en un lugar seguro. El Client Secret no se puede volver a ver. Si lo pierdes, debes crear nuevas credenciales.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 4 -->
+  <div class="step-block">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <h3>Verificar la habilitación de la API de Google+</h3>
+      <p>Para acceder al perfil del usuario, la API correcta debe estar habilitada.</p>
+      <ul class="check-list">
+        <li>Ve a <strong>APIs y Servicios → Biblioteca</strong></li>
+        <li>Busca <strong>"Google People API"</strong> o <strong>"Google+ API"</strong></li>
+        <li>Haz clic en ella y luego en <strong>Habilitar</strong> si no está habilitada</li>
+        <li>Opcionalmente, también habilita la <strong>Google Identity Toolkit API</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SECCIÓN 5 ══════════════════════════════ -->
+  <div class="section-sep"></div>
+  <div id="nestjs" class="section-header">
+    <span class="section-num">SECCIÓN 05</span>
+    <h2>Implementación en NestJS</h2>
+    <p>Construiremos el backend paso a paso usando NestJS con Passport.js y la estrategia de Google OAuth 2.0.</p>
+  </div>
+
+  <!-- PASO 1: PROYECTO -->
+  <div class="step-block">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <h3>Crear el proyecto NestJS e instalar dependencias</h3>
+      <p>Si ya tienes un proyecto NestJS, salta la creación. De lo contrario:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">Terminal</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="lang">BASH</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+        </div>
+        <pre><code><span class="cmt"># Crear proyecto NestJS (si no tienes uno)</span>
+<span class="fn">npm</span> <span class="var">i -g @nestjs/cli</span>
+<span class="fn">nest</span> <span class="var">new auth-oauth-demo</span>
+<span class="fn">cd</span> <span class="var">auth-oauth-demo</span>
+
+<span class="cmt"># Instalar Passport.js y la estrategia de Google</span>
+<span class="fn">npm</span> <span class="var">install @nestjs/passport passport passport-google-oauth20</span>
+<span class="fn">npm</span> <span class="var">install @nestjs/jwt passport-jwt</span>
+<span class="fn">npm</span> <span class="var">install --save-dev @types/passport-google-oauth20 @types/passport-jwt</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 2: ENV -->
+  <div class="step-block">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <h3>Configurar las variables de entorno</h3>
+      <p>Nunca pongas tus credenciales directamente en el código. Usa un archivo <code>.env</code> en la raíz del proyecto.</p>
+
+      <div class="callout warning">
+        <div class="callout-icon">⚠</div>
+        <div class="callout-body">
+          <strong>SEGURIDAD</strong>
+          Agrega <code>.env</code> a tu <code>.gitignore</code> antes de hacer cualquier commit. Nunca subas tus credenciales a un repositorio público.
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">.env</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="lang">ENV</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+        </div>
+        <pre><code><span class="cmt"># Credenciales de Google OAuth (las que copiaste del Console)</span>
+<span class="var">GOOGLE_CLIENT_ID</span><span class="pun">=</span><span class="str">tu_client_id_aqui.apps.googleusercontent.com</span>
+<span class="var">GOOGLE_CLIENT_SECRET</span><span class="pun">=</span><span class="str">tu_client_secret_aqui</span>
+<span class="var">GOOGLE_CALLBACK_URL</span><span class="pun">=</span><span class="str">http://localhost:3000/auth/google/callback</span>
+
+<span class="cmt"># Clave secreta para firmar los JWT propios</span>
+<span class="var">JWT_SECRET</span><span class="pun">=</span><span class="str">una_clave_muy_larga_y_aleatoria_cambia_esto_en_produccion</span></code></pre>
+      </div>
+
+      <p>Instala <code>@nestjs/config</code> para leer el <code>.env</code>:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">Terminal</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="lang">BASH</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+        </div>
+        <pre><code><span class="fn">npm</span> <span class="var">install @nestjs/config</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 3: APP MODULE -->
+  <div class="step-block">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <h3>Actualizar AppModule para cargar la configuración</h3>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">src/app.module.ts</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="lang">TYPESCRIPT</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+        </div>
+        <pre><code><span class="kw">import</span> { Module } <span class="kw">from</span> <span class="str">'@nestjs/common'</span><span class="pun">;</span>
+<span class="kw">import</span> { ConfigModule } <span class="kw">from</span> <span class="str">'@nestjs/config'</span><span class="pun">;</span>
+<span class="kw">import</span> { AuthModule } <span class="kw">from</span> <span class="str">'./auth/auth.module'</span><span class="pun">;</span>
+
+<span class="dec">@Module</span><span class="pun">({</span>
+  imports<span class="pun">: [</span>
+    ConfigModule<span class="pun">.</span><span class="fn">forRoot</span><span class="pun">({</span> isGlobal<span class="pun">:</span> <span class="kw">true</span> <span class="pun">}),</span> <span class="cmt">// carga el .env globalmente</span>
+    AuthModule<span class="pun">,</span>
+  <span class="pun">],</span>
+<span class="pun">})</span>
+<span class="kw">export class</span> <span class="typ">AppModule</span> <span class="pun">{}</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 4: GOOGLE STRATEGY -->
+  <div class="step-block">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <h3>Crear la Estrategia de Google (Google Strategy)</h3>
+      <p>La <strong>estrategia</strong> es el corazón del proceso. Passport.js la usa para manejar el flujo OAuth automáticamente. Crea la carpeta <code>src/auth/</code> y dentro el archivo:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">src/auth/google.strategy.ts</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="lang">TYPESCRIPT</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+        </div>
+        <pre><code><span class="kw">import</span> { Injectable } <span class="kw">from</span> <span class="str">'@nestjs/common'</span><span class="pun">;</span>
+<span class="kw">import</span> { PassportStrategy } <span class="kw">from</span> <span class="str">'@nestjs/passport'</span><span class="pun">;</span>
+<span class="kw">import</span> { Strategy, VerifyCallback } <span class="kw">from</span> <span class="str">'passport-google-oauth20'</span><span class="pun">;</span>
+<span class="kw">import</span> { ConfigService } <span class="kw">from</span> <span class="str">'@nestjs/config'</span><span class="pun">;</span>
+
+<span class="dec">@Injectable</span><span class="pun">()</span>
+<span class="kw">export class</span> <span class="typ">GoogleStrategy</span> <span class="kw">extends</span> <span class="fn">PassportStrategy</span><span class="pun">(</span>Strategy<span class="pun">,</span> <span class="str">'google'</span><span class="pun">) {</span>
+
+  <span class="fn">constructor</span><span class="pun">(</span><span class="kw">private</span> configService<span class="pun">:</span> <span class="typ">ConfigService</span><span class="pun">) {</span>
+    <span class="fn">super</span><span class="pun">({</span>
+      clientID<span class="pun">:</span>     configService<span class="pun">.</span><span class="fn">get</span><span class="pun">(</span><span class="str">'GOOGLE_CLIENT_ID'</span><span class="pun">),</span>
+      clientSecret<span class="pun">:</span> configService<span class="pun">.</span><span class="fn">get</span><span class="pun">(</span><span class="str">'GOOGLE_CLIENT_SECRET'</span><span class="pun">),</span>
+      callbackURL<span class="pun">:</span>  configService<span class="pun">.</span><span class="fn">get</span><span class="pun">(</span><span class="str">'GOOGLE_CALLBACK_URL'</span><span class="pun">),</span>
+      scope<span class="pun">: [</span><span class="str">'email'</span><span class="pun">,</span> <span class="str">'profile'</span><span class="pun">],</span> <span class="cmt">// qué pedimos a Google</span>
+    <span class="pun">});</span>
+  <span class="pun">}</span>
+
+  <span class="cmt">/**
+   * validate() se ejecuta automáticamente cuando Google redirige
+   * al callback con el perfil del usuario ya verificado.
+   * Lo que retornamos aquí se adjunta a req.user
+   */</span>
+  <span class="kw">async</span> <span class="fn">validate</span><span class="pun">(</span>
+    accessToken<span class="pun">:</span> <span class="typ">string</span><span class="pun">,</span>
+    refreshToken<span class="pun">:</span> <span class="typ">string</span><span class="pun">,</span>
+    profile<span class="pun">:</span> <span class="kw">any</span><span class="pun">,</span>
+    done<span class="pun">:</span> <span class="typ">VerifyCallback</span><span class="pun">,</span>
+  <span class="pun">):</span> <span class="typ">Promise</span><span class="pun">&lt;</span><span class="kw">any</span><span class="pun">&gt; {</span>
+    <span class="kw">const</span> <span class="pun">{</span> name<span class="pun">,</span> emails<span class="pun">,</span> photos <span class="pun">} =</span> profile<span class="pun">;</span>
+
+    <span class="cmt">// Construimos un objeto usuario con los datos relevantes</span>
+    <span class="kw">const</span> user <span class="pun">= {</span>
+      email<span class="pun">:</span>     emails<span class="pun">[</span><span class="num">0</span><span class="pun">].</span>value<span class="pun">,</span>
+      firstName<span class="pun">:</span> name<span class="pun">.</span>givenName<span class="pun">,</span>
+      lastName<span class="pun">:</span>  name<span class="pun">.</span>familyName<span class="pun">,</span>
+      picture<span class="pun">:</span>   photos<span class="pun">[</span><span class="num">0</span><span class="pun">].</span>value<span class="pun">,</span>
+      accessToken<span class="pun">,</span>
+    <span class="pun">};</span>
+
+    <span class="fn">done</span><span class="pun">(</span><span class="kw">null</span><span class="pun">,</span> user<span class="pun">);</span> <span class="cmt">// null = sin error, user = datos adjuntados a req.user</span>
+  <span class="pun">}</span>
+<span class="pun">}</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 5: AUTH SERVICE -->
+  <div class="step-block">
+    <div class="step-num">5</div>
+    <div class="step-content">
+      <h3>Crear el AuthService (generar el JWT propio)</h3>
+      <p>Después de verificar al usuario con Google, generamos nuestro propio JWT de sesión para usar en llamadas futuras a nuestra API.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">src/auth/auth.service.ts</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="lang">TYPESCRIPT</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+        </div>
+        <pre><code><span class="kw">import</span> { Injectable } <span class="kw">from</span> <span class="str">'@nestjs/common'</span><span class="pun">;</span>
+<span class="kw">import</span> { JwtService } <span class="kw">from</span> <span class="str">'@nestjs/jwt'</span><span class="pun">;</span>
+
+<span class="dec">@Injectable</span><span class="pun">()</span>
+<span class="kw">export class</span> <span class="typ">AuthService</span> <span class="pun">{</span>
+
+  <span class="fn">constructor</span><span class="pun">(</span><span class="kw">private</span> jwtService<span class="pun">:</span> <span class="typ">JwtService</span><span class="pun">) {}</span>
+
+  <span class="cmt">/**
+   * Recibe el objeto usuario que retornó GoogleStrategy.validate()
+   * y genera un JWT firmado con nuestra propia clave secreta.
+   */</span>
+  <span class="fn">generateToken</span><span class="pun">(</span>user<span class="pun">:</span> <span class="kw">any</span><span class="pun">) {</span>
+    <span class="kw">const</span> payload <span class="pun">= {</span>
+      email<span class="pun">:</span>     user<span class="pun">.</span>email<span class="pun">,</span>
+      firstName<span class="pun">:</span> user<span class="pun">.</span>firstName<span class="pun">,</span>
+      lastName<span class="pun">:</span>  user<span class="pun">.</span>lastName<span class="pun">,</span>
+      picture<span class="pun">:</span>   user<span class="pun">.</span>picture<span class="pun">,</span>
+      sub<span class="pun">:</span>       user<span class="pun">.</span>email<span class="pun">,</span> <span class="cmt">// "subject" del JWT — identificador único</span>
+    <span class="pun">};</span>
+
+    <span class="kw">return</span> <span class="pun">{</span>
+      access_token<span class="pun">:</span> <span class="kw">this</span><span class="pun">.</span>jwtService<span class="pun">.</span><span class="fn">sign</span><span class="pun">(</span>payload<span class="pun">),</span>
+    <span class="pun">};</span>
+  <span class="pun">}</span>
+<span class="pun">}</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 6: AUTH CONTROLLER -->
+  <div class="step-block">
+    <div class="step-num">6</div>
+    <div class="step-content">
+      <h3>Crear el AuthController (rutas de autenticación)</h3>
+      <p>El controlador expone dos endpoints: el que inicia el flujo OAuth y el callback que maneja la respuesta de Google.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">src/auth/auth.controller.ts</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="lang">TYPESCRIPT</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+        </div>
+        <pre><code><span class="kw">import</span> { Controller, Get, Req, Res, UseGuards } <span class="kw">from</span> <span class="str">'@nestjs/common'</span><span class="pun">;</span>
+<span class="kw">import</span> { AuthGuard } <span class="kw">from</span> <span class="str">'@nestjs/passport'</span><span class="pun">;</span>
+<span class="kw">import</span> { AuthService } <span class="kw">from</span> <span class="str">'./auth.service'</span><span class="pun">;</span>
+
+<span class="dec">@Controller</span><span class="pun">(</span><span class="str">'auth'</span><span class="pun">)</span>
+<span class="kw">export class</span> <span class="typ">AuthController</span> <span class="pun">{</span>
+
+  <span class="fn">constructor</span><span class="pun">(</span><span class="kw">private</span> authService<span class="pun">:</span> <span class="typ">AuthService</span><span class="pun">) {}</span>
+
+  <span class="cmt">// PASO 1 del flujo: el frontend redirige aquí para iniciar auth con Google</span>
+  <span class="dec">@Get</span><span class="pun">(</span><span class="str">'google'</span><span class="pun">)</span>
+  <span class="dec">@UseGuards</span><span class="pun">(</span><span class="fn">AuthGuard</span><span class="pun">(</span><span class="str">'google'</span><span class="pun">))</span>
+  <span class="kw">async</span> <span class="fn">googleAuth</span><span class="pun">() {</span>
+    <span class="cmt">// Passport intercepta esta ruta y redirige automáticamente a Google.
+    // El cuerpo de esta función nunca se ejecuta.</span>
+  <span class="pun">}</span>
+
+  <span class="cmt">// PASO 3 del flujo: Google redirige aquí con el código de autorización</span>
+  <span class="dec">@Get</span><span class="pun">(</span><span class="str">'google/callback'</span><span class="pun">)</span>
+  <span class="dec">@UseGuards</span><span class="pun">(</span><span class="fn">AuthGuard</span><span class="pun">(</span><span class="str">'google'</span><span class="pun">))</span>
+  <span class="kw">async</span> <span class="fn">googleCallback</span><span class="pun">(</span><span class="dec">@Req</span><span class="pun">()</span> req<span class="pun">:</span> <span class="kw">any</span><span class="pun">,</span> <span class="dec">@Res</span><span class="pun">()</span> res<span class="pun">:</span> <span class="kw">any</span><span class="pun">) {</span>
+    <span class="cmt">// req.user contiene lo que retornó GoogleStrategy.validate()
+    // Generamos nuestro propio JWT de sesión</span>
+    <span class="kw">const</span> tokenData <span class="pun">=</span> <span class="kw">this</span><span class="pun">.</span>authService<span class="pun">.</span><span class="fn">generateToken</span><span class="pun">(</span>req<span class="pun">.</span>user<span class="pun">);</span>
+
+    <span class="cmt">// Redirigimos al frontend con el token en la URL
+    // En producción: usa cookies HttpOnly en lugar de URL params</span>
+    res<span class="pun">.</span><span class="fn">redirect</span><span class="pun">(</span>
+      <span class="str">`http://localhost:5500/index.html?token=<span class="pun">${</span>tokenData<span class="pun">.</span>access_token<span class="pun">}</span>`</span>
+    <span class="pun">);</span>
+  <span class="pun">}</span>
+
+  <span class="cmt">// Endpoint para obtener el perfil del usuario autenticado</span>
+  <span class="dec">@Get</span><span class="pun">(</span><span class="str">'profile'</span><span class="pun">)</span>
+  <span class="dec">@UseGuards</span><span class="pun">(</span><span class="fn">AuthGuard</span><span class="pun">(</span><span class="str">'jwt'</span><span class="pun">))</span>
+  <span class="fn">getProfile</span><span class="pun">(</span><span class="dec">@Req</span><span class="pun">()</span> req<span class="pun">:</span> <span class="kw">any</span><span class="pun">) {</span>
+    <span class="kw">return</span> req<span class="pun">.</span>user<span class="pun">;</span> <span class="cmt">// retorna el payload del JWT</span>
+  <span class="pun">}</span>
+<span class="pun">}</span></code></pre>
+      </div>
+
+      <div class="callout info">
+        <div class="callout-icon">ℹ</div>
+        <div class="callout-body">
+          <strong>¿QUÉ ES @UseGuards(AuthGuard('google'))?</strong>
+          Es un decorador de NestJS que activa una guardia de Passport. Con <code>'google'</code> activa nuestra <code>GoogleStrategy</code>. Con <code>'jwt'</code> activará la estrategia JWT que crearemos a continuación.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 7: JWT STRATEGY -->
+  <div class="step-block">
+    <div class="step-num">7</div>
+    <div class="step-content">
+      <h3>Crear la estrategia JWT para proteger rutas privadas</h3>
+      <p>Una vez que el usuario tiene su JWT propio, necesitamos una estrategia que valide ese token en las rutas protegidas.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">src/auth/jwt.strategy.ts</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="lang">TYPESCRIPT</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+        </div>
+        <pre><code><span class="kw">import</span> { Injectable } <span class="kw">from</span> <span class="str">'@nestjs/common'</span><span class="pun">;</span>
+<span class="kw">import</span> { PassportStrategy } <span class="kw">from</span> <span class="str">'@nestjs/passport'</span><span class="pun">;</span>
+<span class="kw">import</span> { ExtractJwt, Strategy } <span class="kw">from</span> <span class="str">'passport-jwt'</span><span class="pun">;</span>
+<span class="kw">import</span> { ConfigService } <span class="kw">from</span> <span class="str">'@nestjs/config'</span><span class="pun">;</span>
+
+<span class="dec">@Injectable</span><span class="pun">()</span>
+<span class="kw">export class</span> <span class="typ">JwtStrategy</span> <span class="kw">extends</span> <span class="fn">PassportStrategy</span><span class="pun">(</span>Strategy<span class="pun">,</span> <span class="str">'jwt'</span><span class="pun">) {</span>
+
+  <span class="fn">constructor</span><span class="pun">(</span><span class="kw">private</span> configService<span class="pun">:</span> <span class="typ">ConfigService</span><span class="pun">) {</span>
+    <span class="fn">super</span><span class="pun">({</span>
+      <span class="cmt">// Extrae el token del encabezado Authorization: Bearer &lt;token&gt;</span>
+      jwtFromRequest<span class="pun">:</span> ExtractJwt<span class="pun">.</span><span class="fn">fromAuthHeaderAsBearerToken</span><span class="pun">(),</span>
+      ignoreExpiration<span class="pun">:</span> <span class="kw">false</span><span class="pun">,</span>
+      secretOrKey<span class="pun">:</span> configService<span class="pun">.</span><span class="fn">get</span><span class="pun">(</span><span class="str">'JWT_SECRET'</span><span class="pun">),</span>
+    <span class="pun">});</span>
+  <span class="pun">}</span>
+
+  <span class="kw">async</span> <span class="fn">validate</span><span class="pun">(</span>payload<span class="pun">:</span> <span class="kw">any</span><span class="pun">) {</span>
+    <span class="cmt">// payload es el contenido decodificado del JWT
+    // Lo que retornamos se adjunta a req.user en las rutas protegidas</span>
+    <span class="kw">return</span> <span class="pun">{</span>
+      email<span class="pun">:</span>     payload<span class="pun">.</span>email<span class="pun">,</span>
+      firstName<span class="pun">:</span> payload<span class="pun">.</span>firstName<span class="pun">,</span>
+      lastName<span class="pun">:</span>  payload<span class="pun">.</span>lastName<span class="pun">,</span>
+      picture<span class="pun">:</span>   payload<span class="pun">.</span>picture<span class="pun">,</span>
+    <span class="pun">};</span>
+  <span class="pun">}</span>
+<span class="pun">}</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 8: AUTH MODULE -->
+  <div class="step-block">
+    <div class="step-num">8</div>
+    <div class="step-content">
+      <h3>Ensamblar el AuthModule</h3>
+      <p>El módulo une todas las piezas: estrategias, servicio, controlador y configuración de JWT.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">src/auth/auth.module.ts</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="lang">TYPESCRIPT</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+        </div>
+        <pre><code><span class="kw">import</span> { Module } <span class="kw">from</span> <span class="str">'@nestjs/common'</span><span class="pun">;</span>
+<span class="kw">import</span> { PassportModule } <span class="kw">from</span> <span class="str">'@nestjs/passport'</span><span class="pun">;</span>
+<span class="kw">import</span> { JwtModule } <span class="kw">from</span> <span class="str">'@nestjs/jwt'</span><span class="pun">;</span>
+<span class="kw">import</span> { ConfigModule, ConfigService } <span class="kw">from</span> <span class="str">'@nestjs/config'</span><span class="pun">;</span>
+
+<span class="kw">import</span> { AuthController } <span class="kw">from</span> <span class="str">'./auth.controller'</span><span class="pun">;</span>
+<span class="kw">import</span> { AuthService } <span class="kw">from</span> <span class="str">'./auth.service'</span><span class="pun">;</span>
+<span class="kw">import</span> { GoogleStrategy } <span class="kw">from</span> <span class="str">'./google.strategy'</span><span class="pun">;</span>
+<span class="kw">import</span> { JwtStrategy } <span class="kw">from</span> <span class="str">'./jwt.strategy'</span><span class="pun">;</span>
+
+<span class="dec">@Module</span><span class="pun">({</span>
+  imports<span class="pun">: [</span>
+    PassportModule<span class="pun">,</span>
+    JwtModule<span class="pun">.</span><span class="fn">registerAsync</span><span class="pun">({</span>
+      imports<span class="pun">: [</span>ConfigModule<span class="pun">],</span>
+      useFactory<span class="pun">: (</span>configService<span class="pun">:</span> <span class="typ">ConfigService</span><span class="pun">) => ({</span>
+        secret<span class="pun">:</span>      configService<span class="pun">.</span><span class="fn">get</span><span class="pun">(</span><span class="str">'JWT_SECRET'</span><span class="pun">),</span>
+        signOptions<span class="pun">: {</span> expiresIn<span class="pun">:</span> <span class="str">'7d'</span> <span class="pun">},</span> <span class="cmt">// el token expira en 7 días</span>
+      <span class="pun">}),</span>
+      inject<span class="pun">: [</span>ConfigService<span class="pun">],</span>
+    <span class="pun">}),</span>
+  <span class="pun">],</span>
+  controllers<span class="pun">: [</span>AuthController<span class="pun">],</span>
+  providers<span class="pun">: [</span>AuthService<span class="pun">,</span> GoogleStrategy<span class="pun">,</span> JwtStrategy<span class="pun">],</span>
+<span class="pun">})</span>
+<span class="kw">export class</span> <span class="typ">AuthModule</span> <span class="pun">{}</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 9: CORS -->
+  <div class="step-block">
+    <div class="step-num">9</div>
+    <div class="step-content">
+      <h3>Habilitar CORS en main.ts</h3>
+      <p>Para que el frontend HTML pueda comunicarse con el backend, debemos habilitar CORS.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">src/main.ts</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="lang">TYPESCRIPT</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+        </div>
+        <pre><code><span class="kw">import</span> { NestFactory } <span class="kw">from</span> <span class="str">'@nestjs/core'</span><span class="pun">;</span>
+<span class="kw">import</span> { AppModule } <span class="kw">from</span> <span class="str">'./app.module'</span><span class="pun">;</span>
+
+<span class="kw">async function</span> <span class="fn">bootstrap</span><span class="pun">() {</span>
+  <span class="kw">const</span> app <span class="pun">=</span> <span class="kw">await</span> NestFactory<span class="pun">.</span><span class="fn">create</span><span class="pun">(</span>AppModule<span class="pun">);</span>
+
+  app<span class="pun">.</span><span class="fn">enableCors</span><span class="pun">({</span>
+    origin<span class="pun">: [</span><span class="str">'http://localhost:5500'</span><span class="pun">,</span> <span class="str">'http://127.0.0.1:5500'</span><span class="pun">],</span>
+    methods<span class="pun">: [</span><span class="str">'GET'</span><span class="pun">,</span> <span class="str">'POST'</span><span class="pun">,</span> <span class="str">'PUT'</span><span class="pun">,</span> <span class="str">'DELETE'</span><span class="pun">],</span>
+    credentials<span class="pun">:</span> <span class="kw">true</span><span class="pun">,</span>
+  <span class="pun">});</span>
+
+  <span class="kw">await</span> app<span class="pun">.</span><span class="fn">listen</span><span class="pun">(</span><span class="num">3000</span><span class="pun">);</span>
+  console<span class="pun">.</span><span class="fn">log</span><span class="pun">(</span><span class="str">'🚀 Backend corriendo en http://localhost:3000'</span><span class="pun">);</span>
+<span class="pun">}</span>
+<span class="fn">bootstrap</span><span class="pun">();</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO 10: ESTRUCTURA -->
+  <div class="step-block">
+    <div class="step-num">10</div>
+    <div class="step-content">
+      <h3>Estructura final del proyecto</h3>
+      <p>Al terminar el backend, la carpeta <code>src/auth/</code> debe verse así:</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">Estructura de archivos</span>
+          <span class="lang">TREE</span>
+        </div>
+        <pre><code>src/
+├── auth/
+│   ├── auth.controller.ts   <span class="cmt">← rutas /auth/google y /auth/google/callback</span>
+│   ├── auth.module.ts       <span class="cmt">← módulo que ensambla todo</span>
+│   ├── auth.service.ts      <span class="cmt">← genera el JWT propio</span>
+│   ├── google.strategy.ts   <span class="cmt">← estrategia OAuth con Google</span>
+│   └── jwt.strategy.ts      <span class="cmt">← estrategia para validar JWT en rutas privadas</span>
+├── app.module.ts
+└── main.ts</code></pre>
+      </div>
+
+      <p>Inicia el backend con:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="filename">Terminal</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="lang">BASH</span>
+            <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+          </div>
+        </div>
+        <pre><code><span class="fn">npm</span> <span class="var">run start:dev</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SECCIÓN 6 ══════════════════════════════ -->
+  <div class="section-sep"></div>
+  <div id="frontend" class="section-header">
+    <span class="section-num">SECCIÓN 06</span>
+    <h2>Frontend HTML con autenticación</h2>
+    <p>Una página HTML simple que integra el flujo OAuth completo: botón de login, captura del token y llamada a rutas protegidas.</p>
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <strong>CÓMO SERVIR EL HTML</strong>
+      Abre el archivo <code>index.html</code> con la extensión <strong>Live Server</strong> de VS Code (click derecho → "Open with Live Server"). Esto lo sirve en <code>http://localhost:5500</code>, que es el origen que habilitamos en CORS. <strong>No abras el archivo directamente con doble clic</strong> (protocolo <code>file://</code>) porque los redireccionamientos no funcionarán.
+    </div>
+  </div>
+
+  <div class="step-block">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <h3>Crear el archivo index.html completo</h3>
+      <p>Este archivo maneja tres estados: no autenticado (muestra el botón de login), procesando el callback de Google (captura el token de la URL), y autenticado (muestra el perfil del usuario).</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="filename">index.html</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="lang">HTML</span>
+        <button class="copy-btn" onclick="copyCode(this)">copiar</button>
+      </div>
+    </div>
+    <pre><code><span class="pun">&lt;!</span><span class="kw">DOCTYPE</span> html<span class="pun">&gt;</span>
+<span class="pun">&lt;</span><span class="fn">html</span> lang<span class="pun">=</span><span class="str">"es"</span><span class="pun">&gt;</span>
+<span class="pun">&lt;</span><span class="fn">head</span><span class="pun">&gt;</span>
+  <span class="pun">&lt;</span><span class="fn">meta</span> charset<span class="pun">=</span><span class="str">"UTF-8"</span><span class="pun">&gt;</span>
+  <span class="pun">&lt;</span><span class="fn">title</span><span class="pun">&gt;</span>Demo OAuth Google<span class="pun">&lt;/</span><span class="fn">title</span><span class="pun">&gt;</span>
+  <span class="pun">&lt;</span><span class="fn">style</span><span class="pun">&gt;</span>
+    <span class="pun">*</span> { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: <span class="str">#f0f2f5</span>;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    h1 { font-size: 1.4rem; color: <span class="str">#1a1a2e</span>; margin-bottom: 0.5rem; }
+    .subtitle { color: <span class="str">#6b7280</span>; font-size: 0.9rem; margin-bottom: 2rem; }
+
+    <span class="cmt">/* Botón "Iniciar sesión con Google" */</span>
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: white;
+      border: 1.5px solid <span class="str">#dadce0</span>;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: <span class="str">#3c4043</span>;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.15s, box-shadow 0.15s;
+      text-decoration: none;
+    }
+    .btn-google:hover {
+      background: <span class="str">#f8f9fa</span>;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .btn-google svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+    <span class="cmt">/* Perfil del usuario autenticado */</span>
+    .profile { display: none; }
+    .profile img {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      margin-bottom: 1rem;
+      border: 3px solid <span class="str">#e8f0fe</span>;
+    }
+    .profile .name { font-size: 1.2rem; font-weight: 600; color: <span class="str">#1a1a2e</span>; }
+    .profile .email { color: <span class="str">#6b7280</span>; font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .badge {
+      display: inline-block;
+      background: <span class="str">#e8f5e9</span>;
+      color: <span class="str">#2e7d32</span>;
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    <span class="cmt">/* Área de respuesta de API */</span>
+    .api-response {
+      background: <span class="str">#1e1e2e</span>;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: left;
+      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 12px;
+      color: <span class="str">#a6e3a1</span>;
+      max-height: 140px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .btn-primary {
+      background: <span class="str">#4285f4</span>;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-right: 8px;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: <span class="str">#3367d6</span>; }
+
+    .btn-secondary {
+      background: <span class="str">#f1f3f4</span>;
+      color: <span class="str">#3c4043</span>;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-secondary:hover { background: <span class="str">#e8eaed</span>; }
+
+    .loading { color: <span class="str">#6b7280</span>; font-size: 14px; padding: 1rem; }
+  <span class="pun">&lt;/</span><span class="fn">style</span><span class="pun">&gt;</span>
+<span class="pun">&lt;/</span><span class="fn">head</span><span class="pun">&gt;</span>
+<span class="pun">&lt;</span><span class="fn">body</span><span class="pun">&gt;</span>
+
+<span class="pun">&lt;</span><span class="fn">div</span> class<span class="pun">=</span><span class="str">"card"</span><span class="pun">&gt;</span>
+
+  <span class="cmt">&lt;!-- Estado: NO autenticado --&gt;</span>
+  <span class="pun">&lt;</span><span class="fn">div</span> id<span class="pun">=</span><span class="str">"login-view"</span><span class="pun">&gt;</span>
+    <span class="pun">&lt;</span><span class="fn">h1</span><span class="pun">&gt;</span>Demo OAuth 2.0<span class="pun">&lt;/</span><span class="fn">h1</span><span class="pun">&gt;</span>
+    <span class="pun">&lt;</span><span class="fn">p</span> class<span class="pun">=</span><span class="str">"subtitle"</span><span class="pun">&gt;</span>Inicia sesión con tu cuenta de Google<span class="pun">&lt;/</span><span class="fn">p</span><span class="pun">&gt;</span>
+    <span class="pun">&lt;</span><span class="fn">a</span> href<span class="pun">=</span><span class="str">"http://localhost:3000/auth/google"</span> class<span class="pun">=</span><span class="str">"btn-google"</span><span class="pun">&gt;</span>
+      <span class="cmt">&lt;!-- Logo SVG de Google --&gt;</span>
+      <span class="pun">&lt;</span><span class="fn">svg</span> viewBox<span class="pun">=</span><span class="str">"0 0 48 48"</span><span class="pun">&gt;</span>
+        <span class="pun">&lt;</span><span class="fn">path</span> fill<span class="pun">=</span><span class="str">"#EA4335"</span> d<span class="pun">=</span><span class="str">"M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"</span><span class="pun">/&gt;</span>
+        <span class="pun">&lt;</span><span class="fn">path</span> fill<span class="pun">=</span><span class="str">"#4285F4"</span> d<span class="pun">=</span><span class="str">"M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"</span><span class="pun">/&gt;</span>
+        <span class="pun">&lt;</span><span class="fn">path</span> fill<span class="pun">=</span><span class="str">"#FBBC05"</span> d<span class="pun">=</span><span class="str">"M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"</span><span class="pun">/&gt;</span>
+        <span class="pun">&lt;</span><span class="fn">path</span> fill<span class="pun">=</span><span class="str">"#34A853"</span> d<span class="pun">=</span><span class="str">"M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"</span><span class="pun">/&gt;</span>
+      <span class="pun">&lt;/</span><span class="fn">svg</span><span class="pun">&gt;</span>
+      Continuar con Google
+    <span class="pun">&lt;/</span><span class="fn">a</span><span class="pun">&gt;</span>
+  <span class="pun">&lt;/</span><span class="fn">div</span><span class="pun">&gt;</span>
+
+  <span class="cmt">&lt;!-- Estado: Cargando (procesando callback) --&gt;</span>
+  <span class="pun">&lt;</span><span class="fn">div</span> id<span class="pun">=</span><span class="str">"loading-view"</span> style<span class="pun">=</span><span class="str">"display:none"</span><span class="pun">&gt;</span>
+    <span class="pun">&lt;</span><span class="fn">p</span> class<span class="pun">=</span><span class="str">"loading"</span><span class="pun">&gt;</span>Iniciando sesión...<span class="pun">&lt;/</span><span class="fn">p</span><span class="pun">&gt;</span>
+  <span class="pun">&lt;/</span><span class="fn">div</span><span class="pun">&gt;</span>
+
+  <span class="cmt">&lt;!-- Estado: Autenticado --&gt;</span>
+  <span class="pun">&lt;</span><span class="fn">div</span> id<span class="pun">=</span><span class="str">"profile-view"</span> class<span class="pun">=</span><span class="str">"profile"</span><span class="pun">&gt;</span>
+    <span class="pun">&lt;</span><span class="fn">img</span> id<span class="pun">=</span><span class="str">"user-avatar"</span> src<span class="pun">=</span><span class="str">""</span> alt<span class="pun">=</span><span class="str">"Avatar"</span><span class="pun">&gt;</span>
+    <span class="pun">&lt;</span><span class="fn">p</span> class<span class="pun">=</span><span class="str">"name"</span> id<span class="pun">=</span><span class="str">"user-name"</span><span class="pun">&gt;&lt;/</span><span class="fn">p</span><span class="pun">&gt;</span>
+    <span class="pun">&lt;</span><span class="fn">p</span> class<span class="pun">=</span><span class="str">"email"</span> id<span class="pun">=</span><span class="str">"user-email"</span><span class="pun">&gt;&lt;/</span><span class="fn">p</span><span class="pun">&gt;</span>
+    <span class="pun">&lt;</span><span class="fn">span</span> class<span class="pun">=</span><span class="str">"badge"</span><span class="pun">&gt;</span>✓ Autenticado<span class="pun">&lt;/</span><span class="fn">span</span><span class="pun">&gt;</span>
+    <span class="pun">&lt;</span><span class="fn">div</span><span class="pun">&gt;</span>
+      <span class="pun">&lt;</span><span class="fn">button</span> class<span class="pun">=</span><span class="str">"btn-primary"</span> onclick<span class="pun">=</span><span class="str">"callProtectedAPI()"</span><span class="pun">&gt;</span>
+        Llamar ruta protegida
+      <span class="pun">&lt;/</span><span class="fn">button</span><span class="pun">&gt;</span>
+      <span class="pun">&lt;</span><span class="fn">button</span> class<span class="pun">=</span><span class="str">"btn-secondary"</span> onclick<span class="pun">=</span><span class="str">"logout()"</span><span class="pun">&gt;</span>Salir<span class="pun">&lt;/</span><span class="fn">button</span><span class="pun">&gt;</span>
+    <span class="pun">&lt;/</span><span class="fn">div</span><span class="pun">&gt;</span>
+    <span class="pun">&lt;</span><span class="fn">pre</span> class<span class="pun">=</span><span class="str">"api-response"</span> id<span class="pun">=</span><span class="str">"api-result"</span><span class="pun">&gt;&lt;/</span><span class="fn">pre</span><span class="pun">&gt;</span>
+  <span class="pun">&lt;/</span><span class="fn">div</span><span class="pun">&gt;</span>
+
+<span class="pun">&lt;/</span><span class="fn">div</span><span class="pun">&gt;</span>
+
+<span class="pun">&lt;</span><span class="fn">script</span><span class="pun">&gt;</span>
+<span class="kw">const</span> API_URL <span class="pun">=</span> <span class="str">'http://localhost:3000'</span><span class="pun">;</span>
+
+<span class="cmt">// ─── Al cargar la página ───────────────────────────────────────────</span>
+<span class="kw">function</span> <span class="fn">init</span><span class="pun">() {</span>
+  <span class="kw">const</span> params <span class="pun">=</span> <span class="kw">new</span> <span class="fn">URLSearchParams</span><span class="pun">(</span>window<span class="pun">.</span>location<span class="pun">.</span>search<span class="pun">);</span>
+  <span class="kw">const</span> tokenFromCallback <span class="pun">=</span> params<span class="pun">.</span><span class="fn">get</span><span class="pun">(</span><span class="str">'token'</span><span class="pun">);</span>
+
+  <span class="kw">if</span> <span class="pun">(</span>tokenFromCallback<span class="pun">) {</span>
+    <span class="cmt">// Venimos del callback de Google — guardamos el token</span>
+    localStorage<span class="pun">.</span><span class="fn">setItem</span><span class="pun">(</span><span class="str">'auth_token'</span><span class="pun">,</span> tokenFromCallback<span class="pun">);</span>
+    <span class="cmt">// Limpiamos el token de la URL por seguridad</span>
+    window<span class="pun">.</span>history<span class="pun">.</span><span class="fn">replaceState</span><span class="pun">({},</span> document<span class="pun">.</span>title<span class="pun">,</span> <span class="str">'/'</span><span class="pun">);</span>
+  <span class="pun">}</span>
+
+  <span class="kw">const</span> savedToken <span class="pun">=</span> localStorage<span class="pun">.</span><span class="fn">getItem</span><span class="pun">(</span><span class="str">'auth_token'</span><span class="pun">);</span>
+
+  <span class="kw">if</span> <span class="pun">(</span>savedToken<span class="pun">) {</span>
+    <span class="fn">showProfile</span><span class="pun">(</span>savedToken<span class="pun">);</span>
+  <span class="pun">}</span> <span class="kw">else</span> <span class="pun">{</span>
+    <span class="fn">showLoginView</span><span class="pun">();</span>
+  <span class="pun">}</span>
+<span class="pun">}</span>
+
+<span class="cmt">// ─── Decodificar el JWT y mostrar el perfil ────────────────────────</span>
+<span class="kw">function</span> <span class="fn">showProfile</span><span class="pun">(</span>token<span class="pun">) {</span>
+  <span class="kw">try</span> <span class="pun">{</span>
+    <span class="cmt">// Los JWT tienen 3 partes separadas por '.': header.payload.signature
+    // Decodificamos el payload (parte central) en Base64</span>
+    <span class="kw">const</span> payload <span class="pun">=</span> <span class="fn">JSON</span><span class="pun">.</span><span class="fn">parse</span><span class="pun">(</span><span class="fn">atob</span><span class="pun">(</span>token<span class="pun">.</span><span class="fn">split</span><span class="pun">(</span><span class="str">'.'</span><span class="pun">)[</span><span class="num">1</span><span class="pun">]));</span>
+
+    document<span class="pun">.</span><span class="fn">getElementById</span><span class="pun">(</span><span class="str">'user-avatar'</span><span class="pun">).</span>src <span class="pun">=</span> payload<span class="pun">.</span>picture <span class="pun">||</span> <span class="str">''</span><span class="pun">;</span>
+    document<span class="pun">.</span><span class="fn">getElementById</span><span class="pun">(</span><span class="str">'user-name'</span><span class="pun">).</span>textContent <span class="pun">=</span>
+      <span class="str">`</span><span class="pun">${</span>payload<span class="pun">.</span>firstName<span class="pun">}</span> <span class="pun">${</span>payload<span class="pun">.</span>lastName<span class="pun">}</span><span class="str">`</span><span class="pun">;</span>
+    document<span class="pun">.</span><span class="fn">getElementById</span><span class="pun">(</span><span class="str">'user-email'</span><span class="pun">).</span>textContent <span class="pun">=</span> payload<span class="pun">.</span>email<span class="pun">;</span>
+
+    document<span class="pun">.</span><span class="fn">getElementById</span><span class="pun">(</span><span class="str">'login-view'</span><span class="pun">).</span>style<span class="pun">.</span>display <span class="pun">=</span> <span class="str">'none'</span><span class="pun">;</span>
+    document<span class="pun">.</span><span class="fn">getElementById</span><span class="pun">(</span><span class="str">'profile-view'</span><span class="pun">).</span>style<span class="pun">.</span>display <span class="pun">=</span> <span class="str">'block'</span><span class="pun">;</span>
+  <span class="pun">} </span><span class="kw">catch</span> <span class="pun">(e) {</span>
+    <span class="fn">logout</span><span class="pun">();</span> <span class="cmt">// token inválido → volvemos al login</span>
+  <span class="pun">}</span>
+<span class="pun">}</span>
+
+<span class="kw">function</span> <span class="fn">showLoginView</span><span class="pun">() {</span>
+  document<span class="pun">.</span><span class="fn">getElementById</span><span class="pun">(</span><span class="str">'login-view'</span><span class="pun">).</span>style<span class="pun">.</span>display <span class="pun">=</span> <span class="str">'block'</span><span class="pun">;</span>
+  document<span class="pun">.</span><span class="fn">getElementById</span><span class="pun">(</span><span class="str">'profile-view'</span><span class="pun">).</span>style<span class="pun">.</span>display <span class="pun">=</span> <span class="str">'none'</span><span class="pun">;</span>
+<span class="pun">}</span>
+
+<span class="cmt">// ─── Llamar a una ruta protegida del backend ───────────────────────</span>
+<span class="kw">async function</span> <span class="fn">callProtectedAPI</span><span class="pun">() {</span>
+  <span class="kw">const</span> token <span class="pun">=</span> localStorage<span class="pun">.</span><span class="fn">getItem</span><span class="pun">(</span><span class="str">'auth_token'</span><span class="pun">);</span>
+  <span class="kw">const</span> resultEl <span class="pun">=</span> document<span class="pun">.</span><span class="fn">getElementById</span><span class="pun">(</span><span class="str">'api-result'</span><span class="pun">);</span>
+
+  <span class="kw">try</span> <span class="pun">{</span>
+    <span class="kw">const</span> res <span class="pun">=</span> <span class="kw">await</span> <span class="fn">fetch</span><span class="pun">(</span><span class="str">`</span><span class="pun">${</span>API_URL<span class="pun">}</span><span class="str">/auth/profile`</span><span class="pun">, {</span>
+      headers<span class="pun">: {</span>
+        <span class="cmt">// Enviamos el JWT en el encabezado Authorization</span>
+        <span class="str">'Authorization'</span><span class="pun">:</span> <span class="str">`Bearer </span><span class="pun">${</span>token<span class="pun">}</span><span class="str">`</span>
+      <span class="pun">}</span>
+    <span class="pun">});</span>
+
+    <span class="kw">if</span> <span class="pun">(</span>res<span class="pun">.</span>ok<span class="pun">) {</span>
+      <span class="kw">const</span> data <span class="pun">=</span> <span class="kw">await</span> res<span class="pun">.</span><span class="fn">json</span><span class="pun">();</span>
+      resultEl<span class="pun">.</span>textContent <span class="pun">=</span> <span class="fn">JSON</span><span class="pun">.</span><span class="fn">stringify</span><span class="pun">(</span>data<span class="pun">,</span> <span class="kw">null</span><span class="pun">,</span> <span class="num">2</span><span class="pun">);</span>
+      resultEl<span class="pun">.</span>style<span class="pun">.</span>display <span class="pun">=</span> <span class="str">'block'</span><span class="pun">;</span>
+    <span class="pun">} </span><span class="kw">else</span> <span class="pun">{</span>
+      resultEl<span class="pun">.</span>textContent <span class="pun">=</span> <span class="str">'Error: token inválido o expirado'</span><span class="pun">;</span>
+      resultEl<span class="pun">.</span>style<span class="pun">.</span>display <span class="pun">=</span> <span class="str">'block'</span><span class="pun">;</span>
+    <span class="pun">}</span>
+  <span class="pun">} </span><span class="kw">catch</span> <span class="pun">(e) {</span>
+    resultEl<span class="pun">.</span>textContent <span class="pun">=</span> <span class="str">'Error de red: ¿está corriendo el backend?'</span><span class="pun">;</span>
+    resultEl<span class="pun">.</span>style<span class="pun">.</span>display <span class="pun">=</span> <span class="str">'block'</span><span class="pun">;</span>
+  <span class="pun">}</span>
+<span class="pun">}</span>
+
+<span class="cmt">// ─── Cerrar sesión ─────────────────────────────────────────────────</span>
+<span class="kw">function</span> <span class="fn">logout</span><span class="pun">() {</span>
+  localStorage<span class="pun">.</span><span class="fn">removeItem</span><span class="pun">(</span><span class="str">'auth_token'</span><span class="pun">);</span>
+  <span class="fn">showLoginView</span><span class="pun">();</span>
+  document<span class="pun">.</span><span class="fn">getElementById</span><span class="pun">(</span><span class="str">'api-result'</span><span class="pun">).</span>style<span class="pun">.</span>display <span class="pun">=</span> <span class="str">'none'</span><span class="pun">;</span>
+<span class="pun">}</span>
+
+<span class="cmt">// Ejecutar al cargar</span>
+<span class="fn">init</span><span class="pun">();</span>
+<span class="pun">&lt;/</span><span class="fn">script</span><span class="pun">&gt;</span>
+<span class="pun">&lt;/</span><span class="fn">body</span><span class="pun">&gt;</span>
+<span class="pun">&lt;/</span><span class="fn">html</span><span class="pun">&gt;</span></code></pre>
+  </div>
+
+  <!-- PRUEBA -->
+  <div class="step-block" style="margin-top:2.5rem">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <h3>Probar el flujo completo</h3>
+      <ul class="check-list">
+        <li>Inicia el backend: <code>npm run start:dev</code> en la carpeta de NestJS</li>
+        <li>Abre el <code>index.html</code> con Live Server (VS Code) → aparece en <code>http://localhost:5500</code></li>
+        <li>Haz clic en <strong>"Continuar con Google"</strong></li>
+        <li>Selecciona tu cuenta de Google (la que agregaste como usuario de prueba)</li>
+        <li>Aprueba los permisos solicitados</li>
+        <li>Google redirige a tu callback → tu backend genera el JWT → redirige al frontend</li>
+        <li>El frontend captura el token de la URL, lo guarda en localStorage y muestra tu perfil</li>
+        <li>Haz clic en <strong>"Llamar ruta protegida"</strong> para ver la respuesta del backend con tu perfil decodificado del JWT</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- RESUMEN FINAL -->
+  <div class="section-sep"></div>
+  <div class="section-header" style="padding-top:3rem">
+    <span class="section-num">RESUMEN</span>
+    <h2>Lo que construimos</h2>
+  </div>
+
+  <div class="concept-grid">
+    <div class="concept-card">
+      <span class="tag">BACKEND</span>
+      <h4>GoogleStrategy</h4>
+      <p>Maneja el flujo OAuth con Google usando Passport.js. Extrae el perfil del usuario y lo pasa al controlador.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">BACKEND</span>
+      <h4>JwtStrategy</h4>
+      <p>Valida el JWT propio en cada petición a rutas protegidas. Inyecta el perfil en <code>req.user</code>.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">BACKEND</span>
+      <h4>AuthService</h4>
+      <p>Genera un JWT firmado con datos del usuario de Google. Este token es el que usamos en nuestra app.</p>
+    </div>
+    <div class="concept-card">
+      <span class="tag">FRONTEND</span>
+      <h4>index.html</h4>
+      <p>Detecta el token en la URL al volver del callback, lo guarda en localStorage y lo envía en el header <code>Authorization</code>.</p>
+    </div>
+  </div>
+
+  <div class="callout warning" style="margin-top:2rem">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body">
+      <strong>PARA PRODUCCIÓN — CONSIDERA ADEMÁS</strong>
+      Usar cookies HttpOnly en lugar de localStorage para el token (más seguro contra XSS). Implementar un sistema de revocación de tokens. Registrar y manejar los Refresh Tokens. Usar HTTPS obligatoriamente. Validar y sanitizar todos los datos del perfil antes de guardarlos en base de datos.
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  PROGRAMACIÓN WEB · MÓDULO DE AUTENTICACIÓN · OAUTH 2.0 CON NESTJS + GOOGLE
+</footer>
+
+<script>
+  // Scroll progress bar
+  window.addEventListener('scroll', () => {
+    const scrollTop = document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    document.getElementById('scrollBar').style.width = progress + '%';
+  });
+
+  // Active nav link on scroll
+  const sections = document.querySelectorAll('[id]');
+  const navLinks = document.querySelectorAll('nav a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === '#' + entry.target.id) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  // Copy button functionality
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ copiado';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'copiar';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+</script>
+
+</body>
+</html>
