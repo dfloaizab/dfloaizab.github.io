@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grafos — Listas de Adyacencia, BFS & DFS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --crimson:   rgb(128,0,0);
+  --crimson2:  rgb(160,20,20);
+  --crimson3:  rgb(200,40,40);
+  --gold:      #c9a227;
+  --gold2:     #e8c060;
+  --cream:     #f5f0e8;
+  --ink:       #1a1208;
+  --ink2:      #2d2010;
+  --muted:     #5c4a30;
+  --border:    rgba(128,0,0,0.15);
+  --surface:   #faf7f2;
+  --card:      #fff9f0;
+  --green:     #166534;
+  --green-bg:  rgba(22,101,52,.07);
+  --blue:      #1e3a8a;
+  --blue-bg:   rgba(30,58,138,.07);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Crimson Pro',Georgia,serif;
+  font-size:1.1rem;background:var(--surface);
+  color:var(--ink);line-height:1.75;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:100;
+  background:var(--crimson);
+  display:flex;align-items:center;padding:0 2rem;
+  box-shadow:0 3px 20px rgba(128,0,0,.4);
+  overflow-x:auto;white-space:nowrap;
+}
+.nav-logo{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.65rem 1.2rem .65rem 0;
+  border-right:1px solid rgba(255,255,255,.2);
+  margin-right:.8rem;flex-shrink:0;
+}
+.logo-placeholder{
+  width:34px;height:34px;
+  border:2px dashed rgba(255,255,255,.5);border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:.55rem;
+  color:rgba(255,255,255,.5);text-align:center;line-height:1.2;
+}
+.nav-brand{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.08em;color:#fff;}
+nav a{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.08em;
+  text-transform:uppercase;color:rgba(255,255,255,.7);text-decoration:none;
+  padding:.9rem .85rem;transition:color .2s,background .2s;flex-shrink:0;
+}
+nav a:hover,nav a.active{color:#fff;background:rgba(255,255,255,.1);}
+
+/* ── HERO ── */
+.hero{
+  position:relative;z-index:1;
+  background:linear-gradient(135deg,#1a0000 0%,var(--crimson) 55%,#6b0000 100%);
+  min-height:82vh;display:grid;place-items:center;
+  text-align:center;padding:4rem 2rem;overflow:hidden;
+}
+.hero-bg{position:absolute;inset:0;z-index:0;opacity:.1;}
+.hero-content{position:relative;z-index:1;max-width:860px;}
+.hero-tag{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(201,162,39,.4);
+  padding:.3rem .9rem;border-radius:2px;margin-bottom:1.2rem;
+  animation:fadeUp .7s ease both;
+}
+.hero h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3rem,9vw,7.5rem);line-height:.92;color:#fff;
+  letter-spacing:.04em;animation:fadeUp .7s .12s ease both;
+  text-shadow:0 4px 30px rgba(0,0,0,.5);
+}
+.hero h1 span{color:var(--gold);}
+.hero-sub{
+  font-size:1.2rem;color:rgba(255,255,255,.72);font-style:italic;
+  margin:.9rem 0 2rem;animation:fadeUp .7s .22s ease both;
+}
+.hero-pills{
+  display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;
+  animation:fadeUp .7s .32s ease both;
+}
+.pill{
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;
+  padding:.3rem .85rem;border:1px solid rgba(255,255,255,.22);
+  border-radius:20px;color:rgba(255,255,255,.75);
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SECTIONS ── */
+section{position:relative;z-index:1;padding:4.5rem 2rem;max-width:1100px;margin:0 auto;}
+section+section{border-top:1px solid var(--border);}
+.sec-label{
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.2em;
+  color:var(--crimson);text-transform:uppercase;margin-bottom:.6rem;
+  display:flex;align-items:center;gap:.5rem;
+}
+.sec-label::after{content:'';height:1px;width:80px;background:var(--border);}
+h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,4vw,3.2rem);letter-spacing:.05em;color:var(--ink);margin-bottom:1.2rem;line-height:1.1;}
+h2 span{color:var(--crimson);}
+h3{font-family:'Bebas Neue',sans-serif;font-size:1.75rem;letter-spacing:.05em;color:var(--crimson);margin:2.5rem 0 .7rem;}
+h4{font-family:'JetBrains Mono',monospace;font-size:.86rem;color:var(--ink2);margin:1.4rem 0 .4rem;text-transform:uppercase;letter-spacing:.05em;}
+p{margin-bottom:.9rem;color:#3d2e1a;}
+strong{color:var(--crimson);}
+
+/* ── DEF BOX ── */
+.def{
+  border-left:3px solid var(--crimson);
+  background:rgba(128,0,0,.05);
+  padding:1rem 1.4rem;margin:1.3rem 0;
+  border-radius:0 5px 5px 0;font-style:italic;
+}
+.def strong{color:var(--crimson);font-style:normal;}
+
+/* ── DIAGRAM WRAP ── */
+.dw{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.4rem;margin:2rem 0;overflow-x:auto;}
+.dw-title{
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem;
+  display:flex;align-items:center;gap:.4rem;
+}
+.dw-title::before{content:'◈';color:var(--crimson);}
+
+/* ── CODE ── */
+.code-block{background:#1a0000;border:1px solid rgba(128,0,0,.35);border-radius:6px;overflow:hidden;margin:1.2rem 0;}
+.code-hdr{
+  background:rgba(128,0,0,.3);padding:.45rem 1rem;
+  display:flex;justify-content:space-between;
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(255,200,200,.7);
+}
+pre{font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.65;padding:1.2rem 1.5rem;overflow-x:auto;color:#ffb3b3;}
+.kw{color:#ff6b6b}.fn{color:#ffd93d}.cm{color:#5a3535;font-style:italic}
+.str{color:#a8ff78}.num{color:#ff9f43}.tp{color:#48dbfb}.ann{color:#c9a227}
+
+/* ── TABLE ── */
+.tw{overflow-x:auto;margin:1.5rem 0;}
+table{width:100%;border-collapse:collapse;font-size:.93rem;}
+th{
+  background:var(--crimson);color:#fff;
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
+  padding:.75rem 1rem;text-align:left;
+}
+td{padding:.65rem 1rem;border-bottom:1px solid var(--border);color:var(--ink2);}
+tr:hover td{background:rgba(128,0,0,.04);}
+.mono2{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--crimson);}
+.badge-g{display:inline-block;background:rgba(22,101,52,.12);color:var(--green);border:1px solid rgba(22,101,52,.3);font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:.15rem .5rem;border-radius:3px;}
+.badge-r{display:inline-block;background:rgba(128,0,0,.1);color:var(--crimson);border:1px solid rgba(128,0,0,.3);font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:.15rem .5rem;border-radius:3px;}
+.badge-y{display:inline-block;background:rgba(201,162,39,.12);color:#7a5c00;border:1px solid rgba(201,162,39,.35);font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:.15rem .5rem;border-radius:3px;}
+.badge-b{display:inline-block;background:rgba(30,58,138,.1);color:var(--blue);border:1px solid rgba(30,58,138,.3);font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:.15rem .5rem;border-radius:3px;}
+
+/* ── CARD GRIDS ── */
+.cc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.1rem;margin:1.8rem 0;}
+.cc{
+  background:var(--card);border:1px solid var(--border);
+  border-top:3px solid var(--crimson);border-radius:0 0 6px 6px;
+  padding:1.2rem;transition:box-shadow .25s,transform .25s;
+}
+.cc:hover{box-shadow:0 5px 20px rgba(128,0,0,.12);transform:translateY(-3px);}
+.cc-icon{font-size:1.6rem;margin-bottom:.5rem;}
+.cc h4{margin:0 0 .4rem;font-size:.8rem;color:var(--crimson);}
+.cc p{font-size:.92rem;color:var(--muted);margin:0;}
+
+/* ── STEP BOXES (BFS/DFS trace) ── */
+.trace-wrap{display:flex;gap:.5rem;flex-wrap:wrap;margin:1.2rem 0;}
+.trace-step{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:5px;padding:.55rem .9rem;
+  font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  color:var(--ink2);text-align:center;min-width:70px;
+  transition:background .2s;
+}
+.trace-step.visited{background:rgba(128,0,0,.12);border-color:var(--crimson);color:var(--crimson);font-weight:700;}
+.trace-step.queue{background:rgba(201,162,39,.15);border-color:var(--gold);color:#7a5c00;}
+.trace-step.current{background:var(--crimson);color:#fff;font-weight:700;}
+
+/* ── ALGO SIDE-BY-SIDE ── */
+.algo-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:2rem 0;}
+@media(max-width:700px){.algo-grid{grid-template-columns:1fr;}}
+.algo-box{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.algo-header{padding:.9rem 1.2rem;display:flex;align-items:center;gap:.8rem;}
+.algo-header.bfs-h{background:linear-gradient(90deg,rgba(30,58,138,.15),rgba(30,58,138,.04));border-bottom:2px solid rgba(30,58,138,.3);}
+.algo-header.dfs-h{background:linear-gradient(90deg,rgba(22,101,52,.15),rgba(22,101,52,.04));border-bottom:2px solid rgba(22,101,52,.3);}
+.algo-label{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.06em;}
+.algo-label.bfs{color:var(--blue);}
+.algo-label.dfs{color:var(--green);}
+.algo-sub{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);}
+.algo-body{padding:1rem 1.2rem;}
+.algo-body p{font-size:.95rem;color:var(--muted);margin-bottom:.6rem;}
+.algo-body ul{padding-left:1.2rem;color:var(--muted);font-size:.93rem;}
+.algo-body li{margin-bottom:.3rem;}
+.algo-body li strong{color:var(--ink2);}
+
+/* ── EXAMPLE CARDS ── */
+.ex-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:2rem 0;}
+@media(max-width:680px){.ex-grid{grid-template-columns:1fr;}}
+.ex-card{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.ex-num{
+  font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.1em;
+  padding:.5rem 1.1rem;color:#fff;
+}
+.ex-num.ex1{background:var(--blue);}
+.ex-num.ex2{background:var(--green);}
+.ex-body{padding:1.2rem 1.3rem;}
+.ex-body h4{margin:0 0 .5rem;}
+.ex-body p{font-size:.95rem;color:var(--muted);margin-bottom:.6rem;}
+
+/* ── INTERACTIVE QUIZ ── */
+.quiz-wrap{
+  background:var(--card);border:2px solid var(--crimson);
+  border-radius:10px;padding:2rem;margin:2rem 0;
+}
+.quiz-title{
+  font-family:'Bebas Neue',sans-serif;font-size:2rem;
+  letter-spacing:.05em;color:var(--crimson);margin-bottom:.4rem;
+}
+.quiz-subtitle{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);margin-bottom:1.5rem;}
+.scenario{
+  background:#fff;border:1px solid var(--border);
+  border-radius:7px;padding:1.2rem 1.4rem;margin-bottom:1.2rem;
+  transition:border-color .2s;
+}
+.scenario:last-of-type{margin-bottom:0;}
+.scenario-q{
+  font-size:1.05rem;color:var(--ink);margin-bottom:.8rem;font-weight:600;
+}
+.scenario-desc{font-size:.93rem;color:var(--muted);margin-bottom:.9rem;font-style:italic;}
+.btn-row{display:flex;gap:.7rem;flex-wrap:wrap;}
+.btn-algo{
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;letter-spacing:.05em;
+  padding:.45rem 1.1rem;border-radius:5px;border:2px solid;cursor:pointer;
+  transition:background .2s,color .2s,transform .15s;background:transparent;
+  text-transform:uppercase;
+}
+.btn-bfs{border-color:var(--blue);color:var(--blue);}
+.btn-dfs{border-color:var(--green);color:var(--green);}
+.btn-bfs:hover{background:var(--blue);color:#fff;transform:translateY(-1px);}
+.btn-dfs:hover{background:var(--green);color:#fff;transform:translateY(-1px);}
+.btn-bfs.selected{background:var(--blue);color:#fff;}
+.btn-dfs.selected{background:var(--green);color:#fff;}
+.feedback{
+  display:none;margin-top:.8rem;padding:.7rem 1rem;
+  border-radius:5px;font-size:.95rem;
+}
+.feedback.correct{background:rgba(22,101,52,.1);border:1px solid rgba(22,101,52,.3);color:var(--green);}
+.feedback.wrong{background:rgba(128,0,0,.08);border:1px solid rgba(128,0,0,.25);color:var(--crimson);}
+.feedback .fb-icon{font-weight:700;margin-right:.4rem;}
+.score-box{
+  display:none;margin-top:1.5rem;padding:1rem 1.4rem;
+  background:linear-gradient(90deg,rgba(128,0,0,.08),transparent);
+  border-left:4px solid var(--crimson);border-radius:0 6px 6px 0;
+}
+.score-num{font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--crimson);line-height:1;}
+.score-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);}
+.score-msg{font-size:.97rem;color:var(--ink2);margin-top:.3rem;}
+.btn-check{
+  font-family:'JetBrains Mono',monospace;font-size:.8rem;letter-spacing:.08em;
+  text-transform:uppercase;padding:.55rem 1.4rem;
+  background:var(--crimson);color:#fff;border:none;
+  border-radius:5px;cursor:pointer;margin-top:1.2rem;
+  transition:background .2s,transform .15s;
+}
+.btn-check:hover{background:var(--crimson2);transform:translateY(-1px);}
+.btn-reset{
+  font-family:'JetBrains Mono',monospace;font-size:.8rem;
+  text-transform:uppercase;padding:.55rem 1.4rem;
+  background:transparent;color:var(--crimson);border:2px solid var(--crimson);
+  border-radius:5px;cursor:pointer;margin-top:1.2rem;margin-left:.7rem;
+  transition:background .2s;display:none;
+}
+.btn-reset:hover{background:rgba(128,0,0,.06);}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .55s,transform .55s;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ── FOOTER ── */
+footer{
+  position:relative;z-index:1;
+  background:var(--crimson);text-align:center;padding:2.5rem 2rem;
+  font-family:'JetBrains Mono',monospace;font-size:.75rem;color:rgba(255,255,255,.6);
+}
+footer .fl{display:inline-flex;align-items:center;gap:.8rem;margin-bottom:.8rem;}
+footer .logo-placeholder{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.4);}
+footer .fn2{font-size:.9rem;color:rgba(255,255,255,.8);letter-spacing:.1em;font-family:'Bebas Neue',sans-serif;}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-logo">
+    <div class="logo-placeholder">TU<br>LOGO</div>
+    <span class="nav-brand">Estructuras de Datos</span>
+  </div>
+  <a href="#listas">Listas Adyacencia</a>
+  <a href="#comparativa">Comparativa</a>
+  <a href="#codigo">Código Java</a>
+  <a href="#bfs">BFS</a>
+  <a href="#dfs">DFS</a>
+  <a href="#ejemplos">Ejemplos</a>
+  <a href="#ejercicio">Ejercicio</a>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <svg class="hero-bg" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="white" fill="none" stroke-width="1.2">
+      <!-- Graph lines -->
+      <line x1="150" y1="350" x2="350" y2="180"/>
+      <line x1="150" y1="350" x2="350" y2="520"/>
+      <line x1="350" y1="180" x2="600" y2="200"/>
+      <line x1="350" y1="180" x2="600" y2="350"/>
+      <line x1="350" y1="520" x2="600" y2="350"/>
+      <line x1="350" y1="520" x2="600" y2="520"/>
+      <line x1="600" y1="200" x2="850" y2="180"/>
+      <line x1="600" y1="350" x2="850" y2="350"/>
+      <line x1="600" y1="520" x2="850" y2="520"/>
+      <line x1="850" y1="180" x2="1050" y2="350"/>
+      <line x1="850" y1="350" x2="1050" y2="350"/>
+      <line x1="850" y1="520" x2="1050" y2="350"/>
+      <!-- Nodes -->
+      <circle cx="150"  cy="350" r="12"/>
+      <circle cx="350"  cy="180" r="12"/>
+      <circle cx="350"  cy="520" r="12"/>
+      <circle cx="600"  cy="200" r="12"/>
+      <circle cx="600"  cy="350" r="14"/>
+      <circle cx="600"  cy="520" r="12"/>
+      <circle cx="850"  cy="180" r="12"/>
+      <circle cx="850"  cy="350" r="12"/>
+      <circle cx="850"  cy="520" r="12"/>
+      <circle cx="1050" cy="350" r="12"/>
+    </g>
+    <!-- Adjacency list hint lines -->
+    <g stroke="white" fill="none" stroke-width=".6" opacity=".4">
+      <rect x="30"  y="560" width="120" height="24" rx="3"/>
+      <rect x="30"  y="590" width="160" height="24" rx="3"/>
+      <rect x="30"  y="620" width="140" height="24" rx="3"/>
+      <rect x="30"  y="650" width="180" height="24" rx="3"/>
+    </g>
+  </svg>
+  <div class="hero-content">
+    <div class="hero-tag">Estructuras de Datos · Ingeniería de Sistemas</div>
+    <h1>Grafos:<br><span>Listas de</span><br>Adyacencia</h1>
+    <p class="hero-sub">Representación, implementación en Java, BFS, DFS y aplicaciones prácticas</p>
+    <div class="hero-pills">
+      <span class="pill">Lista de Adyacencia</span>
+      <span class="pill">vs Matriz</span>
+      <span class="pill">BFS — O(V+E)</span>
+      <span class="pill">DFS — O(V+E)</span>
+      <span class="pill">Código Java</span>
+      <span class="pill">Ejercicio Interactivo</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 1. LISTAS DE ADYACENCIA -->
+<!-- ══════════════════════════════════════════ -->
+<section id="listas">
+  <div class="sec-label">01 · Representación</div>
+  <h2>Lista de <span>Adyacencia</span></h2>
+
+  <div class="def">
+    Una <strong>lista de adyacencia</strong> representa un grafo G = (V, E) como un arreglo de V listas encadenadas. Cada posición <em>i</em> contiene la lista de todos los vértices directamente conectados a <em>i</em>. Opcionalmente, cada nodo de la lista guarda también el <strong>peso</strong> de la arista.
+  </div>
+
+  <p>Es la representación <em>estándar de facto</em> en programación competitiva y en implementaciones industriales de algoritmos sobre grafos, porque es eficiente en espacio para grafos dispersos (la gran mayoría en la práctica: redes viales, sociales, de dependencias) y permite iterar los vecinos en O(deg(v)) en lugar del O(V) que impone la matriz.</p>
+
+  <h3>Estructura visual — Grafo de referencia</h3>
+
+  <div class="dw reveal">
+    <div class="dw-title">Grafo no dirigido G con 6 vértices y 7 aristas</div>
+    <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:700px;display:block;margin:auto">
+      <defs>
+        <marker id="aw" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+          <polygon points="0 0,7 2.5,0 5" fill="rgb(128,0,0)"/>
+        </marker>
+      </defs>
+      <!-- Edges -->
+      <g stroke="rgb(128,0,0)" stroke-width="2" fill="none" opacity=".7">
+        <line x1="100" y1="140" x2="220" y2="80"/>
+        <line x1="100" y1="140" x2="220" y2="200"/>
+        <line x1="220" y1="80"  x2="360" y2="80"/>
+        <line x1="220" y1="80"  x2="360" y2="200"/>
+        <line x1="220" y1="200" x2="360" y2="200"/>
+        <line x1="360" y1="80"  x2="480" y2="140"/>
+        <line x1="360" y1="200" x2="480" y2="140"/>
+      </g>
+      <!-- Edge labels (weights) -->
+      <g font-family="JetBrains Mono,monospace" font-size="11" fill="#c9a227" text-anchor="middle">
+        <text x="155" y="98">4</text>
+        <text x="155" y="182">7</text>
+        <text x="290" y="68">2</text>
+        <text x="285" y="160">9</text>
+        <text x="290" y="210">3</text>
+        <text x="425" y="98">5</text>
+        <text x="425" y="182">6</text>
+      </g>
+      <!-- Nodes -->
+      <g>
+        <circle cx="100" cy="140" r="24" fill="#fff9f0" stroke="rgb(128,0,0)" stroke-width="2.5"/>
+        <circle cx="220" cy="80"  r="24" fill="#fff9f0" stroke="rgb(128,0,0)" stroke-width="2.5"/>
+        <circle cx="220" cy="200" r="24" fill="#fff9f0" stroke="rgb(128,0,0)" stroke-width="2.5"/>
+        <circle cx="360" cy="80"  r="24" fill="#fff9f0" stroke="rgb(128,0,0)" stroke-width="2.5"/>
+        <circle cx="360" cy="200" r="24" fill="#fff9f0" stroke="rgb(128,0,0)" stroke-width="2.5"/>
+        <circle cx="480" cy="140" r="24" fill="#fff9f0" stroke="rgb(128,0,0)" stroke-width="2.5"/>
+      </g>
+      <!-- Node labels -->
+      <g font-family="Bebas Neue,sans-serif" font-size="18" fill="rgb(128,0,0)" text-anchor="middle">
+        <text x="100" y="147">0</text>
+        <text x="220" y="87">1</text>
+        <text x="220" y="207">2</text>
+        <text x="360" y="87">3</text>
+        <text x="360" y="207">4</text>
+        <text x="480" y="147">5</text>
+      </g>
+      <!-- degree annotations -->
+      <g font-family="Crimson Pro,serif" font-size="11" fill="#9b8060" font-style="italic">
+        <text x="55"  y="145">grado=2</text>
+        <text x="220" y="40">grado=3</text>
+        <text x="220" y="240">grado=3</text>
+        <text x="360" y="40">grado=3</text>
+        <text x="360" y="240">grado=3</text>
+        <text x="490" y="175">grado=2</text>
+      </g>
+
+      <!-- ── Adjacency list (right side) ── -->
+      <text x="580" y="30" font-family="Bebas Neue,sans-serif" font-size="15" fill="rgb(128,0,0)" letter-spacing="1">Lista de Adyacencia</text>
+
+      <!-- Row 0 -->
+      <rect x="548" y="40"  width="24" height="22" fill="rgba(128,0,0,.12)" stroke="rgb(128,0,0)" stroke-width="1.5" rx="2"/>
+      <text x="560" y="56" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="rgb(128,0,0)">0</text>
+      <rect x="577" y="40"  width="52" height="22" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1" rx="2"/>
+      <text x="603" y="56" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3d2e1a">1(4)</text>
+      <text x="633" y="54" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">→</text>
+      <rect x="640" y="40"  width="52" height="22" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1" rx="2"/>
+      <text x="666" y="56" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3d2e1a">2(7)</text>
+
+      <!-- Row 1 -->
+      <rect x="548" y="68"  width="24" height="22" fill="rgba(128,0,0,.12)" stroke="rgb(128,0,0)" stroke-width="1.5" rx="2"/>
+      <text x="560" y="84" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="rgb(128,0,0)">1</text>
+      <rect x="577" y="68"  width="52" height="22" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1" rx="2"/>
+      <text x="603" y="84" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3d2e1a">0(4)</text>
+      <text x="633" y="82" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">→</text>
+      <rect x="640" y="68"  width="52" height="22" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1" rx="2"/>
+      <text x="666" y="84" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3d2e1a">3(2)</text>
+      <text x="633" y="110" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">→</text>
+      <rect x="640" y="96"  width="52" height="22" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1" rx="2"/>
+      <text x="666" y="112" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3d2e1a">4(9)</text>
+
+      <!-- Row 2 -->
+      <rect x="548" y="124" width="24" height="22" fill="rgba(128,0,0,.12)" stroke="rgb(128,0,0)" stroke-width="1.5" rx="2"/>
+      <text x="560" y="140" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="rgb(128,0,0)">2</text>
+      <rect x="577" y="124" width="52" height="22" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1" rx="2"/>
+      <text x="603" y="140" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3d2e1a">0(7)</text>
+      <text x="633" y="138" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">→</text>
+      <rect x="640" y="124" width="52" height="22" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1" rx="2"/>
+      <text x="666" y="140" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3d2e1a">4(3)</text>
+
+      <!-- Row 3 -->
+      <rect x="548" y="152" width="24" height="22" fill="rgba(128,0,0,.12)" stroke="rgb(128,0,0)" stroke-width="1.5" rx="2"/>
+      <text x="560" y="168" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="rgb(128,0,0)">3</text>
+      <rect x="577" y="152" width="52" height="22" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1" rx="2"/>
+      <text x="603" y="168" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3d2e1a">1(2)</text>
+      <text x="633" y="166" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">→</text>
+      <rect x="640" y="152" width="52" height="22" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1" rx="2"/>
+      <text x="666" y="168" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3d2e1a">5(5)</text>
+
+      <!-- Row 4 -->
+      <rect x="548" y="180" width="24" height="22" fill="rgba(128,0,0,.12)" stroke="rgb(128,0,0)" stroke-width="1.5" rx="2"/>
+      <text x="560" y="196" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="rgb(128,0,0)">4</text>
+      <rect x="577" y="180" width="52" height="22" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1" rx="2"/>
+      <text x="603" y="196" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3d2e1a">1(9)</text>
+      <text x="633" y="194" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">→</text>
+      <rect x="640" y="180" width="52" height="22" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1" rx="2"/>
+      <text x="666" y="196" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3d2e1a">2(3)</text>
+      <text x="633" y="222" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">→</text>
+      <rect x="640" y="208" width="52" height="22" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1" rx="2"/>
+      <text x="666" y="224" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3d2e1a">5(6)</text>
+
+      <!-- Row 5 -->
+      <rect x="548" y="236" width="24" height="22" fill="rgba(128,0,0,.12)" stroke="rgb(128,0,0)" stroke-width="1.5" rx="2"/>
+      <text x="560" y="252" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="rgb(128,0,0)">5</text>
+      <rect x="577" y="236" width="52" height="22" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1" rx="2"/>
+      <text x="603" y="252" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3d2e1a">3(5)</text>
+      <text x="633" y="250" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">→</text>
+      <rect x="640" y="236" width="52" height="22" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1" rx="2"/>
+      <text x="666" y="252" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#3d2e1a">4(6)</text>
+
+      <!-- notation -->
+      <text x="600" y="272" text-anchor="middle" font-family="Crimson Pro,serif" font-size="11" fill="#9b8060" font-style="italic">vecino(peso) — lista enlazada</text>
+    </svg>
+  </div>
+
+  <h3>Variantes de la lista de adyacencia</h3>
+  <div class="cc-grid">
+    <div class="cc reveal">
+      <div class="cc-icon">📋</div>
+      <h4>ArrayList / Vector (más común)</h4>
+      <p><span class="mono2">List&lt;List&lt;int[]&gt;&gt;</span> en Java o <span class="mono2">vector&lt;vector&lt;pair&lt;int,int&gt;&gt;&gt;</span> en C++. Acceso O(1) por índice del vértice. Sin peso: <span class="mono2">List&lt;List&lt;Integer&gt;&gt;</span>.</p>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">🔗</div>
+      <h4>Lista enlazada clásica</h4>
+      <p>Nodos explícitos con puntero <span class="mono2">siguiente</span>. Inserción O(1) al frente, pero peor localidad de caché que el ArrayList. Más usada en libros de texto que en competencia.</p>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">🗺️</div>
+      <h4>HashMap de HashSets</h4>
+      <p><span class="mono2">Map&lt;T, Set&lt;T&gt;&gt;</span>. Ideal cuando los vértices son objetos (strings, coordenadas). Soporta vértices no consecutivos y permite verificar si existe arista en O(1) amortizado.</p>
+    </div>
+    <div class="cc reveal">
+      <div class="cc-icon">⚡</div>
+      <h4>CSR — Compressed Sparse Row</h4>
+      <p>Dos arreglos planos: <span class="mono2">offset[]</span> y <span class="mono2">dest[]</span>. Máxima eficiencia de caché. Usada en bibliotecas de grafos de alto rendimiento (GraphX, NetworkX interno).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 2. COMPARATIVA -->
+<!-- ══════════════════════════════════════════ -->
+<section id="comparativa">
+  <div class="sec-label">02 · Comparativa</div>
+  <h2>Lista vs <span>Matriz</span> de Adyacencia</h2>
+  <p>Ninguna representación es universalmente superior. La elección depende del tipo de grafo (denso vs. disperso) y de las operaciones que más se realizan.</p>
+
+  <div class="tw reveal">
+    <table>
+      <thead>
+        <tr>
+          <th>Operación / Propiedad</th>
+          <th>Lista de Adyacencia</th>
+          <th>Matriz de Adyacencia</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Espacio</strong></td>
+          <td><span class="badge-g">O(V + E)</span> — sólo almacena aristas existentes</td>
+          <td><span class="badge-r">O(V²)</span> — toda la cuadrícula aunque esté vacía</td>
+        </tr>
+        <tr>
+          <td><strong>¿Existe arista (u, v)?</strong></td>
+          <td><span class="badge-y">O(deg(u))</span> — hay que recorrer la lista de u</td>
+          <td><span class="badge-g">O(1)</span> — acceso directo A[u][v]</td>
+        </tr>
+        <tr>
+          <td><strong>Agregar arista</strong></td>
+          <td><span class="badge-g">O(1)</span> amortizado — agregar al final de la lista</td>
+          <td><span class="badge-g">O(1)</span> — asignar A[u][v] = w</td>
+        </tr>
+        <tr>
+          <td><strong>Eliminar arista</strong></td>
+          <td><span class="badge-y">O(deg(u))</span> — buscar y remover de la lista</td>
+          <td><span class="badge-g">O(1)</span> — poner A[u][v] = 0</td>
+        </tr>
+        <tr>
+          <td><strong>Recorrer vecinos de u</strong></td>
+          <td><span class="badge-g">O(deg(u))</span> — iterar sólo los vecinos reales</td>
+          <td><span class="badge-r">O(V)</span> — revisar todas las columnas de la fila</td>
+        </tr>
+        <tr>
+          <td><strong>BFS / DFS</strong></td>
+          <td><span class="badge-g">O(V + E)</span> — óptimo para grafos dispersos</td>
+          <td><span class="badge-r">O(V²)</span> — inevitable al recorrer cada fila</td>
+        </tr>
+        <tr>
+          <td><strong>Dijkstra (con heap)</strong></td>
+          <td><span class="badge-g">O((V+E) log V)</span></td>
+          <td><span class="badge-r">O(V²)</span> sin heap / <span class="badge-y">O(V² log V)</span> con heap</td>
+        </tr>
+        <tr>
+          <td><strong>Floyd-Warshall</strong></td>
+          <td>Se convierte internamente a matriz — no aplica</td>
+          <td><span class="badge-y">O(V³)</span> — nativamente eficiente sobre matriz</td>
+        </tr>
+        <tr>
+          <td><strong>Localidad de caché</strong></td>
+          <td><span class="badge-y">Media</span> — punteros dispersos en memoria</td>
+          <td><span class="badge-g">Alta</span> — memoria contigua, prefetch amigable</td>
+        </tr>
+        <tr>
+          <td><strong>Grafos densos (E ≈ V²)</strong></td>
+          <td><span class="badge-r">No óptima</span> — espacio similar, overhead de punteros</td>
+          <td><span class="badge-g">Preferida</span> — simple y cache-friendly</td>
+        </tr>
+        <tr>
+          <td><strong>Grafos dispersos (E &lt;&lt; V²)</strong></td>
+          <td><span class="badge-g">Preferida</span> — ahorra memoria y tiempo de traversal</td>
+          <td><span class="badge-r">Ineficiente</span> — 99% de la matriz puede ser 0</td>
+        </tr>
+        <tr>
+          <td><strong>Multiaristas / multigrafos</strong></td>
+          <td><span class="badge-g">Soportado</span> — múltiples entradas del mismo vecino</td>
+          <td><span class="badge-r">No soportado</span> — A[u][v] es un único valor</td>
+        </tr>
+        <tr>
+          <td><strong>Caso de uso típico</strong></td>
+          <td>Redes sociales, mapas, web graph, compiladores</td>
+          <td>Grafos pequeños, Floyd-Warshall, álgebra lineal</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="def reveal" style="margin-top:1.5rem">
+    <strong>Regla práctica:</strong> Si E &lt; V² / 10 (el grafo tiene menos del 10% de las aristas posibles) usa <strong>lista de adyacencia</strong>. Si el grafo es casi completo o V es pequeño (V ≤ 1000), la <strong>matriz</strong> puede ser más conveniente por su simplicidad de acceso. En programación competitiva se prefiere casi siempre la lista.
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 3. CÓDIGO JAVA -->
+<!-- ══════════════════════════════════════════ -->
+<section id="codigo">
+  <div class="sec-label">03 · Implementación</div>
+  <h2>Código en <span>Java</span></h2>
+  <p>Implementación completa orientada a objetos usando <span class="mono2">ArrayList</span>. Incluye grafo dirigido y no dirigido, con y sin peso, y las operaciones principales.</p>
+
+  <div class="code-block reveal">
+    <div class="code-hdr"><span>Clase Grafo — lista de adyacencia</span><span>Java 17</span></div>
+    <pre><span class="kw">import</span> java.util.*;
+
+<span class="kw">public class</span> <span class="tp">Grafo</span> {
+
+    <span class="cm">// ── Nodo interno para representar una arista ────────────────</span>
+    <span class="kw">record</span> <span class="tp">Arista</span>(<span class="kw">int</span> destino, <span class="kw">int</span> peso) {
+        <span class="ann">@Override</span>
+        <span class="kw">public</span> <span class="tp">String</span> <span class="fn">toString</span>() {
+            <span class="kw">return</span> destino + <span class="str">"(w="</span> + peso + <span class="str">")"</span>;
+        }
+    }
+
+    <span class="cm">// ── Campos principales ──────────────────────────────────────</span>
+    <span class="kw">private final int</span> V;              <span class="cm">// número de vértices</span>
+    <span class="kw">private final boolean</span> dirigido;   <span class="cm">// ¿es dirigido?</span>
+    <span class="kw">private final</span> <span class="tp">List</span>&lt;<span class="tp">List</span>&lt;<span class="tp">Arista</span>&gt;&gt; adj; <span class="cm">// lista de adyacencia</span>
+    <span class="kw">private int</span> E;                     <span class="cm">// número de aristas</span>
+
+    <span class="cm">// ── Constructor ─────────────────────────────────────────────</span>
+    <span class="kw">public</span> <span class="fn">Grafo</span>(<span class="kw">int</span> vertices, <span class="kw">boolean</span> dirigido) {
+        <span class="kw">this</span>.V = vertices;
+        <span class="kw">this</span>.dirigido = dirigido;
+        <span class="kw">this</span>.E = <span class="num">0</span>;
+        <span class="kw">this</span>.adj = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; V; i++)
+            adj.add(<span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;());
+    }
+
+    <span class="cm">// ── Agregar arista (con peso) ────────────────────────────────</span>
+    <span class="kw">public void</span> <span class="fn">agregarArista</span>(<span class="kw">int</span> u, <span class="kw">int</span> v, <span class="kw">int</span> peso) {
+        <span class="fn">validar</span>(u); <span class="fn">validar</span>(v);
+        adj.get(u).add(<span class="kw">new</span> <span class="tp">Arista</span>(v, peso));
+        <span class="kw">if</span> (!dirigido)
+            adj.get(v).add(<span class="kw">new</span> <span class="tp">Arista</span>(u, peso)); <span class="cm">// ← bidireccional</span>
+        E++;
+    }
+
+    <span class="cm">// Sobrecarga sin peso (peso = 1 por defecto)</span>
+    <span class="kw">public void</span> <span class="fn">agregarArista</span>(<span class="kw">int</span> u, <span class="kw">int</span> v) { <span class="fn">agregarArista</span>(u, v, <span class="num">1</span>); }
+
+    <span class="cm">// ── Vecinos de un vértice ────────────────────────────────────</span>
+    <span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">Arista</span>&gt; <span class="fn">vecinos</span>(<span class="kw">int</span> u) { <span class="kw">return</span> adj.get(u); }
+
+    <span class="cm">// ── ¿Existe arista (u, v)? ──────────────────────────────────</span>
+    <span class="kw">public boolean</span> <span class="fn">existeArista</span>(<span class="kw">int</span> u, <span class="kw">int</span> v) {
+        <span class="kw">return</span> adj.get(u).stream()
+                   .anyMatch(a -> a.destino() == v);
+    }
+
+    <span class="cm">// ── Grado de un vértice ─────────────────────────────────────</span>
+    <span class="kw">public int</span> <span class="fn">grado</span>(<span class="kw">int</span> u) { <span class="kw">return</span> adj.get(u).size(); }
+
+    <span class="cm">// ── Imprimir la lista completa ───────────────────────────────</span>
+    <span class="kw">public void</span> <span class="fn">imprimir</span>() {
+        <span class="tp">System</span>.out.println(<span class="str">"Grafo ("</span> + V + <span class="str">" vértices, "</span> + E + <span class="str">" aristas):"</span>);
+        <span class="kw">for</span> (<span class="kw">int</span> u = <span class="num">0</span>; u &lt; V; u++) {
+            <span class="tp">System</span>.out.print(<span class="str">"  ["</span> + u + <span class="str">"] → "</span>);
+            adj.get(u).forEach(a -> <span class="tp">System</span>.out.print(a + <span class="str">" "</span>));
+            <span class="tp">System</span>.out.println();
+        }
+    }
+
+    <span class="cm">// ── Validación ───────────────────────────────────────────────</span>
+    <span class="kw">private void</span> <span class="fn">validar</span>(<span class="kw">int</span> v) {
+        <span class="kw">if</span> (v &lt; <span class="num">0</span> || v &gt;= V)
+            <span class="kw">throw new</span> <span class="tp">IllegalArgumentException</span>(<span class="str">"Vértice "</span>+v+<span class="str">" fuera de rango"</span>);
+    }
+
+    <span class="kw">public int</span> <span class="fn">V</span>() { <span class="kw">return</span> V; }
+    <span class="kw">public int</span> <span class="fn">E</span>() { <span class="kw">return</span> E; }
+}</pre>
+  </div>
+
+  <div class="code-block reveal">
+    <div class="code-hdr"><span>BFS y DFS sobre Grafo</span><span>Java 17</span></div>
+    <pre><span class="kw">import</span> java.util.*;
+
+<span class="kw">public class</span> <span class="tp">Recorridos</span> {
+
+    <span class="cm">// ══════════════════════════════════════════════════
+    //  BFS — Breadth-First Search (búsqueda por anchura)
+    //  Usa una COLA (Queue) — FIFO
+    // ══════════════════════════════════════════════════</span>
+    <span class="kw">public static</span> <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">bfs</span>(<span class="tp">Grafo</span> g, <span class="kw">int</span> origen) {
+        <span class="kw">boolean</span>[] visitado = <span class="kw">new boolean</span>[g.<span class="fn">V</span>()];
+        <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; orden = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+        <span class="tp">Queue</span>&lt;<span class="tp">Integer</span>&gt; cola = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;&gt;();
+
+        visitado[origen] = <span class="kw">true</span>;
+        cola.offer(origen);
+
+        <span class="kw">while</span> (!cola.isEmpty()) {
+            <span class="kw">int</span> u = cola.poll();          <span class="cm">// sacar el frente</span>
+            orden.add(u);
+
+            <span class="cm">// encolar todos los vecinos no visitados</span>
+            <span class="kw">for</span> (<span class="tp">Grafo.Arista</span> a : g.<span class="fn">vecinos</span>(u)) {
+                <span class="kw">if</span> (!visitado[a.destino()]) {
+                    visitado[a.destino()] = <span class="kw">true</span>;
+                    cola.offer(a.destino());
+                }
+            }
+        }
+        <span class="kw">return</span> orden;
+    }
+
+    <span class="cm">// ══════════════════════════════════════════════════
+    //  DFS — Depth-First Search (búsqueda por profundidad)
+    //  Usa la PILA de llamadas (recursión) o un Stack
+    // ══════════════════════════════════════════════════</span>
+    <span class="kw">public static</span> <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">dfs</span>(<span class="tp">Grafo</span> g, <span class="kw">int</span> origen) {
+        <span class="kw">boolean</span>[] visitado = <span class="kw">new boolean</span>[g.<span class="fn">V</span>()];
+        <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; orden = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+        <span class="fn">dfsHelper</span>(g, origen, visitado, orden);
+        <span class="kw">return</span> orden;
+    }
+
+    <span class="kw">private static void</span> <span class="fn">dfsHelper</span>(<span class="tp">Grafo</span> g, <span class="kw">int</span> u,
+                                    <span class="kw">boolean</span>[] visitado,
+                                    <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; orden) {
+        visitado[u] = <span class="kw">true</span>;
+        orden.add(u);
+        <span class="kw">for</span> (<span class="tp">Grafo.Arista</span> a : g.<span class="fn">vecinos</span>(u)) {
+            <span class="kw">if</span> (!visitado[a.destino()])
+                <span class="fn">dfsHelper</span>(g, a.destino(), visitado, orden);
+        }
+        <span class="cm">// ← al salir de la recursión: post-order disponible aquí</span>
+    }
+
+    <span class="cm">// ── BFS con distancias desde el origen ──────────────────────</span>
+    <span class="kw">public static int</span>[] <span class="fn">bfsDistancias</span>(<span class="tp">Grafo</span> g, <span class="kw">int</span> origen) {
+        <span class="kw">int</span>[] dist = <span class="kw">new int</span>[g.<span class="fn">V</span>()];
+        <span class="tp">Arrays</span>.fill(dist, -<span class="num">1</span>);               <span class="cm">// -1 = no alcanzado</span>
+        dist[origen] = <span class="num">0</span>;
+        <span class="tp">Queue</span>&lt;<span class="tp">Integer</span>&gt; cola = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;&gt;();
+        cola.offer(origen);
+
+        <span class="kw">while</span> (!cola.isEmpty()) {
+            <span class="kw">int</span> u = cola.poll();
+            <span class="kw">for</span> (<span class="tp">Grafo.Arista</span> a : g.<span class="fn">vecinos</span>(u)) {
+                <span class="kw">if</span> (dist[a.destino()] == -<span class="num">1</span>) {
+                    dist[a.destino()] = dist[u] + <span class="num">1</span>;
+                    cola.offer(a.destino());
+                }
+            }
+        }
+        <span class="kw">return</span> dist; <span class="cm">// dist[v] = saltos mínimos desde origen a v</span>
+    }
+
+    <span class="cm">// ── DFS para detectar ciclos en grafo dirigido ───────────────</span>
+    <span class="kw">public static boolean</span> <span class="fn">tieneCiclo</span>(<span class="tp">Grafo</span> g) {
+        <span class="kw">boolean</span>[] visitado  = <span class="kw">new boolean</span>[g.<span class="fn">V</span>()];
+        <span class="kw">boolean</span>[] enPila    = <span class="kw">new boolean</span>[g.<span class="fn">V</span>()];
+        <span class="kw">for</span> (<span class="kw">int</span> v = <span class="num">0</span>; v &lt; g.<span class="fn">V</span>(); v++)
+            <span class="kw">if</span> (!visitado[v] && <span class="fn">dfsCiclo</span>(g, v, visitado, enPila))
+                <span class="kw">return true</span>;
+        <span class="kw">return false</span>;
+    }
+
+    <span class="kw">private static boolean</span> <span class="fn">dfsCiclo</span>(<span class="tp">Grafo</span> g, <span class="kw">int</span> u,
+                                       <span class="kw">boolean</span>[] vis, <span class="kw">boolean</span>[] pila) {
+        vis[u] = pila[u] = <span class="kw">true</span>;
+        <span class="kw">for</span> (<span class="tp">Grafo.Arista</span> a : g.<span class="fn">vecinos</span>(u)) {
+            <span class="kw">if</span> (!vis[a.destino()] && <span class="fn">dfsCiclo</span>(g, a.destino(), vis, pila))
+                <span class="kw">return true</span>;
+            <span class="kw">if</span> (pila[a.destino()]) <span class="kw">return true</span>; <span class="cm">// arista de retroceso</span>
+        }
+        pila[u] = <span class="kw">false</span>;
+        <span class="kw">return false</span>;
+    }
+
+    <span class="cm">// ── Demo principal ───────────────────────────────────────────</span>
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="tp">String</span>[] args) {
+        <span class="tp">Grafo</span> g = <span class="kw">new</span> <span class="tp">Grafo</span>(<span class="num">6</span>, <span class="kw">false</span>);
+        g.<span class="fn">agregarArista</span>(<span class="num">0</span>, <span class="num">1</span>, <span class="num">4</span>); g.<span class="fn">agregarArista</span>(<span class="num">0</span>, <span class="num">2</span>, <span class="num">7</span>);
+        g.<span class="fn">agregarArista</span>(<span class="num">1</span>, <span class="num">3</span>, <span class="num">2</span>); g.<span class="fn">agregarArista</span>(<span class="num">1</span>, <span class="num">4</span>, <span class="num">9</span>);
+        g.<span class="fn">agregarArista</span>(<span class="num">2</span>, <span class="num">4</span>, <span class="num">3</span>); g.<span class="fn">agregarArista</span>(<span class="num">3</span>, <span class="num">5</span>, <span class="num">5</span>);
+        g.<span class="fn">agregarArista</span>(<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>);
+
+        g.<span class="fn">imprimir</span>();
+        <span class="tp">System</span>.out.println(<span class="str">"BFS desde 0: "</span> + <span class="fn">bfs</span>(g, <span class="num">0</span>));
+        <span class="cm">// → [0, 1, 2, 3, 4, 5]</span>
+        <span class="tp">System</span>.out.println(<span class="str">"DFS desde 0: "</span> + <span class="fn">dfs</span>(g, <span class="num">0</span>));
+        <span class="cm">// → [0, 1, 3, 5, 4, 2]</span>
+        <span class="tp">System</span>.out.println(<span class="str">"Distancias BFS desde 0: "</span>
+            + <span class="tp">Arrays</span>.toString(<span class="fn">bfsDistancias</span>(g, <span class="num">0</span>)));
+        <span class="cm">// → [0, 1, 1, 2, 2, 3]</span>
+    }
+}</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 4. BFS -->
+<!-- ══════════════════════════════════════════ -->
+<section id="bfs">
+  <div class="sec-label">04 · Algoritmo</div>
+  <h2>BFS — Búsqueda por <span>Anchura</span></h2>
+
+  <div class="def">
+    <strong>BFS (Breadth-First Search)</strong> explora el grafo nivel a nivel: primero todos los vecinos directos del origen, luego los vecinos de los vecinos, y así sucesivamente. Usa una <strong>cola (FIFO)</strong> como estructura auxiliar y garantiza encontrar el <strong>camino mínimo en grafos no ponderados</strong>.
+  </div>
+
+  <h3>Traza visual paso a paso</h3>
+  <div class="dw reveal">
+    <div class="dw-title">BFS desde vértice 0 — el grafo de referencia</div>
+    <svg viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:700px;display:block;margin:auto">
+      <!-- Step labels -->
+      <g font-family="Bebas Neue,sans-serif" font-size="13" fill="rgb(128,0,0)" letter-spacing=".5">
+        <text x="20"  y="20">PASO 1</text>
+        <text x="195" y="20">PASO 2</text>
+        <text x="390" y="20">PASO 3</text>
+        <text x="540" y="20">PASO 4</text>
+      </g>
+
+      <!-- ── STEP 1: start at 0 ── -->
+      <g transform="translate(10,30)">
+        <line x1="40"  y1="80" x2="95"  y2="45"  stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <line x1="40"  y1="80" x2="95"  y2="115" stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <line x1="95"  y1="45"  x2="155" y2="45"  stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <line x1="95"  y1="45"  x2="155" y2="115" stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <line x1="95"  y1="115" x2="155" y2="115" stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <line x1="155" y1="45"  x2="200" y2="80"  stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <line x1="155" y1="115" x2="200" y2="80"  stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <circle cx="40"  cy="80"  r="18" fill="rgb(128,0,0)" stroke="rgb(128,0,0)" stroke-width="2"/>
+        <circle cx="95"  cy="45"  r="18" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1.5"/>
+        <circle cx="95"  cy="115" r="18" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1.5"/>
+        <circle cx="155" cy="45"  r="18" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1.5"/>
+        <circle cx="155" cy="115" r="18" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1.5"/>
+        <circle cx="200" cy="80"  r="18" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1.5"/>
+        <g font-family="Bebas Neue,sans-serif" font-size="14" text-anchor="middle" fill="#fff">
+          <text x="40"  y="86">0</text>
+        </g>
+        <g font-family="Bebas Neue,sans-serif" font-size="14" text-anchor="middle" fill="rgba(128,0,0,.5)">
+          <text x="95"  y="51">1</text><text x="95"  y="121">2</text>
+          <text x="155" y="51">3</text><text x="155" y="121">4</text>
+          <text x="200" y="86">5</text>
+        </g>
+        <text x="110" y="155" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">Cola: [0]</text>
+        <text x="110" y="167" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">Visitado: {0}</text>
+      </g>
+
+      <!-- ── STEP 2: visit neighbors of 0 ── -->
+      <g transform="translate(200,30)">
+        <line x1="40"  y1="80" x2="95"  y2="45"  stroke="rgb(128,0,0)" stroke-width="2.5"/>
+        <line x1="40"  y1="80" x2="95"  y2="115" stroke="rgb(128,0,0)" stroke-width="2.5"/>
+        <line x1="95"  y1="45"  x2="155" y2="45"  stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <line x1="95"  y1="45"  x2="155" y2="115" stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <line x1="95"  y1="115" x2="155" y2="115" stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <line x1="155" y1="45"  x2="200" y2="80"  stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <line x1="155" y1="115" x2="200" y2="80"  stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <circle cx="40"  cy="80"  r="18" fill="rgba(128,0,0,.3)" stroke="rgb(128,0,0)" stroke-width="2"/>
+        <circle cx="95"  cy="45"  r="18" fill="rgb(128,0,0)" stroke="rgb(128,0,0)" stroke-width="2"/>
+        <circle cx="95"  cy="115" r="18" fill="rgb(128,0,0)" stroke="rgb(128,0,0)" stroke-width="2"/>
+        <circle cx="155" cy="45"  r="18" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1.5"/>
+        <circle cx="155" cy="115" r="18" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1.5"/>
+        <circle cx="200" cy="80"  r="18" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1.5"/>
+        <g font-family="Bebas Neue,sans-serif" font-size="14" text-anchor="middle" fill="#fff">
+          <text x="40" y="86">0</text><text x="95" y="51">1</text><text x="95" y="121">2</text>
+        </g>
+        <g font-family="Bebas Neue,sans-serif" font-size="14" text-anchor="middle" fill="rgba(128,0,0,.5)">
+          <text x="155" y="51">3</text><text x="155" y="121">4</text><text x="200" y="86">5</text>
+        </g>
+        <text x="110" y="155" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">Cola: [1, 2]</text>
+        <text x="110" y="167" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">Visitado: {0,1,2}</text>
+      </g>
+
+      <!-- ── STEP 3: visit neighbors of 1 and 2 ── -->
+      <g transform="translate(390,30)">
+        <line x1="40"  y1="80" x2="95"  y2="45"  stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <line x1="40"  y1="80" x2="95"  y2="115" stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <line x1="95"  y1="45"  x2="155" y2="45"  stroke="rgb(128,0,0)" stroke-width="2.5"/>
+        <line x1="95"  y1="45"  x2="155" y2="115" stroke="rgb(128,0,0)" stroke-width="2.5"/>
+        <line x1="95"  y1="115" x2="155" y2="115" stroke="rgb(128,0,0)" stroke-width="2.5"/>
+        <line x1="155" y1="45"  x2="200" y2="80"  stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <line x1="155" y1="115" x2="200" y2="80"  stroke="rgba(128,0,0,.3)" stroke-width="1.5"/>
+        <circle cx="40"  cy="80"  r="18" fill="rgba(128,0,0,.25)" stroke="rgb(128,0,0)" stroke-width="2"/>
+        <circle cx="95"  cy="45"  r="18" fill="rgba(128,0,0,.25)" stroke="rgb(128,0,0)" stroke-width="2"/>
+        <circle cx="95"  cy="115" r="18" fill="rgba(128,0,0,.25)" stroke="rgb(128,0,0)" stroke-width="2"/>
+        <circle cx="155" cy="45"  r="18" fill="rgb(128,0,0)" stroke="rgb(128,0,0)" stroke-width="2"/>
+        <circle cx="155" cy="115" r="18" fill="rgb(128,0,0)" stroke="rgb(128,0,0)" stroke-width="2"/>
+        <circle cx="200" cy="80"  r="18" fill="#fff9f0" stroke="rgba(128,0,0,.4)" stroke-width="1.5"/>
+        <g font-family="Bebas Neue,sans-serif" font-size="14" text-anchor="middle" fill="#fff">
+          <text x="155" y="51">3</text><text x="155" y="121">4</text>
+        </g>
+        <g font-family="Bebas Neue,sans-serif" font-size="14" text-anchor="middle" fill="rgba(128,0,0,.5)">
+          <text x="40" y="86">0</text><text x="95" y="51">1</text><text x="95" y="121">2</text><text x="200" y="86">5</text>
+        </g>
+        <text x="110" y="155" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">Cola: [3, 4]</text>
+        <text x="110" y="167" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">Visitado: {0,1,2,3,4}</text>
+      </g>
+
+      <!-- ── STEP 4: visit 5 ── -->
+      <g transform="translate(540,30)">
+        <line x1="40"  y1="80" x2="95"  y2="45"  stroke="rgba(128,0,0,.2)" stroke-width="1.5"/>
+        <line x1="40"  y1="80" x2="95"  y2="115" stroke="rgba(128,0,0,.2)" stroke-width="1.5"/>
+        <line x1="95"  y1="45"  x2="120" y2="45"  stroke="rgba(128,0,0,.2)" stroke-width="1.5"/>
+        <line x1="95"  y1="45"  x2="120" y2="115" stroke="rgba(128,0,0,.2)" stroke-width="1.5"/>
+        <line x1="95"  y1="115" x2="120" y2="115" stroke="rgba(128,0,0,.2)" stroke-width="1.5"/>
+        <line x1="120" y1="45"  x2="155" y2="80"  stroke="rgb(128,0,0)" stroke-width="2.5"/>
+        <line x1="120" y1="115" x2="155" y2="80"  stroke="rgb(128,0,0)" stroke-width="2.5"/>
+        <circle cx="40"  cy="80"  r="16" fill="rgba(128,0,0,.2)" stroke="rgb(128,0,0)" stroke-width="1.5"/>
+        <circle cx="95"  cy="45"  r="16" fill="rgba(128,0,0,.2)" stroke="rgb(128,0,0)" stroke-width="1.5"/>
+        <circle cx="95"  cy="115" r="16" fill="rgba(128,0,0,.2)" stroke="rgb(128,0,0)" stroke-width="1.5"/>
+        <circle cx="120" cy="45"  r="16" fill="rgba(128,0,0,.2)" stroke="rgb(128,0,0)" stroke-width="1.5"/>
+        <circle cx="120" cy="115" r="16" fill="rgba(128,0,0,.2)" stroke="rgb(128,0,0)" stroke-width="1.5"/>
+        <circle cx="155" cy="80"  r="16" fill="rgb(128,0,0)" stroke="rgb(128,0,0)" stroke-width="2"/>
+        <g font-family="Bebas Neue,sans-serif" font-size="13" text-anchor="middle" fill="#fff">
+          <text x="155" y="86">5</text>
+        </g>
+        <g font-family="Bebas Neue,sans-serif" font-size="12" text-anchor="middle" fill="rgba(128,0,0,.4)">
+          <text x="40" y="86">0</text><text x="95" y="51">1</text><text x="95" y="121">2</text>
+          <text x="120" y="51">3</text><text x="120" y="121">4</text>
+        </g>
+        <text x="97" y="155" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">Cola: []</text>
+        <text x="97" y="167" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">Visitado: todos ✓</text>
+      </g>
+
+      <!-- Orden final -->
+      <text x="350" y="225" text-anchor="middle" font-family="Bebas Neue,sans-serif" font-size="15" fill="rgb(128,0,0)" letter-spacing=".5">ORDEN BFS RESULTANTE</text>
+      <g transform="translate(130,235)">
+        <rect x="0"   y="0" width="60" height="32" fill="rgb(128,0,0)" rx="4"/>
+        <rect x="68"  y="0" width="60" height="32" fill="rgb(128,0,0)" rx="4"/>
+        <rect x="136" y="0" width="60" height="32" fill="rgb(128,0,0)" rx="4"/>
+        <rect x="204" y="0" width="60" height="32" fill="rgb(128,0,0)" rx="4"/>
+        <rect x="272" y="0" width="60" height="32" fill="rgb(128,0,0)" rx="4"/>
+        <rect x="340" y="0" width="60" height="32" fill="rgb(128,0,0)" rx="4"/>
+        <g font-family="Bebas Neue,sans-serif" font-size="20" text-anchor="middle" fill="#fff">
+          <text x="30"  y="22">0</text><text x="98"  y="22">1</text>
+          <text x="166" y="22">2</text><text x="234" y="22">3</text>
+          <text x="302" y="22">4</text><text x="370" y="22">5</text>
+        </g>
+        <g font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle" fill="rgba(255,255,255,.5)">
+          <text x="30" y="38">dist=0</text><text x="98"  y="38">dist=1</text>
+          <text x="166" y="38">dist=1</text><text x="234" y="38">dist=2</text>
+          <text x="302" y="38">dist=2</text><text x="370" y="38">dist=3</text>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="algo-grid">
+    <div class="algo-box reveal">
+      <div class="algo-header bfs-h">
+        <span class="algo-label bfs">BFS</span>
+        <div>
+          <div class="algo-sub">Breadth-First Search</div>
+          <div class="algo-sub">Complejidad: O(V + E)</div>
+        </div>
+      </div>
+      <div class="algo-body">
+        <p><strong style="color:var(--blue)">Estructura clave:</strong> Cola FIFO — los vértices se procesan en el orden en que son descubiertos.</p>
+        <ul>
+          <li><strong>Camino mínimo</strong> en grafos no ponderados (distancia en saltos)</li>
+          <li><strong>Detección de bipartición</strong> — 2-coloración del grafo</li>
+          <li><strong>Componentes conexas</strong> en grafos no dirigidos</li>
+          <li><strong>Rastreadores web</strong> — explorar la web por niveles desde una URL</li>
+          <li><strong>Social BFS</strong> — "personas a N grados de separación"</li>
+          <li><strong>Broadcasting</strong> en redes — propagación de mensajes capa a capa</li>
+          <li><strong>Puzzle 0–1 BFS</strong> con deque para aristas de peso 0 y 1</li>
+        </ul>
+      </div>
+    </div>
+    <div class="algo-box reveal">
+      <div class="algo-header dfs-h">
+        <span class="algo-label dfs">DFS</span>
+        <div>
+          <div class="algo-sub">Depth-First Search</div>
+          <div class="algo-sub">Complejidad: O(V + E)</div>
+        </div>
+      </div>
+      <div class="algo-body">
+        <p><strong style="color:var(--green)">Estructura clave:</strong> Pila implícita (recursión) o explícita — va tan profundo como puede antes de retroceder.</p>
+        <ul>
+          <li><strong>Detección de ciclos</strong> — aristas de retroceso (back edges)</li>
+          <li><strong>Ordenación topológica</strong> de DAGs (compiladores, npm)</li>
+          <li><strong>Componentes fuertemente conexas</strong> (SCC) — Kosaraju, Tarjan</li>
+          <li><strong>Resolución de laberintos</strong> y puzzles con backtracking</li>
+          <li><strong>Árbol generador</strong> de un grafo</li>
+          <li><strong>Puntos de articulación</strong> y puentes (vulnerabilidad de redes)</li>
+          <li><strong>Flood fill</strong> — relleno de regiones en grillas 2D</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h3>Complejidad y comparación directa</h3>
+  <div class="tw reveal">
+    <table>
+      <thead><tr><th>Aspecto</th><th>BFS</th><th>DFS</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Complejidad tiempo</strong></td><td><span class="badge-g">O(V + E)</span></td><td><span class="badge-g">O(V + E)</span></td></tr>
+        <tr><td><strong>Complejidad espacio</strong></td><td><span class="badge-y">O(V)</span> — cola puede contener todo un nivel</td><td><span class="badge-g">O(h)</span> — h = profundidad máxima de la pila</td></tr>
+        <tr><td><strong>Estructura auxiliar</strong></td><td>Cola FIFO (Queue / LinkedList)</td><td>Pila implícita (recursión) o Stack explícita</td></tr>
+        <tr><td><strong>Garantiza camino mínimo?</strong></td><td>✅ Sí — en grafos no ponderados</td><td>❌ No — puede encontrar caminos más largos primero</td></tr>
+        <tr><td><strong>Completo en grafos infinitos?</strong></td><td>✅ Sí — si la solución existe, la encontrará</td><td>❌ No — puede perderse en ramas infinitas</td></tr>
+        <tr><td><strong>Mejor para</strong></td><td>Problemas de distancia, conectividad, niveles</td><td>Problemas de backtracking, ciclos, ordenación</td></tr>
+        <tr><td><strong>Peor caso espacio</strong></td><td>Grafo denso o estrella — O(V) en cola</td><td>Grafo tipo lista (camino) — O(V) en pila</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 5. DFS (visual) -->
+<!-- ══════════════════════════════════════════ -->
+<section id="dfs">
+  <div class="sec-label">05 · DFS Visual</div>
+  <h2>DFS — Traza <span>Paso a Paso</span></h2>
+
+  <div class="dw reveal">
+    <div class="dw-title">DFS desde vértice 0 — árbol DFS y aristas de retroceso</div>
+    <svg viewBox="0 0 680 280" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:680px;display:block;margin:auto">
+      <!-- DFS tree edges (solid) -->
+      <g stroke="#166534" stroke-width="2.5" fill="none">
+        <line x1="100" y1="50"  x2="200" y2="130"/>   <!-- 0→1 -->
+        <line x1="200" y1="130" x2="300" y2="50"/>    <!-- 1→3 -->
+        <line x1="300" y1="50"  x2="430" y2="130"/>   <!-- 3→5 -->
+        <line x1="430" y1="130" x2="300" y2="210"/>   <!-- 5→4 -->
+        <line x1="300" y1="210" x2="200" y2="210"/>   <!-- 4→2 -->
+      </g>
+      <!-- Cross/back edges (dashed) -->
+      <line x1="100" y1="60"  x2="196" y2="208" stroke="#c9a227" stroke-width="1.8" stroke-dasharray="6 3"/>  <!-- 0→2 back -->
+      <line x1="208" y1="130" x2="290" y2="208" stroke="#c9a227" stroke-width="1.8" stroke-dasharray="6 3"/>  <!-- 1→4 cross -->
+
+      <!-- Nodes with DFS order -->
+      <circle cx="100" cy="50"  r="24" fill="var(--green)" stroke="#166534" stroke-width="2.5"/>
+      <circle cx="200" cy="130" r="24" fill="var(--green)" stroke="#166534" stroke-width="2.5"/>
+      <circle cx="300" cy="50"  r="24" fill="var(--green)" stroke="#166534" stroke-width="2.5"/>
+      <circle cx="430" cy="130" r="24" fill="var(--green)" stroke="#166534" stroke-width="2.5"/>
+      <circle cx="300" cy="210" r="24" fill="var(--green)" stroke="#166534" stroke-width="2.5"/>
+      <circle cx="200" cy="210" r="24" fill="var(--green)" stroke="#166534" stroke-width="2.5"/>
+
+      <!-- Node labels -->
+      <g font-family="Bebas Neue,sans-serif" font-size="18" fill="#fff" text-anchor="middle">
+        <text x="100" y="57">0</text>
+        <text x="200" y="137">1</text>
+        <text x="300" y="57">3</text>
+        <text x="430" y="137">5</text>
+        <text x="300" y="217">4</text>
+        <text x="200" y="217">2</text>
+      </g>
+
+      <!-- DFS discovery order badges -->
+      <g font-family="JetBrains Mono,monospace" font-size="10" fill="#c9a227">
+        <text x="100" y="28">d=1</text>
+        <text x="200" y="108">d=2</text>
+        <text x="300" y="28">d=3</text>
+        <text x="430" y="108">d=4</text>
+        <text x="300" y="248">d=5</text>
+        <text x="200" y="248">d=6</text>
+      </g>
+
+      <!-- Legend -->
+      <line x1="490" y1="50"  x2="540" y2="50"  stroke="#166534" stroke-width="2.5"/>
+      <text x="548" y="54" font-family="Crimson Pro,serif" font-size="12" fill="#5c4a30">Arista de árbol DFS</text>
+      <line x1="490" y1="75"  x2="540" y2="75"  stroke="#c9a227" stroke-width="1.8" stroke-dasharray="5 3"/>
+      <text x="548" y="79" font-family="Crimson Pro,serif" font-size="12" fill="#5c4a30">Arista de retroceso / cruce</text>
+      <text x="490" y="105" font-family="Crimson Pro,serif" font-size="11" fill="#9b8060" font-style="italic">Orden visitado:</text>
+      <text x="490" y="120" font-family="JetBrains Mono,monospace" font-size="11" fill="var(--green)">0 → 1 → 3 → 5 → 4 → 2</text>
+
+      <!-- Arrows on tree edges -->
+      <defs>
+        <marker id="gw" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+          <polygon points="0 0,7 2.5,0 5" fill="#166534"/>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+
+  <div class="def reveal">
+    <strong>Observación clave:</strong> En el árbol DFS, las aristas discontinuas amarillas son <strong>aristas de retroceso</strong> (back edges) — conectan un vértice con un ancestro ya visitado. Su existencia es la evidencia de un <strong>ciclo</strong> en el grafo. En grafos no dirigidos, toda arista que no es de árbol es de retroceso.
+  </div>
+
+  <h3>DFS iterativo con Stack (sin recursión)</h3>
+  <div class="code-block reveal">
+    <div class="code-hdr"><span>DFS iterativo — evita stackoverflow en grafos grandes</span><span>Java</span></div>
+    <pre><span class="kw">public static</span> <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">dfsIterativo</span>(<span class="tp">Grafo</span> g, <span class="kw">int</span> origen) {
+    <span class="kw">boolean</span>[] visitado = <span class="kw">new boolean</span>[g.<span class="fn">V</span>()];
+    <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; orden = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+    <span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; pila = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+
+    pila.push(origen);
+
+    <span class="kw">while</span> (!pila.isEmpty()) {
+        <span class="kw">int</span> u = pila.pop();           <span class="cm">// sacar el tope</span>
+        <span class="kw">if</span> (visitado[u]) <span class="kw">continue</span>;   <span class="cm">// puede estar duplicado</span>
+        visitado[u] = <span class="kw">true</span>;
+        orden.add(u);
+
+        <span class="cm">// empujar vecinos en orden INVERSO para mantener
+        // el mismo orden que la versión recursiva</span>
+        <span class="tp">List</span>&lt;<span class="tp">Grafo.Arista</span>&gt; vecinos = g.<span class="fn">vecinos</span>(u);
+        <span class="kw">for</span> (<span class="kw">int</span> i = vecinos.size() - <span class="num">1</span>; i &gt;= <span class="num">0</span>; i--)
+            <span class="kw">if</span> (!visitado[vecinos.get(i).destino()])
+                pila.push(vecinos.get(i).destino());
+    }
+    <span class="kw">return</span> orden;
+}
+
+<span class="cm">// Ordenación topológica con DFS (para DAGs)
+// Resultado: orden inverso de finalización</span>
+<span class="kw">public static</span> <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">ordenTopologico</span>(<span class="tp">Grafo</span> g) {
+    <span class="kw">boolean</span>[] visitado = <span class="kw">new boolean</span>[g.<span class="fn">V</span>()];
+    <span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; resultado = <span class="kw">new</span> <span class="tp">ArrayDeque</span>&lt;&gt;();
+
+    <span class="kw">for</span> (<span class="kw">int</span> v = <span class="num">0</span>; v &lt; g.<span class="fn">V</span>(); v++)
+        <span class="kw">if</span> (!visitado[v])
+            <span class="fn">dfsTopoHelper</span>(g, v, visitado, resultado);
+
+    <span class="kw">return new</span> <span class="tp">ArrayList</span>&lt;&gt;(resultado); <span class="cm">// frente = primero en orden</span>
+}
+
+<span class="kw">private static void</span> <span class="fn">dfsTopoHelper</span>(<span class="tp">Grafo</span> g, <span class="kw">int</span> u,
+                                       <span class="kw">boolean</span>[] vis,
+                                       <span class="tp">Deque</span>&lt;<span class="tp">Integer</span>&gt; res) {
+    vis[u] = <span class="kw">true</span>;
+    <span class="kw">for</span> (<span class="tp">Grafo.Arista</span> a : g.<span class="fn">vecinos</span>(u))
+        <span class="kw">if</span> (!vis[a.destino()])
+            <span class="fn">dfsTopoHelper</span>(g, a.destino(), vis, res);
+    res.push(u);  <span class="cm">// ← añadir DESPUÉS de explorar todos los vecinos</span>
+}</pre>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 6. EJEMPLOS DE APLICACIÓN -->
+<!-- ══════════════════════════════════════════ -->
+<section id="ejemplos">
+  <div class="sec-label">06 · Aplicaciones Prácticas</div>
+  <h2>Dos <span>Ejemplos</span> Concretos</h2>
+
+  <div class="ex-grid">
+    <div class="ex-card reveal">
+      <div class="ex-num ex1">Ejemplo 1 · BFS — Red de metro</div>
+      <div class="ex-body">
+        <h4>¿Cuántas estaciones hay entre A y B?</h4>
+        <p>Una red de metro se modela como grafo no ponderado: estaciones = vértices, líneas directas = aristas. BFS desde la estación A encuentra la <strong>ruta con menos transbordos</strong> hacia cualquier destino.</p>
+        <div class="dw" style="margin:0">
+          <div class="dw-title">Red simplificada (5 estaciones)</div>
+          <svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg" width="100%">
+            <line x1="40"  y1="90" x2="110" y2="50"  stroke="var(--blue)" stroke-width="2"/>
+            <line x1="40"  y1="90" x2="110" y2="130" stroke="var(--blue)" stroke-width="2"/>
+            <line x1="110" y1="50" x2="190" y2="50"  stroke="var(--blue)" stroke-width="2"/>
+            <line x1="110" y1="130" x2="190" y2="130" stroke="var(--blue)" stroke-width="2"/>
+            <line x1="190" y1="50" x2="260" y2="90"  stroke="var(--blue)" stroke-width="2"/>
+            <line x1="190" y1="130" x2="260" y2="90" stroke="var(--blue)" stroke-width="2"/>
+            <!-- BFS shortest path highlighted -->
+            <line x1="40"  y1="90" x2="110" y2="50"  stroke="#1e3a8a" stroke-width="4" opacity=".6"/>
+            <line x1="110" y1="50" x2="190" y2="50"  stroke="#1e3a8a" stroke-width="4" opacity=".6"/>
+            <line x1="190" y1="50" x2="260" y2="90"  stroke="#1e3a8a" stroke-width="4" opacity=".6"/>
+            <circle cx="40"  cy="90"  r="18" fill="var(--blue)" stroke="#1e3a8a" stroke-width="2"/>
+            <circle cx="110" cy="50"  r="18" fill="var(--blue)" stroke="#1e3a8a" stroke-width="2"/>
+            <circle cx="110" cy="130" r="18" fill="#fff9f0" stroke="var(--blue)" stroke-width="2"/>
+            <circle cx="190" cy="50"  r="18" fill="var(--blue)" stroke="#1e3a8a" stroke-width="2"/>
+            <circle cx="190" cy="130" r="18" fill="#fff9f0" stroke="var(--blue)" stroke-width="2"/>
+            <circle cx="260" cy="90"  r="18" fill="var(--blue)" stroke="#1e3a8a" stroke-width="2"/>
+            <g font-family="Bebas Neue,sans-serif" font-size="14" text-anchor="middle" fill="#fff">
+              <text x="40"  y="96">A</text><text x="110" y="56">B</text>
+              <text x="190" y="56">D</text><text x="260" y="96">F</text>
+            </g>
+            <g font-family="Bebas Neue,sans-serif" font-size="14" text-anchor="middle" fill="var(--blue)">
+              <text x="110" y="136">C</text><text x="190" y="136">E</text>
+            </g>
+            <text x="150" y="170" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#9b8060">Ruta mínima A→F: 3 estaciones (A→B→D→F)</text>
+          </svg>
+        </div>
+        <p style="margin-top:.7rem;font-size:.92rem"><strong style="color:var(--blue)">¿Por qué BFS?</strong> Explora por niveles = por número de paradas. La primera vez que llega a F es garantizadamente el camino con menos transbordos. DFS podría encontrar A→C→E→F (también 3) pero podría también explorar primero A→C→... si hubiera una rama más larga.</p>
+      </div>
+    </div>
+
+    <div class="ex-card reveal">
+      <div class="ex-num ex2">Ejemplo 2 · DFS — Detección de ciclos en build</div>
+      <div class="ex-body">
+        <h4>¿Hay dependencias circulares en el proyecto?</h4>
+        <p>Un sistema de build (Maven, Gradle) tiene módulos como vértices y dependencias como aristas dirigidas. Si hay un ciclo (A depende de B, B depende de A), el build falla. DFS detecta ciclos con <strong>aristas de retroceso</strong>.</p>
+        <div class="dw" style="margin:0">
+          <div class="dw-title">Grafo de dependencias con ciclo detectado</div>
+          <svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg" width="100%">
+            <defs>
+              <marker id="ga" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><polygon points="0 0,6 2,0 4" fill="#166534"/></marker>
+              <marker id="ra" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><polygon points="0 0,6 2,0 4" fill="rgb(128,0,0)"/></marker>
+            </defs>
+            <line x1="40"  y1="90" x2="106" y2="54"  stroke="#166534" stroke-width="2" marker-end="url(#ga)"/>
+            <line x1="40"  y1="90" x2="106" y2="126" stroke="#166534" stroke-width="2" marker-end="url(#ga)"/>
+            <line x1="118" y1="50" x2="184" y2="50"  stroke="#166534" stroke-width="2" marker-end="url(#ga)"/>
+            <line x1="118" y1="130" x2="184" y2="130" stroke="#166534" stroke-width="2" marker-end="url(#ga)"/>
+            <line x1="196" y1="60" x2="252" y2="84"  stroke="#166534" stroke-width="2" marker-end="url(#ga)"/>
+            <!-- Cycle edge (red) -->
+            <path d="M 260,100 Q 250,160 120,160 Q 30,160 30,100" fill="none" stroke="rgb(128,0,0)" stroke-width="2.5" stroke-dasharray="6 3" marker-end="url(#ra)"/>
+            <circle cx="40"  cy="90"  r="18" fill="var(--green)" stroke="#166534" stroke-width="2"/>
+            <circle cx="110" cy="50"  r="18" fill="var(--green)" stroke="#166534" stroke-width="2"/>
+            <circle cx="110" cy="130" r="18" fill="var(--green)" stroke="#166534" stroke-width="2"/>
+            <circle cx="190" cy="50"  r="18" fill="var(--green)" stroke="#166534" stroke-width="2"/>
+            <circle cx="190" cy="130" r="18" fill="#fff9f0" stroke="#166534" stroke-width="2"/>
+            <circle cx="260" cy="90"  r="18" fill="var(--green)" stroke="#166534" stroke-width="2"/>
+            <g font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle" fill="#fff">
+              <text x="40"  y="93">App</text>
+              <text x="110" y="53">UI</text>
+              <text x="110" y="133">Core</text>
+              <text x="190" y="53">Net</text>
+              <text x="260" y="93">DB</text>
+            </g>
+            <text x="190" y="133" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="var(--green)">Utils</text>
+            <text x="150" y="172" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="rgb(128,0,0)">⚠ DB → App = ciclo detectado!</text>
+          </svg>
+        </div>
+        <p style="margin-top:.7rem;font-size:.92rem"><strong style="color:var(--green)">¿Por qué DFS?</strong> Durante el DFS se mantiene un conjunto de nodos "en la pila de llamadas". Si al explorar un vecino se encuentra uno que ya está en la pila → hay un ciclo. BFS no puede detectar ciclos de esta forma porque no razona sobre la profundidad de la exploración.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 7. EJERCICIO INTERACTIVO -->
+<!-- ══════════════════════════════════════════ -->
+<section id="ejercicio">
+  <div class="sec-label">07 · Ejercicio</div>
+  <h2>¿BFS o <span>DFS</span>? — Elige el correcto</h2>
+  <p>Para cada escenario, selecciona el algoritmo más adecuado y justifica mentalmente tu respuesta antes de ver el resultado. Considera: ¿necesito distancia mínima? ¿Necesito explorar a fondo? ¿Hay backtracking implícito?</p>
+
+  <div class="quiz-wrap reveal">
+    <div class="quiz-title">Ejercicio de Selección</div>
+    <p class="quiz-subtitle">Elige BFS o DFS para cada situación · Luego verifica tus respuestas</p>
+
+    <!-- Q1 -->
+    <div class="scenario" id="q1">
+      <div class="scenario-q">① Un videojuego necesita encontrar si hay algún camino entre dos salas en un dungeon (laberinto). No importa cuántos pasos tenga, sólo saber si existe.</div>
+      <div class="scenario-desc">El dungeon tiene 10,000 salas. La memoria es limitada. Las salas están muy ramificadas en profundidad.</div>
+      <div class="btn-row">
+        <button class="btn-algo btn-bfs" onclick="seleccionar('q1','bfs',false,'DFS es mejor aquí. No necesitamos la ruta mínima, solo existencia. DFS usa O(profundidad) de memoria, mucho menos que BFS que podría llenar la cola con miles de nodos de un mismo nivel. Además, los laberintos profundos favorecen a DFS.')">BFS</button>
+        <button class="btn-algo btn-dfs" onclick="seleccionar('q1','dfs',true,'✓ Correcto. DFS es ideal: no necesitas el camino mínimo, solo saber si existe. Usa mucho menos memoria (O(profundidad)) que BFS (O(ancho)), y los laberintos suelen ser estructuras profundas.')">DFS</button>
+      </div>
+      <div class="feedback" id="fb-q1"></div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="scenario" id="q2">
+      <div class="scenario-q">② Una app de redes sociales quiere mostrar las personas a exactamente 2 grados de separación de un usuario (amigos de amigos, sin contar amigos directos).</div>
+      <div class="scenario-desc">El grafo social tiene millones de nodos. Se necesita el nivel exacto de distancia, no sólo la conectividad.</div>
+      <div class="btn-row">
+        <button class="btn-algo btn-bfs" onclick="seleccionar('q2','bfs',true,'✓ Correcto. BFS explora exactamente nivel a nivel. El nivel 2 son los vecinos de vecinos. BFS con un contador de nivel nos da exactamente los nodos a distancia 2, algo que DFS no puede garantizar sin explorar todo el grafo.')">BFS</button>
+        <button class="btn-algo btn-dfs" onclick="seleccionar('q2','dfs',false,'BFS es la respuesta correcta. Para encontrar nodos a distancia exacta k, BFS es la herramienta natural: explora por niveles y el nivel k son exactamente los nodos a k saltos. Con DFS necesitarías recorrer todo el grafo y rastrear distancias manualmente.')">DFS</button>
+      </div>
+      <div class="feedback" id="fb-q2"></div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="scenario" id="q3">
+      <div class="scenario-q">③ Un compilador necesita ordenar las tareas de compilación de módulos respetando las dependencias: si el módulo A depende de B, B debe compilarse antes que A.</div>
+      <div class="scenario-desc">El grafo de dependencias es un DAG (Grafo Acíclico Dirigido). Se requiere un orden lineal de compilación.</div>
+      <div class="btn-row">
+        <button class="btn-algo btn-bfs" onclick="seleccionar('q3','bfs',false,'DFS es la respuesta. La ordenación topológica se implementa con DFS: al finalizar la exploración de un nodo (post-order), se agrega al resultado. El orden inverso de finalización es el orden topológico válido. BFS puede hacer ordenación topológica con el algoritmo de Kahn, pero conceptualmente DFS es la solución clásica.')">BFS</button>
+        <button class="btn-algo btn-dfs" onclick="seleccionar('q3','dfs',true,'✓ Correcto. La ordenación topológica usa DFS con post-order: cuando un nodo termina de explorar todos sus vecinos, se inserta al frente del resultado. El árbol DFS captura naturalmente la estructura de dependencias.')">DFS</button>
+      </div>
+      <div class="feedback" id="fb-q3"></div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="scenario" id="q4">
+      <div class="scenario-q">④ Un sistema de navegación GPS debe encontrar la ruta con menos semáforos (intersecciones) entre dos puntos de una ciudad, donde cada calle tiene exactamente 1 semáforo.</div>
+      <div class="scenario-desc">El mapa tiene ~50,000 intersecciones. Todas las aristas tienen el mismo peso (1 semáforo). Se necesita la ruta mínima.</div>
+      <div class="btn-row">
+        <button class="btn-algo btn-bfs" onclick="seleccionar('q4','bfs',true,'✓ Correcto. Cuando todas las aristas tienen el mismo peso, BFS encuentra el camino mínimo (menor número de aristas = menos semáforos). No se necesita Dijkstra porque los pesos son uniformes. BFS es O(V+E), más eficiente que Dijkstra O((V+E) log V) en este caso.')">BFS</button>
+        <button class="btn-algo btn-dfs" onclick="seleccionar('q4','dfs',false,'BFS es la respuesta. Con pesos uniformes, BFS garantiza el camino mínimo en número de aristas. DFS podría encontrar una ruta, pero no garantiza que sea la más corta: podría darte A→B→C→D cuando existe A→D directamente.')">DFS</button>
+      </div>
+      <div class="feedback" id="fb-q4"></div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="scenario" id="q5">
+      <div class="scenario-q">⑤ Una herramienta de análisis de código busca identificar si dos paquetes de software están en la misma componente conexa (pueden comunicarse entre sí, directa o indirectamente).</div>
+      <div class="scenario-desc">El grafo de paquetes es grande y disperso. No importa el camino específico, solo si están conectados.</div>
+      <div class="btn-row">
+        <button class="btn-algo btn-bfs" onclick="seleccionar('q5','bfs',false,'Ambos funcionan, pero DFS es la respuesta preferida aquí. Para detectar conectividad (¿están en la misma componente?), DFS tiende a encontrar la respuesta más rápido en grafos dispersos porque va en profundidad antes de ampliar. Además DFS es la base de algoritmos más avanzados de componentes como Tarjan y Kosaraju.')">BFS</button>
+        <button class="btn-algo btn-dfs" onclick="seleccionar('q5','dfs',true,'✓ Correcto. Ambos sirven para conectividad, pero DFS es la elección clásica para componentes conexas: puede implementarse con muy poco código (recursión simple), usa menos memoria en grafos dispersos y profundos, y es la base de algoritmos de SCCs como Tarjan.')">DFS</button>
+      </div>
+      <div class="feedback" id="fb-q5"></div>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.5rem">
+      <button class="btn-check" id="btn-check" onclick="verificar()">Verificar respuestas</button>
+      <button class="btn-reset" id="btn-reset" onclick="resetQuiz()">Reintentar</button>
+    </div>
+
+    <div class="score-box" id="score-box">
+      <div class="score-num" id="score-num">0/5</div>
+      <div class="score-label">RESPUESTAS CORRECTAS</div>
+      <div class="score-msg" id="score-msg"></div>
+    </div>
+  </div>
+
+  <!-- Summary table -->
+  <h3>Guía rápida de selección</h3>
+  <div class="tw reveal">
+    <table>
+      <thead><tr><th>Si el problema necesita…</th><th>Usa</th><th>Razón</th></tr></thead>
+      <tbody>
+        <tr><td>Camino con <strong>menos aristas</strong> (peso uniforme)</td><td><span class="badge-b">BFS</span></td><td>Garantiza mínimo por niveles</td></tr>
+        <tr><td>Saber si existe <strong>algún camino</strong></td><td><span class="badge-g">DFS</span></td><td>Memoria O(h), más eficiente</td></tr>
+        <tr><td>Nodos a <strong>distancia exacta k</strong></td><td><span class="badge-b">BFS</span></td><td>Nivel k = nodos a distancia k</td></tr>
+        <tr><td><strong>Ordenación topológica</strong> de un DAG</td><td><span class="badge-g">DFS</span></td><td>Post-order da orden topológico</td></tr>
+        <tr><td>Detectar <strong>ciclos</strong> en grafo dirigido</td><td><span class="badge-g">DFS</span></td><td>Aristas de retroceso = ciclos</td></tr>
+        <tr><td><strong>Componentes conexas</strong></td><td><span class="badge-g">DFS</span></td><td>Clásico, base de SCC algorithms</td></tr>
+        <tr><td><strong>Bipartición</strong> (2-coloración)</td><td><span class="badge-b">BFS</span></td><td>Coloreado natural por niveles</td></tr>
+        <tr><td><strong>Flood fill</strong> en grilla 2D</td><td><span class="badge-g">DFS</span></td><td>Recursión simple sobre vecinos</td></tr>
+        <tr><td>Encontrar <strong>puentes/articulaciones</strong></td><td><span class="badge-g">DFS</span></td><td>Tarjan usa timestamps DFS</td></tr>
+        <tr><td>Exploración en grafos <strong>muy anchos</strong></td><td><span class="badge-g">DFS</span></td><td>BFS llenaría la cola (O(V) espacio)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <div class="fl">
+    <div class="logo-placeholder">TU<br>LOGO</div>
+    <span class="fn2">Estructuras de Datos — Ingeniería de Sistemas</span>
+  </div>
+  <p>Listas de Adyacencia · BFS · DFS · Java</p>
+  <p style="margin-top:.3rem;color:rgba(255,255,255,.4)">Material académico — Ingeniería de Sistemas</p>
+</footer>
+
+<script>
+// ── Intersection Observer para reveals ──────────────────────
+const obs = new IntersectionObserver(es => es.forEach(e => {
+  if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}
+}),{threshold:.07});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// ── Nav activo al scroll ─────────────────────────────────────
+const secs = document.querySelectorAll('section[id]');
+const links = document.querySelectorAll('nav a');
+const sObs = new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      links.forEach(a=>a.classList.remove('active'));
+      const l=document.querySelector(`nav a[href="#${e.target.id}"]`);
+      if(l)l.classList.add('active');
+    }
+  });
+},{rootMargin:'-40% 0px -50% 0px'});
+secs.forEach(s=>sObs.observe(s));
+
+// ── Quiz logic ───────────────────────────────────────────────
+const respuestas = {};
+const correctas = {q1:'dfs', q2:'bfs', q3:'dfs', q4:'bfs', q5:'dfs'};
+
+function seleccionar(qid, algo, esCorrecta, mensaje) {
+  // Limpiar selección previa en esta pregunta
+  const row = document.getElementById(qid);
+  row.querySelectorAll('.btn-algo').forEach(b => {
+    b.classList.remove('selected');
+  });
+  // Marcar seleccionado
+  const btn = row.querySelector(`.btn-${algo}`);
+  if(btn) btn.classList.add('selected');
+  respuestas[qid] = algo;
+
+  // Ocultar feedback hasta verificar
+  const fb = document.getElementById('fb-'+qid);
+  fb.style.display = 'none';
+  fb.className = 'feedback';
+  // Guardar mensaje y estado
+  fb.dataset.correcto = esCorrecta;
+  fb.dataset.msg = mensaje;
+}
+
+function verificar() {
+  let correctCount = 0;
+  const total = Object.keys(correctas).length;
+
+  for(const [qid, algo] of Object.entries(correctas)) {
+    const fb = document.getElementById('fb-'+qid);
+    const elegido = respuestas[qid];
+    if(!elegido) {
+      fb.innerHTML = '<span class="fb-icon">⚠</span>No seleccionaste ninguna opción.';
+      fb.className = 'feedback wrong';
+      fb.style.display = 'block';
+      continue;
+    }
+    const correcto = (elegido === algo);
+    if(correcto) correctCount++;
+    fb.innerHTML = `<span class="fb-icon">${correcto?'✓':'✗'}</span>${fb.dataset.msg}`;
+    fb.className = 'feedback ' + (correcto ? 'correct' : 'wrong');
+    fb.style.display = 'block';
+  }
+
+  // Score
+  const sb = document.getElementById('score-box');
+  const sn = document.getElementById('score-num');
+  const sm = document.getElementById('score-msg');
+  sn.textContent = correctCount + '/' + total;
+  const msgs = [
+    'Sigue practicando — revisa las explicaciones de cada respuesta.',
+    'Buen intento — ya tienes la intuición básica de cuándo usar cada uno.',
+    'Bien — tienes una buena comprensión de BFS y DFS.',
+    'Muy bien — distingues claramente los casos de uso.',
+    'Muy bien — distingues claramente los casos de uso.',
+    '¡Perfecto! Dominas la selección de algoritmos de traversal.'
+  ];
+  sm.textContent = msgs[Math.min(correctCount, 5)];
+  sb.style.display = 'block';
+  document.getElementById('btn-reset').style.display = 'inline-block';
+}
+
+function resetQuiz() {
+  Object.keys(respuestas).forEach(k => delete respuestas[k]);
+  document.querySelectorAll('.btn-algo').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.feedback').forEach(fb => { fb.style.display='none'; });
+  document.getElementById('score-box').style.display = 'none';
+  document.getElementById('btn-reset').style.display = 'none';
+}
+</script>
+</body>
+</html>
