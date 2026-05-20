@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clase Final · Sistemas Operativos · USC</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0e0e12;--ink2:#1c1c25;--ink3:#2a2a38;
+  --surface:#f8f7f3;--card:#ffffff;
+  --amber:#d4820a;--amber2:#f0a030;--amber3:#ffd080;
+  --slate:#1e2a3a;--slate2:#2d3f55;--slate3:#3d5470;
+  --teal:#0e7a6e;--teal2:#11a090;--teal3:#5dd9cc;
+  --crimson:#8b1a1a;--crimson2:#c42b2b;
+  --muted:#6b6b7a;--border:rgba(14,14,18,.1);
+  --code-bg:#13131a;
+  --r:12px;--r2:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Lora',Georgia,serif;
+  background:var(--surface);color:var(--ink);
+  line-height:1.75;font-size:1rem;
+}
+
+/* NAV */
+nav{
+  position:sticky;top:0;z-index:200;
+  background:var(--slate);
+  display:flex;align-items:center;gap:0;
+  padding:0 2rem;overflow-x:auto;white-space:nowrap;
+  box-shadow:0 2px 20px rgba(0,0,0,.35);
+}
+.nav-brand{
+  font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;
+  color:#fff;padding:.8rem 1.5rem .8rem 0;
+  border-right:1px solid rgba(255,255,255,.15);margin-right:.5rem;
+  flex-shrink:0;letter-spacing:-.01em;
+}
+nav a{
+  font-family:'DM Mono',monospace;font-size:.7rem;
+  letter-spacing:.07em;color:rgba(255,255,255,.6);
+  text-decoration:none;padding:.9rem .9rem;
+  transition:color .2s,background .2s;flex-shrink:0;
+  border-bottom:2px solid transparent;
+}
+nav a:hover{color:#fff;background:rgba(255,255,255,.07);}
+nav a.active{color:var(--amber2);border-bottom-color:var(--amber2);}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,var(--ink2) 0%,var(--slate) 45%,var(--slate2) 100%);
+  padding:4rem 3rem 3.5rem;
+  border-bottom:3px solid var(--amber);
+  position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 70% 40%,rgba(212,130,10,.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-tag{
+  font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.2em;
+  color:var(--amber2);text-transform:uppercase;margin-bottom:1rem;
+}
+.hero h1{
+  font-family:'Syne',sans-serif;font-size:clamp(2.4rem,5vw,4rem);
+  font-weight:800;color:#fff;line-height:1.05;letter-spacing:-.02em;
+  margin-bottom:.8rem;
+}
+.hero h1 em{color:var(--amber2);font-style:normal;}
+.hero-sub{
+  font-family:'Lora',serif;font-style:italic;
+  color:rgba(255,255,255,.65);font-size:1.1rem;max-width:700px;
+  margin-bottom:1.5rem;
+}
+.hero-chips{display:flex;flex-wrap:wrap;gap:.5rem;}
+.chip{
+  font-family:'DM Mono',monospace;font-size:.68rem;
+  padding:.3rem .8rem;border:1px solid rgba(255,255,255,.2);
+  border-radius:20px;color:rgba(255,255,255,.65);
+}
+
+/* CONTENT LAYOUT */
+.page{max-width:1100px;margin:0 auto;padding:3rem 2rem;}
+section{margin-bottom:5rem;}
+
+/* SECTION HEADERS */
+.sec-num{
+  font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.2em;
+  color:var(--amber);text-transform:uppercase;margin-bottom:.5rem;
+  display:flex;align-items:center;gap:.6rem;
+}
+.sec-num::after{content:'';height:1px;width:60px;background:var(--amber);opacity:.4;}
+h2{
+  font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3vw,2.6rem);
+  font-weight:700;color:var(--ink);letter-spacing:-.03em;
+  margin-bottom:1.2rem;line-height:1.1;
+}
+h2 .accent{color:var(--slate2);}
+h3{
+  font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;
+  color:var(--slate);margin:2rem 0 .6rem;letter-spacing:-.01em;
+}
+h4{
+  font-family:'DM Mono',monospace;font-size:.85rem;
+  color:var(--ink);margin:1.2rem 0 .4rem;text-transform:uppercase;letter-spacing:.05em;
+}
+p{color:#3a3a4a;margin-bottom:.8rem;}
+strong{color:var(--ink);}
+em{color:var(--slate2);}
+
+/* CARDS & BOXES */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:1.4rem 1.6rem;margin-bottom:1.2rem;
+  transition:box-shadow .2s;
+}
+.card:hover{box-shadow:0 6px 24px rgba(0,0,0,.08);}
+.card-amber{border-left:4px solid var(--amber);background:#fffdf5;}
+.card-slate{border-left:4px solid var(--slate2);}
+.card-teal{border-left:4px solid var(--teal);}
+.card-crimson{border-left:4px solid var(--crimson);background:#fff8f8;}
+
+.def-box{
+  background:linear-gradient(135deg,#f0f4ff 0%,#e8f0fa 100%);
+  border:1px solid rgba(30,42,58,.12);
+  border-radius:var(--r2);padding:1.2rem 1.4rem;
+  margin:1.5rem 0;font-style:italic;
+  border-left:4px solid var(--slate2);
+}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.2rem;margin:1.5rem 0;}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1.5rem 0;}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin:1.5rem 0;}
+
+/* METRIC CARDS */
+.metric-card{
+  background:var(--slate);color:#fff;
+  border-radius:var(--r2);padding:1.2rem;text-align:center;
+}
+.metric-card .metric-val{
+  font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;
+  color:var(--amber2);line-height:1;margin-bottom:.3rem;
+}
+.metric-card .metric-label{
+  font-family:'DM Mono',monospace;font-size:.72rem;
+  color:rgba(255,255,255,.65);letter-spacing:.08em;
+}
+
+/* CODE */
+.code-wrap{
+  background:var(--code-bg);border-radius:var(--r2);
+  overflow:hidden;margin:1.2rem 0;
+}
+.code-header{
+  background:rgba(255,255,255,.06);padding:.5rem 1rem;
+  display:flex;justify-content:space-between;
+  font-family:'DM Mono',monospace;font-size:.7rem;
+  color:rgba(255,255,255,.5);
+}
+.code-wrap pre{
+  font-family:'DM Mono',monospace;font-size:.82rem;
+  color:#c8d3e0;padding:1.1rem 1.3rem;overflow-x:auto;line-height:1.65;
+}
+.kw{color:#7ec8e3;} .fn{color:#ffe08a;} .cm{color:#506070;font-style:italic;} .str{color:#a8d8a8;} .num{color:#ffb347;}
+
+/* TABLE */
+.tw{overflow-x:auto;margin:1.5rem 0;border-radius:var(--r2);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:.9rem;}
+th{
+  background:var(--slate);color:#fff;
+  font-family:'DM Mono',monospace;font-size:.68rem;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:.7rem 1rem;text-align:left;
+}
+td{padding:.65rem 1rem;border-bottom:1px solid var(--border);color:#3a3a4a;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(30,42,58,.03);}
+.tag{
+  display:inline-block;font-family:'DM Mono',monospace;font-size:.68rem;
+  padding:.2rem .5rem;border-radius:4px;margin:1px;
+}
+.tag-green{background:#dcf3dc;color:#1a6e1a;}
+.tag-red{background:#fce8e8;color:#8b1a1a;}
+.tag-amber{background:#fff0cc;color:#7a5000;}
+.tag-blue{background:#ddeeff;color:#1a3d6e;}
+.tag-gray{background:#ececec;color:#444;}
+
+/* SVG diagrams */
+.svg-wrap{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:1.5rem;margin:2rem 0;
+  overflow-x:auto;
+}
+.svg-label{
+  font-family:'DM Mono',monospace;font-size:.7rem;
+  color:var(--muted);letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:1rem;
+}
+
+/* TABS */
+.tab-nav{
+  display:flex;gap:4px;margin-bottom:1.5rem;
+  border-bottom:2px solid var(--border);overflow-x:auto;
+}
+.tab-btn{
+  font-family:'DM Mono',monospace;font-size:.75rem;letter-spacing:.06em;
+  padding:.6rem 1.2rem;border:none;background:none;cursor:pointer;
+  color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;
+  transition:color .2s,border-color .2s;white-space:nowrap;
+}
+.tab-btn.active{color:var(--slate);border-bottom-color:var(--slate);font-weight:700;}
+.tab-btn:hover{color:var(--ink);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* KERNEL STEPS */
+.step-list{margin:1.5rem 0;}
+.step{
+  display:flex;gap:1.2rem;margin-bottom:1.2rem;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:1.2rem;
+}
+.step-num{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;
+  color:var(--slate);opacity:.15;flex-shrink:0;line-height:1;
+  min-width:40px;
+}
+.step-body h4{margin-top:0;}
+
+/* OS COMPARISON */
+.os-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:1.4rem;
+  border-top:4px solid;
+}
+.os-card.linux{border-top-color:#f0a030;}
+.os-card.android{border-top-color:#3ddc84;}
+.os-card.ios{border-top-color:#007aff;}
+.os-card.windows{border-top-color:#00adef;}
+.os-card.rtos{border-top-color:#c42b2b;}
+.os-icon{font-size:2rem;margin-bottom:.5rem;}
+.os-name{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:.3rem;}
+.os-tag{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted);margin-bottom:.8rem;}
+.os-card ul{padding-left:1.2rem;font-size:.9rem;color:#3a3a4a;}
+.os-card ul li{margin-bottom:.3rem;}
+
+/* VIRT DIAGRAM */
+.virt-layer{
+  display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;
+  border-radius:6px;margin-bottom:3px;
+  font-family:'DM Mono',monospace;font-size:.8rem;
+}
+.vl-label{font-weight:700;min-width:140px;}
+.vl-desc{font-size:.78rem;opacity:.75;}
+.vl-apps{background:#e8f4e8;color:#1a5c1a;}
+.vl-container{background:#e8eef8;color:#1a3060;}
+.vl-runtime{background:#fff0cc;color:#6b4000;}
+.vl-kernel{background:#f0e8f8;color:#4a1a6e;}
+.vl-hw{background:#fce8e8;color:#6e1a1a;}
+.vl-vm{background:#ddeeff;color:#0a2a5e;}
+
+/* CALLOUT */
+.callout{
+  background:var(--slate);color:#fff;
+  border-radius:var(--r);padding:1.4rem 1.6rem;margin:1.5rem 0;
+}
+.callout-title{
+  font-family:'DM Mono',monospace;font-size:.72rem;
+  letter-spacing:.15em;color:var(--amber2);margin-bottom:.5rem;
+}
+.callout p{color:rgba(255,255,255,.8);margin-bottom:.5rem;}
+.callout p:last-child{margin-bottom:0;}
+
+/* FOOTER */
+footer{
+  background:var(--ink2);text-align:center;padding:2rem;
+  font-family:'DM Mono',monospace;font-size:.75rem;
+  color:rgba(255,255,255,.4);
+}
+
+/* PROGRESS BAR */
+.progress-wrap{margin:.4rem 0;}
+.progress-label{
+  font-family:'DM Mono',monospace;font-size:.72rem;
+  color:var(--muted);margin-bottom:.2rem;
+  display:flex;justify-content:space-between;
+}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:3px;transition:width .8s ease;}
+.pf-amber{background:var(--amber);}
+.pf-slate{background:var(--slate2);}
+.pf-teal{background:var(--teal);}
+.pf-crimson{background:var(--crimson2);}
+
+/* RESPONSIVE */
+@media(max-width:640px){
+  .hero{padding:2.5rem 1.5rem;}
+  .page{padding:2rem 1.2rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">SO · USC · 2026</div>
+  <a href="#integracion" class="active">01 · Integración</a>
+  <a href="#otros-os">02 · Otros SO</a>
+  <a href="#temas-avanzados">03 · Temas avanzados</a>
+  <a href="#kernel-propio">04 · Tu kernel</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Clase Final · Sistemas Operativos · Ingeniería de Sistemas</div>
+  <h1>El SO como<br><em>sistema unificado</em></h1>
+  <p class="hero-sub">Integración de módulos, arquitecturas actuales, virtualización y hoja de ruta para construir tu propio kernel</p>
+  <div class="hero-chips">
+    <span class="chip">Gestión de memoria</span>
+    <span class="chip">Gestión de procesos</span>
+    <span class="chip">Sistemas de E/S y archivos</span>
+    <span class="chip">Linux vs. Android vs. iOS</span>
+    <span class="chip">Virtualización · Contenedores</span>
+    <span class="chip">Kernel desde cero</span>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECCIÓN 1 — INTEGRACIÓN DE MÓDULOS -->
+<!-- ══════════════════════════════════════════ -->
+<section id="integracion">
+  <div class="sec-num">01</div>
+  <h2>Integración de <span class="accent">módulos del SO</span></h2>
+
+  <p>Los módulos de gestión de memoria, procesos, I/O y sistema de archivos no son capas independientes: se invocan mutuamente en cada operación del sistema. Entenderlos como un sistema integrado es clave para analizar el rendimiento y la seguridad del SO.</p>
+
+  <div class="def-box">
+    <strong>Principio de cierre:</strong> Ningún módulo del SO puede funcionar de forma aislada. Una sola llamada al sistema —por ejemplo, <code>read(fd, buf, n)</code>— activa el planificador, el traductor de direcciones virtuales, el driver de E/S, y el VFS de manera encadenada y sincronizada.
+  </div>
+
+  <!-- SVG: CICLO DE INTEGRACIÓN -->
+  <div class="svg-wrap">
+    <div class="svg-label">Ciclo de integración entre módulos — una llamada write() de principio a fin</div>
+    <svg width="100%" viewBox="0 0 680 440" role="img">
+      <title>Diagrama de integración de módulos del SO</title>
+      <desc>Muestra cómo proceso, memoria, E/S y sistema de archivos interactúan en una llamada write</desc>
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- Centro: Kernel -->
+      <ellipse cx="340" cy="220" rx="70" ry="38" fill="#1e2a3a" stroke="#d4820a" stroke-width="2"/>
+      <text x="340" y="215" text-anchor="middle" font-family="Syne,sans-serif" font-weight="700" font-size="14" fill="#f0a030">KERNEL</text>
+      <text x="340" y="232" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="rgba(255,255,255,.55)">syscall dispatcher</text>
+
+      <!-- PROCESO (arriba izquierda) -->
+      <rect x="30" y="30" width="180" height="70" rx="10" fill="#f8f7f3" stroke="#1e2a3a" stroke-width="1.5"/>
+      <text x="120" y="56" text-anchor="middle" font-family="Syne,sans-serif" font-weight="700" font-size="13" fill="#1e2a3a">Gestión de Procesos</text>
+      <text x="120" y="73" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#6b6b7a">PCB · Planificador · CFS</text>
+      <text x="120" y="88" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#6b6b7a">Context switch · Señales</text>
+
+      <!-- MEMORIA (arriba derecha) -->
+      <rect x="470" y="30" width="180" height="70" rx="10" fill="#f8f7f3" stroke="#1e2a3a" stroke-width="1.5"/>
+      <text x="560" y="56" text-anchor="middle" font-family="Syne,sans-serif" font-weight="700" font-size="13" fill="#1e2a3a">Gestión de Memoria</text>
+      <text x="560" y="73" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#6b6b7a">MMU · Paginación · TLB</text>
+      <text x="560" y="88" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#6b6b7a">Page fault · Memoria virtual</text>
+
+      <!-- I/O (abajo izquierda) -->
+      <rect x="30" y="330" width="180" height="70" rx="10" fill="#f8f7f3" stroke="#1e2a3a" stroke-width="1.5"/>
+      <text x="120" y="356" text-anchor="middle" font-family="Syne,sans-serif" font-weight="700" font-size="13" fill="#1e2a3a">Gestión de E/S</text>
+      <text x="120" y="373" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#6b6b7a">Drivers · IRQ · DMA</text>
+      <text x="120" y="388" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#6b6b7a">Polling · MMIO · Buffers</text>
+
+      <!-- ARCHIVOS (abajo derecha) -->
+      <rect x="470" y="330" width="180" height="70" rx="10" fill="#f8f7f3" stroke="#1e2a3a" stroke-width="1.5"/>
+      <text x="560" y="356" text-anchor="middle" font-family="Syne,sans-serif" font-weight="700" font-size="13" fill="#1e2a3a">Sist. de Archivos</text>
+      <text x="560" y="373" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#6b6b7a">VFS · inodo · journaling</text>
+      <text x="560" y="388" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#6b6b7a">ext4 · page cache · mmap</text>
+
+      <!-- SYSCALL (proceso usuario) -->
+      <rect x="265" y="30" width="150" height="46" rx="8" fill="#d4820a" stroke="none"/>
+      <text x="340" y="50" text-anchor="middle" font-family="DM Mono,monospace" font-size="11" fill="#fff" font-weight="700">write(fd, buf, n)</text>
+      <text x="340" y="68" text-anchor="middle" font-family="DM Mono,monospace" font-size="9.5" fill="rgba(255,255,255,.75)">TRAP → Ring 3 → Ring 0</text>
+
+      <!-- Conexiones: proceso ↔ kernel -->
+      <line x1="210" y1="65" x2="270" y2="200" stroke="#1e2a3a" stroke-width="1.5" marker-end="url(#ar)"/>
+      <text x="218" y="140" font-family="DM Mono,monospace" font-size="9" fill="#6b6b7a" transform="rotate(-52,218,140)">planifica</text>
+
+      <!-- memoria ↔ kernel -->
+      <line x1="470" y1="65" x2="408" y2="200" stroke="#0e7a6e" stroke-width="1.5" marker-end="url(#ar)"/>
+      <text x="455" y="140" font-family="DM Mono,monospace" font-size="9" fill="#0e7a6e" transform="rotate(52,455,140)">traduce</text>
+
+      <!-- I/O ↔ kernel -->
+      <line x1="210" y1="365" x2="272" y2="250" stroke="#8b1a1a" stroke-width="1.5" marker-end="url(#ar)"/>
+      <text x="215" y="300" font-family="DM Mono,monospace" font-size="9" fill="#8b1a1a" transform="rotate(-52,215,300)">interrumpe</text>
+
+      <!-- archivos ↔ kernel -->
+      <line x1="470" y1="365" x2="408" y2="252" stroke="#2d3f55" stroke-width="1.5" marker-end="url(#ar)"/>
+      <text x="452" y="300" font-family="DM Mono,monospace" font-size="9" fill="#2d3f55" transform="rotate(52,452,300)">VFS lookup</text>
+
+      <!-- syscall → kernel -->
+      <line x1="340" y1="76" x2="340" y2="182" stroke="#d4820a" stroke-width="2" marker-end="url(#ar)"/>
+
+      <!-- Labels de flujo en el centro -->
+      <text x="340" y="300" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e2a3a">① proceso llama write()</text>
+      <text x="340" y="316" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e2a3a">② kernel valida dirección (MMU)</text>
+      <text x="340" y="332" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e2a3a">③ VFS → driver → DMA</text>
+      <text x="340" y="348" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1e2a3a">④ IRQ → página sucia → sysret</text>
+    </svg>
+  </div>
+
+  <h3>Las tecnologías de integración más importantes</h3>
+
+  <div class="tab-nav" id="tech-tabs">
+    <button class="tab-btn active" onclick="switchTab('tech-tabs','t-linux')">Linux Kernel</button>
+    <button class="tab-btn" onclick="switchTab('tech-tabs','t-mmu')">MMU + TLB</button>
+    <button class="tab-btn" onclick="switchTab('tech-tabs','t-vfs')">VFS</button>
+    <button class="tab-btn" onclick="switchTab('tech-tabs','t-sched')">CFS Scheduler</button>
+    <button class="tab-btn" onclick="switchTab('tech-tabs','t-dma')">DMA + IRQ</button>
+  </div>
+
+  <div id="t-linux" class="tab-panel active">
+    <div class="card card-amber">
+      <h4>Linux Kernel (monolítico modular)</h4>
+      <p>El kernel de Linux es monolítico: todos los subsistemas corren en espacio de kernel (Ring 0) y se comunican directamente. No hay overhead de mensajes entre módulos. Sus componentes clave son: <strong>mm/</strong> (memoria), <strong>kernel/sched/</strong> (CFS), <strong>fs/</strong> (VFS + ext4), <strong>drivers/</strong> (E/S), y <strong>arch/x86/</strong> (traducción de arquitectura).</p>
+      <div class="code-wrap">
+        <div class="code-header"><span>Llamada típica en el kernel — path de write()</span><span>C · Linux kernel</span></div>
+        <pre><span class="cm">// Simplified path: write syscall → VFS → ext4 → page cache</span>
+SYSCALL_DEFINE3(write, <span class="kw">int</span>, fd, <span class="kw">const char __user</span>*, buf, <span class="kw">size_t</span>, count) {
+    <span class="kw">struct</span> fd f = fdget_pos(fd);          <span class="cm">// tabla de archivos del proceso</span>
+    <span class="kw">if</span> (!f.file) <span class="kw">return</span> -EBADF;
+    ret = vfs_write(f.file, buf, count, &pos);  <span class="cm">// VFS dispatch</span>
+    <span class="cm">// → ext4_file_write_iter() → page cache → writeout (writeback daemon)</span>
+    fdput_pos(f);
+    <span class="kw">return</span> ret;
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <div id="t-mmu" class="tab-panel">
+    <div class="card card-slate">
+      <h4>MMU (Memory Management Unit) + TLB</h4>
+      <p>La MMU traduce cada acceso a memoria de dirección virtual a física usando tablas de páginas de 4 niveles en x86-64 (PGD → PUD → PMD → PTE). El <strong>TLB (Translation Lookaside Buffer)</strong> es un caché de hardware de las traducciones recientes; un miss en TLB obliga a caminar la tabla completa (100+ ciclos vs. ~1 ciclo en hit). La integración clave: cuando el planificador hace context switch, debe realizar un <em>TLB flush</em> (o usar ASID en ARMv8 para evitarlo). ASLR desordena el espacio virtual como protección.</p>
+      <div class="grid-2" style="margin-top:1rem;">
+        <div>
+          <div class="progress-wrap">
+            <div class="progress-label"><span>TLB hit (1–5 ciclos)</span><span>~99%</span></div>
+            <div class="progress-bar"><div class="progress-fill pf-teal" style="width:99%"></div></div>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-label"><span>TLB miss → page walk (100+ ciclos)</span><span>~1%</span></div>
+            <div class="progress-bar"><div class="progress-fill pf-crimson" style="width:1%"></div></div>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-label"><span>Page fault → disco (millones ciclos)</span><span>raro</span></div>
+            <div class="progress-bar"><div class="progress-fill pf-amber" style="width:0.2%"></div></div>
+          </div>
+        </div>
+        <div style="font-size:.9rem;color:#3a3a4a;">
+          <strong>Overhead de seguridad:</strong><br>
+          KPTI (Meltdown mitigation) obliga a flush de TLB en cada entrada al kernel — overhead de 5–30% según la carga. Mitigado con PCIDs (Process-Context Identifiers) en CPUs modernas.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="t-vfs" class="tab-panel">
+    <div class="card card-teal">
+      <h4>VFS (Virtual File System) — la capa de abstracción universal</h4>
+      <p>El VFS define las operaciones abstractas (<code>open</code>, <code>read</code>, <code>write</code>, <code>mmap</code>) en términos de estructuras de datos genéricas: <code>struct inode</code>, <code>struct dentry</code>, <code>struct file</code>, <code>struct super_block</code>. Cada sistema de archivos concreto (ext4, NTFS vía ntfs3, FAT32, procfs, FUSE) registra sus implementaciones. El <strong>page cache</strong> es el punto de integración con la gestión de memoria: las páginas de datos de archivos son también páginas de memoria física compartidas entre procesos con mmap.</p>
+      <p><strong>Punto clave de integración:</strong> <code>mmap()</code> conecta el sistema de archivos directamente con la MMU — las páginas del archivo se mapean al espacio virtual del proceso y el page fault handler las carga bajo demanda, sin <code>read()</code> explícito.</p>
+    </div>
+  </div>
+
+  <div id="t-sched" class="tab-panel">
+    <div class="card card-amber">
+      <h4>CFS (Completely Fair Scheduler) — integración con E/S</h4>
+      <p>El CFS no opera aislado: cuando un proceso hace E/S bloqueante, el driver llama a <code>schedule()</code> que activa al siguiente proceso del árbol rojo-negro. Cuando la IRQ llega, el proceso es reactivado con <code>wake_up_process()</code> y su prioridad puede ser boosteada si es interactivo. Este <em>boost de E/S</em> asegura que procesos interactivos (como una terminal) respondan antes que un compilador en background.</p>
+      <div class="code-wrap">
+        <div class="code-header"><span>Integración scheduler ↔ driver</span><span>Linux kernel — simplificado</span></div>
+        <pre><span class="cm">// En un driver bloqueante:</span>
+<span class="fn">wait_event_interruptible</span>(queue, condition);   <span class="cm">// duerme el proceso</span>
+<span class="cm">// En la ISR (interrupt handler):</span>
+<span class="fn">wake_up_interruptible</span>(&queue);  <span class="cm">// despierta → CFS re-inserta</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div id="t-dma" class="tab-panel">
+    <div class="card card-crimson">
+      <h4>DMA (Direct Memory Access) + IRQ — la integración hardware</h4>
+      <p>El DMA conecta drivers, memoria y planificador: el driver configura el DMA (dirección en RAM, tamaño), el proceso se bloquea, el DMA transfiere bytes sin CPU, y al terminar levanta una IRQ que despacha el scheduler. Esta cadena es la razón por la que se puede tener alta throughput de disco manteniendo la CPU disponible para otros procesos.</p>
+      <p><strong>Coherencia de caché:</strong> Los procesadores modernos con caché escriben en caché antes que en RAM. El DMA puede leer datos <em>stale</em> de RAM. Las CPUs con coherencia de bus (MESI protocol) resuelven esto automáticamente; en ARM hay que hacer <code>dma_sync_single_for_device()</code> manualmente.</p>
+    </div>
+  </div>
+
+  <h3>Métricas de evaluación — Eficacia y Seguridad</h3>
+
+  <div class="grid-4">
+    <div class="metric-card"><div class="metric-val">μs</div><div class="metric-label">Latencia syscall</div></div>
+    <div class="metric-card"><div class="metric-val">MB/s</div><div class="metric-label">Throughput E/S</div></div>
+    <div class="metric-card"><div class="metric-val">%</div><div class="metric-label">CPU utilization</div></div>
+    <div class="metric-card"><div class="metric-val">ns</div><div class="metric-label">Context switch</div></div>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Categoría</th><th>Métrica</th><th>Herramienta</th><th>Valor de referencia (Linux)</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-blue">Procesos</span></td><td>Tiempo de context switch</td><td><code>lmbench lat_ctx</code></td><td>1–5 μs en CPUs modernas</td></tr>
+        <tr><td><span class="tag tag-blue">Procesos</span></td><td>Throughput de fork()</td><td><code>lmbench lat_proc</code></td><td>~200 μs por fork()</td></tr>
+        <tr><td><span class="tag tag-green">Memoria</span></td><td>Latencia de page fault</td><td><code>lmbench lat_pagefault</code></td><td>1–2 μs (RAM), ~1 ms (SSD)</td></tr>
+        <tr><td><span class="tag tag-green">Memoria</span></td><td>Ancho de banda de memoria</td><td><code>STREAM benchmark</code></td><td>50–100 GB/s (DDR5)</td></tr>
+        <tr><td><span class="tag tag-amber">E/S</span></td><td>IOPS (random 4K)</td><td><code>fio</code></td><td>500K+ IOPS (NVMe)</td></tr>
+        <tr><td><span class="tag tag-amber">E/S</span></td><td>Latencia syscall read()</td><td><code>strace -T</code></td><td>&lt; 1 μs (caché hit)</td></tr>
+        <tr><td><span class="tag tag-gray">Seguridad</span></td><td>ASLR entropy (bits)</td><td><code>/proc/sys/kernel/randomize_va_space</code></td><td>28 bits en x86-64</td></tr>
+        <tr><td><span class="tag tag-gray">Seguridad</span></td><td>Syscall overhead (KPTI)</td><td><code>perf stat</code></td><td>~5–30% dependiendo de workload</td></tr>
+        <tr><td><span class="tag tag-gray">Seguridad</span></td><td>Cobertura de KSPP (hardening)</td><td><code>kconfig-hardened-check</code></td><td>150+ opciones habilitables</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">Tecnologías de seguridad integradas en el SO</div>
+    <p><strong>ASLR + KASLR:</strong> Aleatoriza las direcciones base del heap, stack y kernel en cada boot. Dificulta exploits que requieren conocer direcciones absolutas (buffer overflows, ROP chains).</p>
+    <p><strong>CFI (Control-Flow Integrity):</strong> Restricción en tiempo de compilación/ejecución de qué funciones pueden ser destino de una llamada indirecta. Implementado en el kernel con Clang CFI desde Android 12+.</p>
+    <p><strong>seccomp-BPF:</strong> Filtra qué syscalls puede hacer un proceso. Docker y Chrome lo usan para reducir la superficie de ataque del kernel desde procesos no confiables.</p>
+    <p><strong>eBPF + LSM hooks:</strong> Permite políticas de seguridad programables en el kernel sin módulos. Falco (CNCF) lo usa para detección de anomalías en tiempo real.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECCIÓN 2 — OTROS SISTEMAS OPERATIVOS -->
+<!-- ══════════════════════════════════════════ -->
+<section id="otros-os">
+  <div class="sec-num">02</div>
+  <h2>Otros <span class="accent">sistemas operativos actuales</span></h2>
+  <p>El SO no es sólo Linux. El ecosistema actual abarca desde RTOS de microsegundos hasta sistemas distribuidos. Cada dominio tiene restricciones distintas que moldean su arquitectura.</p>
+
+  <div class="grid-2" style="margin-top:1.5rem;">
+
+    <div class="os-card linux">
+      <div class="os-icon">🐧</div>
+      <div class="os-name">Linux</div>
+      <div class="os-tag">Monolítico modular · GPL v2</div>
+      <ul>
+        <li>Kernel tipo <strong>monolítico</strong>: todos los subsistemas en Ring 0</li>
+        <li>Módulos cargables (.ko) sin recompilar el kernel</li>
+        <li>Planificador: <strong>CFS</strong> con árbol rojo-negro</li>
+        <li>Memoria: paginación de 4 niveles (x86-64)</li>
+        <li>Usado en servidores, cloud, embedded (Yocto), supercomputadores</li>
+        <li>eBPF permite extensibilidad sin módulos</li>
+      </ul>
+    </div>
+
+    <div class="os-card android">
+      <div class="os-icon">🤖</div>
+      <div class="os-name">Android (AOSP)</div>
+      <div class="os-tag">Linux kernel + HAL + ART · Apache 2.0</div>
+      <ul>
+        <li>Kernel Linux modificado con <strong>Binder IPC</strong>, Wakelocks, ION allocator</li>
+        <li><strong>HAL (Hardware Abstraction Layer)</strong> en user-space: separa kernel de drivers de fabricante</li>
+        <li>Runtime <strong>ART</strong> (Android Runtime): compilación AOT+JIT de bytecode Dalvik</li>
+        <li>Planificador: <strong>EAS</strong> (Energy-Aware Scheduler) para clusters big.LITTLE</li>
+        <li>Seguridad: SELinux obligatorio, scudo allocator, seccomp-BPF</li>
+        <li>Memoria: LMK (Low Memory Killer), ION/DMA-BUF para GPU compartida</li>
+      </ul>
+    </div>
+
+    <div class="os-card ios">
+      <div class="os-icon">🍎</div>
+      <div class="os-name">iOS / macOS (XNU)</div>
+      <div class="os-tag">Mach microkernel + BSD · Darwin (partial open source)</div>
+      <ul>
+        <li>Kernel <strong>XNU</strong>: Mach (IPC por mensajes, VM, scheduling) + FreeBSD (POSIX, VFS, networking)</li>
+        <li>Arquitectura <strong>híbrida</strong>: partes del SO en user-space (servidores Mach), pero la comunicación es muy eficiente (Mach traps optimizados)</li>
+        <li>IPC: <strong>Mach ports</strong> — base de toda la comunicación XPC/Objective-C</li>
+        <li>Memoria: <strong>Jetsam</strong> en iOS (no swap, mata procesos por presión)</li>
+        <li>Apple Silicon (M-series): CPU unificada, Metal GPU, Neural Engine — todo integrado en el kernel</li>
+      </ul>
+    </div>
+
+    <div class="os-card windows">
+      <div class="os-icon">🪟</div>
+      <div class="os-name">Windows NT</div>
+      <div class="os-tag">Híbrido (micro + monolítico) · Propietario</div>
+      <ul>
+        <li>Kernel <strong>NT</strong>: HAL + Executive (I/O Manager, Memory Manager, Process Manager) + microkernel</li>
+        <li>Win32 subsystem corre en user-mode — los drivers <em>pueden</em> correr en user-mode (UMDF)</li>
+        <li>Planificador: prioridades fijas (0–31) + boosting dinámico</li>
+        <li>Memoria: secciones + Working Set + VAD trees</li>
+        <li>WSL2: VM Linux completa con kernel real para interoperabilidad</li>
+        <li>Hyper-V integrado: el kernel de Windows corre sobre un hipervizor propio</li>
+      </ul>
+    </div>
+
+    <div class="os-card rtos">
+      <div class="os-icon">⏱️</div>
+      <div class="os-name">RTOS (FreeRTOS / Zephyr / QNX)</div>
+      <div class="os-tag">Tiempo real · Sistemas embebidos críticos</div>
+      <ul>
+        <li><strong>FreeRTOS:</strong> 9KB de huella, planificador por prioridad, sin MMU obligatoria</li>
+        <li><strong>Zephyr (Linux Foundation):</strong> RTOS moderno con soporte de múltiples arquitecturas, usado en IoT/Bluetooth</li>
+        <li><strong>QNX:</strong> microkernel, certificado para automoción (ISO 26262) y aviación (DO-178C)</li>
+        <li>Planificación: Rate-Monotonic (RMS), Earliest Deadline First (EDF)</li>
+        <li>Sin memoria virtual obligatoria — énfasis en determinismo, no throughput</li>
+        <li>Latencia de interrupción garantizada: &lt;10 μs en hardware dedicado</li>
+      </ul>
+    </div>
+
+    <div class="os-card" style="border-top-color:#7c3aed;">
+      <div class="os-icon">🌐</div>
+      <div class="os-name">ChromeOS / Fuchsia</div>
+      <div class="os-tag">Linux / Zircon microkernel · Google</div>
+      <ul>
+        <li><strong>ChromeOS:</strong> Linux kernel + sistema de archivos A/B para actualizaciones atómicas. Root de confianza en hardware (TPM + Verified Boot)</li>
+        <li><strong>Fuchsia:</strong> Nuevo kernel <strong>Zircon</strong> (microkernel), no POSIX. IPC por canales, capacidades (capabilities model), todo driver en user-space</li>
+        <li>Fuchsia usa <strong>FIDL</strong> (Fuchsia Interface Definition Language) como protocolo IPC</li>
+        <li>Relevante académicamente: aprendizaje sobre diseño moderno de microkernels sin legado POSIX</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <h3>Comparación arquitectural con Linux</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>SO</th><th>Tipo de kernel</th><th>Planificador</th><th>IPC</th><th>Memoria virtual</th><th>Fortaleza clave</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Linux</strong></td>
+          <td><span class="tag tag-amber">Monolítico</span> modular</td>
+          <td>CFS (árbol R-B)</td>
+          <td>pipes, sockets, shared mem, signals</td>
+          <td>Paginación 4 niveles</td>
+          <td>Rendimiento, versatilidad</td>
+        </tr>
+        <tr>
+          <td><strong>Android</strong></td>
+          <td><span class="tag tag-amber">Monolítico</span> + HAL</td>
+          <td>EAS (Energy-Aware)</td>
+          <td>Binder (RPC orientado a objetos)</td>
+          <td>Linux + ION/DMA-BUF</td>
+          <td>Móvil, eficiencia energética</td>
+        </tr>
+        <tr>
+          <td><strong>iOS / macOS</strong></td>
+          <td><span class="tag tag-blue">Híbrido</span> (XNU)</td>
+          <td>Mach + BSD boost</td>
+          <td>Mach ports, XPC</td>
+          <td>Mach VM, Jetsam (iOS)</td>
+          <td>Seguridad, ecosistema cerrado</td>
+        </tr>
+        <tr>
+          <td><strong>Windows NT</strong></td>
+          <td><span class="tag tag-blue">Híbrido</span></td>
+          <td>Prioridades fijas</td>
+          <td>LPC, pipes, COM/RPC</td>
+          <td>Working Set + VAD trees</td>
+          <td>Compatibilidad legacy, hardware</td>
+        </tr>
+        <tr>
+          <td><strong>FreeRTOS</strong></td>
+          <td><span class="tag tag-green">RTOS</span> mínimo</td>
+          <td>Prioridad estricta</td>
+          <td>Queues, semáforos, mailboxes</td>
+          <td>Ninguna (opcional MPU)</td>
+          <td>Determinismo, tamaño mínimo</td>
+        </tr>
+        <tr>
+          <td><strong>QNX</strong></td>
+          <td><span class="tag tag-green">Microkernel</span></td>
+          <td>Prioridad estricta + EDF</td>
+          <td>Paso de mensajes síncrono</td>
+          <td>Paginación + procesos aislados</td>
+          <td>Seguridad funcional (autos)</td>
+        </tr>
+        <tr>
+          <td><strong>Fuchsia</strong></td>
+          <td><span class="tag tag-green">Microkernel</span> (Zircon)</td>
+          <td>Fair scheduling</td>
+          <td>FIDL sobre canales Zircon</td>
+          <td>Capacidades basadas en handles</td>
+          <td>Seguridad, modernidad sin legado</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SVG: Arquitecturas comparadas -->
+  <div class="svg-wrap">
+    <div class="svg-label">Comparación de arquitecturas de kernel — espacio de privilegio</div>
+    <svg width="100%" viewBox="0 0 680 280" role="img">
+      <title>Comparación de arquitecturas monolítica, híbrida y microkernel</title>
+      <desc>Tres columnas mostrando qué corre en Ring 0 vs Ring 3 en cada tipo de kernel</desc>
+
+      <!-- MONOLÍTICO -->
+      <text x="110" y="24" text-anchor="middle" font-family="Syne,sans-serif" font-weight="700" font-size="13" fill="#1e2a3a">Monolítico (Linux)</text>
+      <rect x="30" y="32" width="160" height="170" rx="8" fill="#1e2a3a" stroke="none"/>
+      <text x="110" y="52" text-anchor="middle" font-family="DM Mono,monospace" font-size="9.5" fill="rgba(255,255,255,.5)">Ring 0 (Kernel Space)</text>
+      <rect x="40" y="58" width="140" height="20" rx="4" fill="#d4820a"/><text x="110" y="72" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#fff">Memory Manager</text>
+      <rect x="40" y="82" width="140" height="20" rx="4" fill="#2d3f55"/><text x="110" y="96" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#fff">Scheduler / CFS</text>
+      <rect x="40" y="106" width="140" height="20" rx="4" fill="#0e7a6e"/><text x="110" y="120" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#fff">VFS / ext4 / driver</text>
+      <rect x="40" y="130" width="140" height="20" rx="4" fill="#8b1a1a"/><text x="110" y="144" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#fff">Network stack</text>
+      <rect x="40" y="154" width="140" height="20" rx="4" fill="#4a1a6e"/><text x="110" y="168" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#fff">IPC subsystem</text>
+      <rect x="30" y="210" width="160" height="36" rx="8" fill="#e8f4e8" stroke="#1a5c1a" stroke-width="1"/>
+      <text x="110" y="225" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1a5c1a">Ring 3 (User Space)</text>
+      <text x="110" y="240" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1a5c1a">Procesos de usuario</text>
+      <text x="110" y="265" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#3a3a4a">+ Rendimiento</text>
+      <text x="110" y="278" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#8b1a1a">− Fallo = todo el kernel</text>
+
+      <!-- HÍBRIDO -->
+      <text x="340" y="24" text-anchor="middle" font-family="Syne,sans-serif" font-weight="700" font-size="13" fill="#1e2a3a">Híbrido (Windows/XNU)</text>
+      <rect x="260" y="32" width="160" height="90" rx="8" fill="#1e2a3a" stroke="none"/>
+      <text x="340" y="52" text-anchor="middle" font-family="DM Mono,monospace" font-size="9.5" fill="rgba(255,255,255,.5)">Ring 0</text>
+      <rect x="270" y="58" width="140" height="20" rx="4" fill="#d4820a"/><text x="340" y="72" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#fff">Microkernel (IPC/VM)</text>
+      <rect x="270" y="82" width="140" height="20" rx="4" fill="#2d3f55"/><text x="340" y="96" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#fff">Scheduler + HAL</text>
+      <rect x="260" y="130" width="160" height="90" rx="8" fill="#ddeeff" stroke="#1a3d6e" stroke-width="1"/>
+      <text x="340" y="148" text-anchor="middle" font-family="DM Mono,monospace" font-size="9.5" fill="#1a3d6e">Ring 3 (semi-privilegiado)</text>
+      <rect x="270" y="154" width="140" height="20" rx="4" fill="rgba(30,61,110,.15)" stroke="#1a3d6e" stroke-width="0.5"/><text x="340" y="168" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1a3d6e">Win32 / BSD subsystem</text>
+      <rect x="270" y="178" width="140" height="20" rx="4" fill="rgba(30,61,110,.15)" stroke="#1a3d6e" stroke-width="0.5"/><text x="340" y="192" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1a3d6e">Drivers (UMDF)</text>
+      <rect x="260" y="228" width="160" height="24" rx="6" fill="#e8f4e8" stroke="#1a5c1a" stroke-width="1"/>
+      <text x="340" y="244" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1a5c1a">Procesos usuario</text>
+      <text x="340" y="265" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#3a3a4a">± Balance</text>
+      <text x="340" y="278" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#0e7a6e">± Flexibilidad</text>
+
+      <!-- MICROKERNEL -->
+      <text x="568" y="24" text-anchor="middle" font-family="Syne,sans-serif" font-weight="700" font-size="13" fill="#1e2a3a">Microkernel (QNX/Fuchsia)</text>
+      <rect x="490" y="32" width="160" height="50" rx="8" fill="#1e2a3a" stroke="none"/>
+      <text x="568" y="52" text-anchor="middle" font-family="DM Mono,monospace" font-size="9.5" fill="rgba(255,255,255,.5)">Ring 0 (mínimo)</text>
+      <rect x="500" y="58" width="140" height="20" rx="4" fill="#d4820a"/><text x="568" y="72" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#fff">IPC + scheduling + VM</text>
+      <rect x="490" y="90" width="160" height="160" rx="8" fill="#ddeeff" stroke="#1a3d6e" stroke-width="1"/>
+      <text x="568" y="108" text-anchor="middle" font-family="DM Mono,monospace" font-size="9.5" fill="#1a3d6e">Ring 3 (servidores SO)</text>
+      <rect x="500" y="114" width="140" height="18" rx="4" fill="rgba(30,61,110,.12)" stroke="#1a3d6e" stroke-width="0.5"/><text x="568" y="127" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1a3d6e">File system server</text>
+      <rect x="500" y="136" width="140" height="18" rx="4" fill="rgba(30,61,110,.12)" stroke="#1a3d6e" stroke-width="0.5"/><text x="568" y="149" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1a3d6e">Network server</text>
+      <rect x="500" y="158" width="140" height="18" rx="4" fill="rgba(30,61,110,.12)" stroke="#1a3d6e" stroke-width="0.5"/><text x="568" y="171" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1a3d6e">Drivers (user-mode)</text>
+      <rect x="500" y="180" width="140" height="18" rx="4" fill="rgba(30,61,110,.12)" stroke="#1a3d6e" stroke-width="0.5"/><text x="568" y="193" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1a3d6e">Device manager</text>
+      <rect x="490" y="258" width="160" height="18" rx="6" fill="#e8f4e8" stroke="#1a5c1a" stroke-width="1"/>
+      <text x="568" y="271" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#1a5c1a">Procesos usuario</text>
+      <text x="568" y="265" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#0e7a6e">+ Aislamiento</text>
+      <text x="568" y="278" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#8b1a1a">− Overhead de IPC</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECCIÓN 3 — TEMAS AVANZADOS -->
+<!-- ══════════════════════════════════════════ -->
+<section id="temas-avanzados">
+  <div class="sec-num">03</div>
+  <h2>Temas <span class="accent">relacionados y avanzados</span></h2>
+
+  <div class="tab-nav" id="adv-tabs">
+    <button class="tab-btn active" onclick="switchTab('adv-tabs','v-virtualizacion')">Virtualización</button>
+    <button class="tab-btn" onclick="switchTab('adv-tabs','v-contenedores')">Contenedores</button>
+    <button class="tab-btn" onclick="switchTab('adv-tabs','v-ebpf')">eBPF</button>
+    <button class="tab-btn" onclick="switchTab('adv-tabs','v-unikernels')">Unikernels</button>
+    <button class="tab-btn" onclick="switchTab('adv-tabs','v-wasm')">WASM / Sandboxing</button>
+  </div>
+
+  <!-- VIRTUALIZACIÓN -->
+  <div id="v-virtualizacion" class="tab-panel active">
+    <h3>Virtualización</h3>
+    <p>La virtualización permite ejecutar múltiples sistemas operativos <em>completos</em> sobre un mismo hardware, cada uno con su propio kernel. El componente central es el <strong>hipervisor</strong> (VMM — Virtual Machine Monitor).</p>
+
+    <div class="grid-2">
+      <div class="card card-amber">
+        <h4>Tipo 1 — Bare-metal (nativo)</h4>
+        <p>El hipervisor corre directamente sobre el hardware. No hay SO host intermedio. Ejemplos: <strong>KVM</strong> (Linux, el kernel mismo se convierte en hipervisor vía módulo), <strong>Xen</strong>, <strong>VMware ESXi</strong>, <strong>Hyper-V</strong>.</p>
+        <p>Mecanismos hardware clave: <strong>Intel VT-x / AMD-V</strong> — instrucciones hardware para capturar operaciones privilegiadas de la VM (intercept de instrucciones sensibles). <strong>EPT/NPT</strong> (Extended/Nested Page Tables): dos niveles de traducción de paginación en hardware → la MMU traduce GVA→GPA→HPA sin intervención del hipervisor por cada acceso.</p>
+      </div>
+      <div class="card card-slate">
+        <h4>Tipo 2 — Hosted (sobre SO)</h4>
+        <p>El hipervisor es un proceso más del SO host. Ejemplos: <strong>VirtualBox</strong>, <strong>QEMU</strong> (en modo full emulation), <strong>VMware Workstation</strong>.</p>
+        <p>QEMU + KVM es el stack estándar en cloud: QEMU gestiona los dispositivos virtuales (VirtIO para discos/red), KVM usa VT-x para ejecutar el código de guest sin emular la CPU instrucción a instrucción.</p>
+      </div>
+    </div>
+
+    <!-- Capas virtualización -->
+    <div class="card" style="margin-top:1rem;">
+      <h4>Capas en un host KVM (cloud)</h4>
+      <div class="virt-layer vl-apps"><span class="vl-label">App (VM guest)</span><span class="vl-desc">Proceso en la VM — ve su propio espacio de direcciones</span></div>
+      <div class="virt-layer vl-kernel"><span class="vl-label">Kernel invitado (Guest OS)</span><span class="vl-desc">Linux / Windows kernel — cree que tiene hardware real (salvo para E/S)</span></div>
+      <div class="virt-layer vl-vm"><span class="vl-label">KVM + QEMU (hipervisor)</span><span class="vl-desc">VT-x intercepts · EPT page tables · VirtIO drivers · emula NIC, disco</span></div>
+      <div class="virt-layer vl-kernel"><span class="vl-label">Kernel host (Linux)</span><span class="vl-desc">Gestiona CPU real, memoria física, scheduling de vCPUs como threads</span></div>
+      <div class="virt-layer vl-hw"><span class="vl-label">Hardware físico</span><span class="vl-desc">x86-64 CPU con VT-x/EPT · DDR5 RAM · NVMe SSD · NIC</span></div>
+    </div>
+  </div>
+
+  <!-- CONTENEDORES -->
+  <div id="v-contenedores" class="tab-panel">
+    <h3>Contenedores (Docker / Podman / LXC)</h3>
+    <p>Los contenedores <em>no virtualizan el hardware</em>: comparten el kernel del SO host. Su aislamiento viene de dos mecanismos del kernel Linux:</p>
+
+    <div class="grid-2">
+      <div class="card card-teal">
+        <h4>Namespaces — aislamiento de visibilidad</h4>
+        <p>Cada contenedor tiene su propia vista de recursos del sistema. Linux tiene 8 namespaces: <strong>pid</strong> (procesos con IDs propios), <strong>net</strong> (interfaces de red propias), <strong>mnt</strong> (sistema de archivos propio), <strong>uts</strong> (hostname), <strong>ipc</strong>, <strong>user</strong> (UIDs propios), <strong>time</strong>, <strong>cgroup</strong>.</p>
+      </div>
+      <div class="card card-amber">
+        <h4>cgroups v2 — aislamiento de recursos</h4>
+        <p>Controla <em>cuánto</em> de cada recurso puede usar el grupo de procesos: CPU (cpu.weight), memoria (memory.max), E/S (io.weight), red. Docker traduce <code>--memory=512m</code> y <code>--cpus=0.5</code> a configuración de cgroups v2.</p>
+      </div>
+    </div>
+
+    <div class="card card-crimson" style="margin-top:.5rem;">
+      <h4>Diferencia crucial: VM vs Contenedor</h4>
+      <div class="tw" style="margin:0;">
+        <table>
+          <thead><tr><th>Aspecto</th><th>Máquina Virtual (KVM)</th><th>Contenedor (Docker)</th></tr></thead>
+          <tbody>
+            <tr><td>Kernel</td><td><span class="tag tag-blue">Propio (guest kernel)</span></td><td><span class="tag tag-green">Compartido (host kernel)</span></td></tr>
+            <tr><td>Aislamiento</td><td>Completo (hardware virtual)</td><td>Namespaces + cgroups</td></tr>
+            <tr><td>Overhead</td><td>Alto (~10% de CPU/RAM)</td><td>Casi nulo (&lt;1%)</td></tr>
+            <tr><td>Tiempo de boot</td><td>Segundos a minutos</td><td>Milisegundos</td></tr>
+            <tr><td>Superficie de ataque</td><td>Baja (hipervisor)</td><td>Mayor (kernel compartido)</td></tr>
+            <tr><td>Caso de uso</td><td>Multi-tenant cloud, Windows en Linux</td><td>Microservicios, CI/CD, dev</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- eBPF -->
+  <div id="v-ebpf" class="tab-panel">
+    <h3>eBPF — Programabilidad del kernel</h3>
+    <div class="def-box">
+      <strong>eBPF (extended Berkeley Packet Filter)</strong> permite cargar programas bytecode en el kernel Linux de forma segura (verificados formalmente), que se ejecutan en respuesta a eventos del kernel sin necesidad de módulos ni cambios en el código fuente.
+    </div>
+    <div class="grid-2">
+      <div class="card card-teal">
+        <h4>Casos de uso</h4>
+        <ul style="font-size:.9rem;color:#3a3a4a;padding-left:1.2rem;">
+          <li><strong>Observabilidad:</strong> bpftrace, BCC tools — profiling de CPU, latencia de syscalls, análisis de memoria, tracing de aplicaciones sin modificarlas</li>
+          <li><strong>Networking:</strong> XDP (eXpress Data Path) — procesa paquetes antes del stack de red, &lt;1μs de latencia. Base de Cilium (networking en Kubernetes)</li>
+          <li><strong>Seguridad:</strong> seccomp-BPF (filtros de syscall), Falco (detección de amenazas)</li>
+          <li><strong>Balanceo de carga:</strong> Facebook usa eBPF para balanceo de carga L4 a escala de millones de conexiones</li>
+        </ul>
+      </div>
+      <div class="card card-slate">
+        <h4>Por qué es revolucionario</h4>
+        <p>Antes de eBPF, extender el kernel requería módulos (.ko) que corren en Ring 0 sin verificación — un bug crashea todo el sistema. eBPF verifica el bytecode antes de ejecutarlo (análisis estático de flujo, límite de instrucciones, sin accesos de memoria inválidos) y lo compila JIT a código nativo.</p>
+        <div class="code-wrap">
+          <div class="code-header"><span>Ejemplo — tracing de latencia con bpftrace</span></div>
+          <pre><span class="cm"># Latencia de cada syscall read() por proceso</span>
+bpftrace -e <span class="str">'tracepoint:syscalls:sys_enter_read { @[comm] = count(); }'</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNIKERNELS -->
+  <div id="v-unikernels" class="tab-panel">
+    <h3>Unikernels y kernels especializados</h3>
+    <p>Los unikernels llevan la especialización al extremo: un único espacio de direcciones donde la biblioteca del SO y la aplicación se compilan juntas. Sin user-space ni kernel-space separados. Sin context switches. Sin múltiples procesos.</p>
+    <div class="grid-2">
+      <div class="card card-amber">
+        <h4>MirageOS / Unikraft / OSv</h4>
+        <ul style="font-size:.9rem;color:#3a3a4a;padding-left:1.2rem;">
+          <li><strong>MirageOS:</strong> OCaml funcional, genera VMs UKVM ultra ligeras. Un servidor web en &lt;10MB de imagen</li>
+          <li><strong>Unikraft:</strong> modular, elige los componentes del "kernel" que necesitas</li>
+          <li><strong>OSv:</strong> JVM unikernel para Java/Scala sin JNI overhead</li>
+        </ul>
+        <p style="font-size:.9rem;margin-top:.8rem;"><strong>Ventajas:</strong> superficie de ataque mínima, boot en &lt;10ms, sin syscall overhead (todo en Ring 0).</p>
+        <p style="font-size:.9rem;"><strong>Desventajas:</strong> sin multi-proceso, sin usuario dinámico, debugging muy difícil.</p>
+      </div>
+      <div class="card card-slate">
+        <h4>Comparación de stack</h4>
+        <div class="virt-layer vl-apps"><span class="vl-label">App tradicional</span><span class="vl-desc">libc → syscall → kernel → hardware</span></div>
+        <div class="virt-layer vl-vm"><span class="vl-label">Contenedor</span><span class="vl-desc">app → libc → kernel compartido → hardware</span></div>
+        <div class="virt-layer vl-kernel"><span class="vl-label">Unikernel</span><span class="vl-desc">app + kernel = UN ejecutable → hypervisor → hardware</span></div>
+        <p style="font-size:.85rem;color:#6b6b7a;margin-top:.8rem;">Los unikernels eliminar el OS boundary completamente: la función <code>read()</code> no hace trap, llama directamente al driver en el mismo espacio de memoria.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- WASM -->
+  <div id="v-wasm" class="tab-panel">
+    <h3>WebAssembly (WASM) como plataforma de sandboxing</h3>
+    <div class="def-box">
+      <strong>WASI (WebAssembly System Interface)</strong> define cómo los módulos WASM acceden a recursos del SO (archivos, red, tiempo). WASM se perfila como una alternativa portable a contenedores para funciones serverless sin estado.
+    </div>
+    <div class="grid-2">
+      <div class="card card-teal">
+        <h4>WASM como "SO virtual"</h4>
+        <p>Runtimes como <strong>Wasmtime</strong> y <strong>WasmEdge</strong> implementan WASI y usan capabilities-based security: un módulo WASM no puede acceder a ningún recurso del SO que no se le conceda explícitamente en el launch. Sin syscall directo — el runtime lo media.</p>
+        <p><strong>Fermyon Spin / Fastly Compute@Edge</strong> usan WASM para serverless con cold start de &lt;1ms vs. ~100ms de un contenedor Docker.</p>
+      </div>
+      <div class="card card-amber">
+        <h4>Comparación de aislamiento</h4>
+        <div class="tw" style="margin:0;">
+          <table>
+            <thead><tr><th>Tecnología</th><th>Cold start</th><th>Aislamiento</th></tr></thead>
+            <tbody>
+              <tr><td>VM (KVM)</td><td>~1–5s</td><td><span class="tag tag-green">Máximo</span></td></tr>
+              <tr><td>Contenedor (Docker)</td><td>~100ms</td><td><span class="tag tag-amber">Bueno</span></td></tr>
+              <tr><td>WASM (Wasmtime)</td><td>&lt;1ms</td><td><span class="tag tag-blue">Capabilities</span></td></tr>
+              <tr><td>Proceso nativo</td><td>&lt;1ms</td><td><span class="tag tag-red">Solo POSIX</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECCIÓN 4 — IMPLEMENTAR TU PROPIO KERNEL -->
+<!-- ══════════════════════════════════════════ -->
+<section id="kernel-propio">
+  <div class="sec-num">04</div>
+  <h2>Hoja de ruta para <span class="accent">tu propio kernel</span></h2>
+
+  <div class="def-box">
+    Construir un kernel funcional, aunque sea mínimo, es la mejor forma de consolidar todo lo visto en el curso. No se trata de reinventar Linux — se trata de entender por qué Linux toma las decisiones que toma.
+  </div>
+
+  <h3>Herramientas mínimas necesarias</h3>
+  <div class="grid-3">
+    <div class="card card-amber">
+      <h4>Compilador</h4>
+      <p><strong>i686-elf-gcc</strong> o <strong>x86_64-elf-gcc</strong> (cross-compiler). Compila para x86 sin libc ni runtime del SO host. En macOS: <code>brew install i686-elf-gcc</code>. En Linux: build desde fuente o usa el toolchain de OSDev.</p>
+    </div>
+    <div class="card card-slate">
+      <h4>Ensamblador</h4>
+      <p><strong>NASM</strong> para el código de bajo nivel: multiboot header, GDT, IDT, cambio a modo protegido/long mode. Alternativa: GNU as (GAS) con sintaxis AT&T.</p>
+    </div>
+    <div class="card card-teal">
+      <h4>Emulador</h4>
+      <p><strong>QEMU</strong> es el emulador ideal. Permite correr tu kernel sin necesidad de hardware real: <code>qemu-system-i386 -kernel mykernel.elf</code>. Con <code>-s -S</code> conectas gdb para debugging de código del kernel.</p>
+    </div>
+    <div class="card">
+      <h4>Bootloader</h4>
+      <p><strong>GRUB 2</strong> con el protocolo <strong>Multiboot</strong> es el camino más sencillo. Defines un header Multiboot en tu binario y GRUB lo carga en memoria y entrega el control a tu función <code>kernel_main()</code>.</p>
+    </div>
+    <div class="card">
+      <h4>Linker script</h4>
+      <p>Un archivo <strong>.ld</strong> que define la disposición de secciones en memoria: <code>.text</code> desde <code>0x100000</code>, <code>.data</code>, <code>.bss</code>. Esencial para que GRUB cargue tu kernel en la dirección correcta.</p>
+    </div>
+    <div class="card">
+      <h4>Lenguaje</h4>
+      <p><strong>C + ensamblador</strong> para código de inicialización. En el proyecto final, C es suficiente. Evita C++ al inicio (requiere runtime). Rust es una opción moderna: excelente para evitar UB, aunque la curva inicial es mayor.</p>
+    </div>
+  </div>
+
+  <h3>Etapas de desarrollo — mínimo viable</h3>
+  <div class="step-list">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h4>Modo protegido + GDT</h4>
+        <p>Escribe el header Multiboot en NASM, configura la <strong>GDT (Global Descriptor Table)</strong> con segmentos de código y datos, cambia de modo real a modo protegido (32-bit). Verifica en QEMU con serial output (<code>outb(0x3F8, c)</code>).</p>
+        <div class="code-wrap">
+          <div class="code-header"><span>Multiboot header — NASM</span></div>
+          <pre><span class="cm">; kernel_start.asm</span>
+section .multiboot_header
+    dd <span class="num">0x1BADB002</span>        <span class="cm">; magic</span>
+    dd <span class="num">0x00</span>              <span class="cm">; flags</span>
+    dd -(<span class="num">0x1BADB002</span>)     <span class="cm">; checksum
+
+</span>section .text
+    global _start
+_start:
+    <span class="kw">mov</span> esp, stack_top
+    <span class="kw">call</span> kernel_main     <span class="cm">; salta a C</span>
+    <span class="kw">hlt</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>Terminal VGA + output básico</h4>
+        <p>El framebuffer VGA en modo texto vive en <code>0xB8000</code>. Cada celda es 2 bytes: carácter + atributo de color. Implementa <code>kprintf()</code> escribiendo directamente a esa memoria. Así puedes depurar visualmente desde el primer momento.</p>
+        <div class="code-wrap">
+          <div class="code-header"><span>Terminal VGA mínima — C</span></div>
+          <pre><span class="kw">volatile</span> uint16_t* vga = (<span class="kw">volatile</span> uint16_t*)<span class="num">0xB8000</span>;
+<span class="kw">void</span> <span class="fn">vga_putchar</span>(<span class="kw">char</span> c, <span class="kw">uint8_t</span> color, <span class="kw">int</span> col, <span class="kw">int</span> row) {
+    vga[row * <span class="num">80</span> + col] = (<span class="kw">uint16_t</span>)c | ((<span class="kw">uint16_t</span>)color << <span class="num">8</span>);
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h4>IDT + manejadores de interrupción</h4>
+        <p>Configura la <strong>IDT (Interrupt Descriptor Table)</strong> con 256 entradas. Maneja las excepciones básicas (división por cero, GPF). Configura el <strong>PIC 8259</strong> y habilita el timer IRQ0 — el corazón del preemptive scheduling. Sin interrupciones no hay planificador.</p>
+        <div class="code-wrap">
+          <div class="code-header"><span>Habilitar timer IRQ0 — C</span></div>
+          <pre><span class="cm">// Remapear PIC para que IRQ0 esté en vector 0x20</span>
+<span class="fn">outb</span>(<span class="num">0x20</span>, <span class="num">0x11</span>); <span class="fn">outb</span>(<span class="num">0xA0</span>, <span class="num">0x11</span>);  <span class="cm">// inicio init</span>
+<span class="fn">outb</span>(<span class="num">0x21</span>, <span class="num">0x20</span>); <span class="fn">outb</span>(<span class="num">0xA1</span>, <span class="num">0x28</span>);  <span class="cm">// vector base</span>
+<span class="fn">outb</span>(<span class="num">0x21</span>, <span class="num">0x01</span>); <span class="fn">outb</span>(<span class="num">0xA1</span>, <span class="num">0x01</span>);  <span class="cm">// modo 8086</span>
+<span class="fn">outb</span>(<span class="num">0x21</span>, <span class="num">0xFE</span>);  <span class="cm">// habilitar solo IRQ0 (timer)</span>
+<span class="fn">sti</span>();              <span class="cm">// habilitar interrupciones</span></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h4>Gestor de memoria física (buddy/bitmap)</h4>
+        <p>Implementa un gestor de <strong>frames físicos</strong>. La forma más simple es un bitmap: 1 bit por frame de 4KB. Para asignar, busca el primer bit en 0. Implementa <code>pmm_alloc_frame()</code> y <code>pmm_free_frame()</code>. La información de memoria disponible la provee Multiboot en la estructura <code>multiboot_info_t</code>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h4>Paginación (Virtual Memory Manager)</h4>
+        <p>Configura el Page Directory y Page Tables para x86. Mapea el kernel al espacio alto (higher-half kernel, <code>0xC0000000</code>). Implementa manejo del page fault (ISR 14) para crecer el heap on-demand. Con esto tienes un sistema de memoria virtual básico.</p>
+        <div class="code-wrap">
+          <div class="code-header"><span>Habilitar paginación — C + ASM inline</span></div>
+          <pre><span class="cm">// CR3 apunta al Page Directory físico</span>
+<span class="fn">write_cr3</span>((uint32_t)page_directory);
+<span class="cm">// Habilitar bit PG en CR0</span>
+<span class="fn">write_cr0</span>(<span class="fn">read_cr0</span>() | <span class="num">0x80000000</span>);</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <h4>Planificador básico (Round Robin)</h4>
+        <p>Crea una estructura <code>task_t</code> con el PCB mínimo: pila de kernel, puntero de instrucción, estado. En el handler del timer IRQ0 guarda el contexto del proceso actual (empuja registros a la pila) y carga el contexto del siguiente en la cola. Esto es el <em>context switch</em>.</p>
+        <div class="code-wrap">
+          <div class="code-header"><span>Context switch mínimo — NASM</span></div>
+          <pre><span class="cm">; Salva contexto del proceso saliente, carga el entrante</span>
+switch_context:
+    <span class="kw">push</span> ebp
+    <span class="kw">mov</span>  [eax + OFFSET_ESP], esp  <span class="cm">; guarda ESP actual</span>
+    <span class="kw">mov</span>  esp, [ecx + OFFSET_ESP]  <span class="cm">; carga ESP del nuevo</span>
+    <span class="kw">pop</span>  ebp
+    <span class="kw">ret</span>                           <span class="cm">; salta al PC del nuevo</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Referencias fundamentales</h3>
+  <div class="grid-2">
+    <div class="card card-amber">
+      <h4>Para aprender (teoria + práctica)</h4>
+      <ul style="font-size:.9rem;color:#3a3a4a;padding-left:1.2rem;">
+        <li><strong>OSDev Wiki</strong> — <code>wiki.osdev.org</code>: la biblia del desarrollo de SO. Cubre GDT, IDT, paginación, PS/2, AHCI, etc.</li>
+        <li><strong>xv6 (MIT)</strong> — <code>github.com/mit-pdos/xv6-public</code>: SO educativo UNIX-like de ~10K líneas de C. Con comentarios del textbook. Ideal para entender estructura real.</li>
+        <li><strong>"Operating Systems: Three Easy Pieces"</strong> (Arpaci-Dusseau) — libre en <code>ostep.org</code>. El mejor libro moderno de SO.</li>
+        <li><strong>Intermezzos OS</strong> — Rust, moderno, muy bien documentado.</li>
+      </ul>
+    </div>
+    <div class="card card-slate">
+      <h4>Kernels de referencia abiertos</h4>
+      <ul style="font-size:.9rem;color:#3a3a4a;padding-left:1.2rem;">
+        <li><strong>SerenityOS</strong> — C++, monolítico, hobby OS con interfaz gráfica completa. Excelente código para leer</li>
+        <li><strong>ToaruOS</strong> — SO gráfico desde cero, bien comentado</li>
+        <li><strong>Redox OS</strong> — microkernel en Rust, producción-grade</li>
+        <li><strong>Linux</strong> desde <code>v0.01</code> (1991) — solo 10K líneas, perfectamente legible. Busca <em>"linux-0.01 source"</em></li>
+        <li><strong>Minix 3</strong> — el microkernel de Tanenbaum, usado en clase para ilustrar diseño</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">Recomendación para el proyecto final del curso</div>
+    <p>Para un kernel de grado universitario, el objetivo mínimo recomendable es: <strong>boot via GRUB → modo protegido → terminal VGA → IDT + timer IRQ → gestor de frames → paginación básica → Round Robin con 2–3 tareas hardcodeadas</strong>. Esto cubre todos los módulos del curso en un sistema funcional.</p>
+    <p>Para diferenciarse: implementar un heap de kernel con <code>kmalloc/kfree</code> (buddy allocator o slab simple), o agregar el controlador de teclado PS/2 para input interactivo, o implementar un sistema de archivos en RAM (initrd/ramfs).</p>
+    <p>El lenguaje recomendado es <strong>C con GNU extensions</strong>. Usa <code>-ffreestanding -nostdlib -O2 -Wall</code> y el linker script para producir un ELF Multiboot. El emulador QEMU con <code>-serial stdio</code> permite debugging por puerto serial desde el primer día.</p>
+  </div>
+
+</section>
+
+</div><!-- /.page -->
+
+<footer>
+  <p>Sistemas Operativos · Universidad Santiago de Cali · 2026A</p>
+  <p style="margin-top:.4rem;">Compilación integrada de módulos, arquitecturas actuales y guía de implementación</p>
+  <p style="margin-top:.4rem;font-size:.7rem;">Silberschatz, Galvin & Gagne · Tanenbaum & Bos · Stallings · Linux kernel source · OSDev Wiki</p>
+</footer>
+
+<script>
+function switchTab(navId, panelId) {
+  const nav = document.getElementById(navId);
+  const panelPrefix = panelId.split('-').slice(0,1)[0];
+  nav.querySelectorAll('.tab-btn').forEach((b,i) => {
+    const panels = document.querySelectorAll(`#${panelId}`);
+    b.classList.remove('active');
+  });
+  nav.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    if (p.id === panelId) { p.classList.add('active'); }
+    else { p.classList.remove('active'); }
+  });
+  const btn = [...nav.querySelectorAll('.tab-btn')].find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(panelId));
+  if(btn) btn.classList.add('active');
+}
+
+const navLinks = document.querySelectorAll('nav a[href^="#"]');
+const secs = document.querySelectorAll('section[id]');
+const sObs = new IntersectionObserver(es => {
+  es.forEach(e => {
+    if(e.isIntersecting){
+      navLinks.forEach(a => a.classList.remove('active'));
+      const l = document.querySelector(`nav a[href="#${e.target.id}"]`);
+      if(l) l.classList.add('active');
+    }
+  });
+},{rootMargin:'-40% 0px -50% 0px'});
+secs.forEach(s => sObs.observe(s));
+</script>
+</body>
+</html>
