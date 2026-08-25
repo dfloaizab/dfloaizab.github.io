@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complejidad Computacional | Estructuras de Datos 2026B</title>
+<style>
+  :root{
+    --bg-0:#0d1117;
+    --bg-1:#131a22;
+    --bg-2:#182028;
+    --bg-3:#1e2732;
+    --border:#2a3542;
+    --border-soft:#212b35;
+    --text-0:#e6edf3;
+    --text-1:#b7c2cc;
+    --text-2:#7d8b98;
+    --accent:#4fb3bf;
+    --accent-soft:#3a8f9c;
+    --accent-2:#c99a5b;
+    --danger:#c2665f;
+    --ok:#5fae76;
+    --warn:#c9a15b;
+    --shadow: 0 8px 24px rgba(0,0,0,0.35);
+    --radius: 10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #16202a 0%, transparent 60%),
+      radial-gradient(1000px 700px at 100% 0%, #17222b 0%, transparent 55%),
+      var(--bg-0);
+    color:var(--text-0);
+    font-family: "Georgia", "Iowan Old Style", "Palatino Linotype", serif;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1050px;margin:0 auto;padding:0 28px 90px;}
+
+  header.masthead{
+    padding:56px 28px 34px;
+    border-bottom:1px solid var(--border-soft);
+    background:linear-gradient(180deg, var(--bg-1), transparent);
+  }
+  .masthead-inner{max-width:1050px;margin:0 auto;}
+  .kicker{
+    font-family:"Helvetica Neue", Arial, sans-serif;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:.72rem;
+    color:var(--accent);
+    margin-bottom:14px;
+    display:flex; gap:10px; align-items:center;
+  }
+  .kicker::before{
+    content:"";
+    display:inline-block;width:22px;height:1px;background:var(--accent);
+  }
+  h1.title{
+    font-size:2.15rem;
+    margin:0 0 10px;
+    color:var(--text-0);
+    font-weight:600;
+    letter-spacing:.2px;
+  }
+  .subtitle{
+    color:var(--text-1);
+    font-size:1.02rem;
+    max-width:720px;
+  }
+  .meta-row{
+    margin-top:22px;
+    display:flex; flex-wrap:wrap; gap:10px 26px;
+    font-family:"Helvetica Neue", Arial, sans-serif;
+    font-size:.82rem;
+    color:var(--text-2);
+  }
+  .meta-row span b{color:var(--text-1); font-weight:600;}
+
+  nav.toc{
+    margin:34px 0 10px;
+    padding:20px 22px;
+    background:var(--bg-2);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius);
+  }
+  nav.toc h2{
+    font-family:"Helvetica Neue", Arial, sans-serif;
+    font-size:.75rem; text-transform:uppercase; letter-spacing:.12em;
+    color:var(--accent); margin:0 0 12px;
+  }
+  nav.toc ol{margin:0; padding-left:20px; columns:2; column-gap:32px;}
+  nav.toc li{margin-bottom:8px; font-size:.94rem;}
+  nav.toc a{color:var(--text-1); text-decoration:none; border-bottom:1px dotted var(--border);}
+  nav.toc a:hover{color:var(--accent);}
+
+  section{margin-top:56px;}
+  h2.sec-title{
+    font-size:1.5rem;
+    color:var(--text-0);
+    border-left:3px solid var(--accent);
+    padding-left:14px;
+    margin-bottom:6px;
+  }
+  .sec-num{
+    font-family:"Helvetica Neue", Arial, sans-serif;
+    color:var(--accent-2);
+    font-size:.78rem;
+    letter-spacing:.1em;
+    margin-left:14px;
+    text-transform:uppercase;
+  }
+  h3{color:var(--text-0); font-size:1.15rem; margin-top:32px;}
+  p{color:var(--text-1);}
+  .lead{color:var(--text-1); font-size:1.02rem;}
+
+  .callout{
+    background:var(--bg-2);
+    border:1px solid var(--border-soft);
+    border-left:3px solid var(--accent-2);
+    border-radius:8px;
+    padding:16px 20px;
+    margin:22px 0;
+    font-size:.95rem;
+    color:var(--text-1);
+  }
+  .callout b{color:var(--text-0);}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin:22px 0;
+    background:var(--bg-2);
+    border:1px solid var(--border-soft);
+    border-radius:8px;
+    overflow:hidden;
+    font-family:"Helvetica Neue", Arial, sans-serif;
+    font-size:.88rem;
+  }
+  thead th{
+    background:var(--bg-3);
+    color:var(--accent);
+    text-align:left;
+    padding:11px 14px;
+    font-weight:600;
+    letter-spacing:.02em;
+    border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:10px 14px;
+    border-bottom:1px solid var(--border-soft);
+    color:var(--text-1);
+    vertical-align:top;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(255,255,255,0.02);}
+  td.mono, th.mono{font-family:"SFMono-Regular", Consolas, monospace;}
+  .tag{
+    display:inline-block;
+    font-family:"Helvetica Neue", Arial, sans-serif;
+    font-size:.72rem;
+    padding:2px 8px;
+    border-radius:20px;
+    border:1px solid var(--border);
+  }
+  .tag.ok{color:var(--ok); border-color:#2f4a37;}
+  .tag.warn{color:var(--warn); border-color:#4a3f2a;}
+  .tag.danger{color:var(--danger); border-color:#4a2f2d;}
+
+  figure{margin:26px 0; background:var(--bg-2); border:1px solid var(--border-soft); border-radius:10px; padding:18px;}
+  figcaption{
+    font-family:"Helvetica Neue", Arial, sans-serif;
+    font-size:.8rem;
+    color:var(--text-2);
+    margin-top:10px;
+    text-align:center;
+  }
+  figcaption b{color:var(--text-1);}
+  svg{display:block; margin:0 auto; max-width:100%; height:auto;}
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  @media (max-width:760px){
+    .grid-2{grid-template-columns:1fr;}
+    nav.toc ol{columns:1;}
+  }
+
+  .steps{counter-reset:step; list-style:none; padding:0; margin:20px 0;}
+  .steps li{
+    counter-increment:step;
+    position:relative;
+    padding:6px 0 6px 40px;
+    color:var(--text-1);
+    margin-bottom:6px;
+  }
+  .steps li::before{
+    content:counter(step);
+    position:absolute; left:0; top:4px;
+    width:26px; height:26px;
+    border-radius:50%;
+    background:var(--bg-3);
+    border:1px solid var(--accent-soft);
+    color:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    font-family:"Helvetica Neue", Arial, sans-serif;
+    font-size:.78rem;
+    font-weight:600;
+  }
+
+  .legend{display:flex; flex-wrap:wrap; gap:16px; justify-content:center; margin-top:12px; font-family:"Helvetica Neue", Arial, sans-serif; font-size:.78rem; color:var(--text-2);}
+  .legend span{display:flex; align-items:center; gap:6px;}
+  .legend i{width:10px; height:10px; border-radius:2px; display:inline-block;}
+
+  footer{
+    margin-top:80px;
+    padding-top:26px;
+    border-top:1px solid var(--border-soft);
+    color:var(--text-2);
+    font-family:"Helvetica Neue", Arial, sans-serif;
+    font-size:.8rem;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+
+  .glossary dt{color:var(--text-0); font-weight:600; margin-top:14px;}
+  .glossary dd{color:var(--text-1); margin-left:0;}
+
+  a.section-link{color:var(--accent); text-decoration:none;}
+  a.section-link:hover{text-decoration:underline;}
+
+  .badge-list{display:flex; gap:8px; flex-wrap:wrap; margin:14px 0;}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="kicker">Universidad Santiago de Cali · Facultad de Ingeniería</div>
+    <h1 class="title">Complejidad Computacional en Ordenamiento y Búsqueda</h1>
+    <p class="subtitle">Material de apoyo para la asignatura de Estructuras de Datos. Puente conceptual entre los algoritmos clásicos de ordenamiento/búsqueda ya estudiados y la introducción a las estructuras de datos lineales.</p>
+    <div class="meta-row">
+      <span><b>Curso:</b> Estructuras de Datos</span>
+      <span><b>Periodo:</b> 2026B</span>
+      <span><b>Unidad:</b> Fundamentos de complejidad algorítmica</span>
+      <span><b>Prerrequisito:</b> Algoritmos de ordenamiento y búsqueda</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc" aria-label="Tabla de contenido">
+    <h2>Contenido</h2>
+    <ol>
+      <li><a href="#seccion-1">Del código a la complejidad: por qué medir</a></li>
+      <li><a href="#seccion-2">Notaciones asintóticas: O, Ω y Θ</a></li>
+      <li><a href="#seccion-3">Tipos de complejidad y su rol en ordenar/buscar</a></li>
+      <li><a href="#seccion-4">Impacto del ordenamiento en la eficiencia de la búsqueda</a></li>
+      <li><a href="#seccion-5">Panorama comparativo de algoritmos</a></li>
+      <li><a href="#seccion-6">Criterios para elegir un algoritmo de ordenamiento</a></li>
+      <li><a href="#seccion-7">De la complejidad a las estructuras lineales</a></li>
+      <li><a href="#seccion-8">Glosario y referencias</a></li>
+    </ol>
+  </nav>
+
+  <!-- SECCIÓN 1 -->
+  <section id="seccion-1">
+    <h2 class="sec-title">1. Del código a la complejidad<span class="sec-num">Motivación</span></h2>
+    <p class="lead">Ya se han implementado algoritmos de ordenamiento (burbuja, inserción, selección, mezcla, quicksort) y de búsqueda (lineal, binaria). El siguiente paso conceptual no es escribir más código, sino aprender a <b style="color:var(--text-0)">predecir el comportamiento</b> de ese código antes de ejecutarlo, en función del tamaño de la entrada <span class="mono" style="font-family:monospace;color:var(--accent-2)">n</span>.</p>
+    <div class="callout">
+      <b>Idea central:</b> la complejidad computacional no mide cuánto tarda un algoritmo en segundos —eso depende del hardware, del compilador y hasta del clima del procesador— sino cómo <i>crece</i> el número de operaciones o el consumo de memoria a medida que crece la entrada. Es una propiedad del algoritmo, no de la máquina.
+    </div>
+    <p>Esta distinción es la que permite comparar, por ejemplo, ordenamiento por inserción con ordenamiento por mezcla sin necesidad de ejecutar ambos: el análisis asintótico predice cuál degradará peor cuando <span class="mono">n</span> pase de 100 a 100.000 elementos.</p>
+  </section>
+
+  <!-- SECCIÓN 2 -->
+  <section id="seccion-2">
+    <h2 class="sec-title">2. Notaciones asintóticas<span class="sec-num">O, Ω, Θ</span></h2>
+    <p>Las notaciones asintóticas son el lenguaje formal para describir el crecimiento de una función de costo <span class="mono">T(n)</span>. Cada una responde una pregunta distinta.</p>
+
+    <table>
+      <thead>
+        <tr><th>Notación</th><th>Nombre</th><th>Pregunta que responde</th><th>Significado formal (informal)</th><th>Aplicación típica</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono" style="color:var(--danger); font-weight:600;">O(g(n))</td>
+          <td>Cota superior</td>
+          <td>¿Qué tan mal puede ir, en el peor de los casos?</td>
+          <td>El algoritmo nunca crece más rápido que <span class="mono">g(n)</span> para <span class="mono">n</span> suficientemente grande.</td>
+          <td>Garantizar un límite máximo de tiempo/recursos; es la más usada en la práctica de ingeniería.</td>
+        </tr>
+        <tr>
+          <td class="mono" style="color:var(--ok); font-weight:600;">Ω(g(n))</td>
+          <td>Cota inferior</td>
+          <td>¿Qué tan bien puede ir, en el mejor de los casos?</td>
+          <td>El algoritmo nunca es más rápido que <span class="mono">g(n)</span>; establece un piso de esfuerzo mínimo.</td>
+          <td>Demostrar que un problema no puede resolverse por debajo de cierto costo (p. ej. Ω(n log n) para ordenamiento por comparación).</td>
+        </tr>
+        <tr>
+          <td class="mono" style="color:var(--accent); font-weight:600;">Θ(g(n))</td>
+          <td>Cota ajustada</td>
+          <td>¿Cuál es el comportamiento exacto, en promedio/siempre?</td>
+          <td>El algoritmo crece exactamente al ritmo de <span class="mono">g(n)</span>, por arriba y por abajo simultáneamente.</td>
+          <td>Caracterizar con precisión el comportamiento típico de un algoritmo bien entendido, como mergesort.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <b>En el aula:</b> cuando se dice "quicksort es O(n²)" se habla del peor caso (pivote siempre desafortunado). Cuando se dice "quicksort es Θ(n log n) en promedio", se habla del comportamiento esperado con entradas aleatorias. Ambas afirmaciones son ciertas y no se contradicen: describen escenarios distintos.
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="plot-clip"><rect x="60" y="20" width="620" height="290"/></clipPath>
+        </defs>
+        <!-- ejes -->
+        <line x1="60" y1="310" x2="680" y2="310" stroke="#2a3542" stroke-width="1.5"/>
+        <line x1="60" y1="20" x2="60" y2="310" stroke="#2a3542" stroke-width="1.5"/>
+        <text x="670" y="330" fill="#7d8b98" font-size="13" font-family="Helvetica Neue, Arial" text-anchor="end">n (tamaño de entrada)</text>
+        <text x="40" y="20" fill="#7d8b98" font-size="13" font-family="Helvetica Neue, Arial" text-anchor="middle" transform="rotate(-90 40 20)">T(n)</text>
+
+        <g clip-path="url(#plot-clip)">
+          <!-- O(1) -->
+          <path d="M 60 300 L 680 300" fill="none" stroke="#5fae76" stroke-width="2.5"/>
+          <!-- O(log n) -->
+          <path d="M 60 300 C 200 260, 400 220, 680 195" fill="none" stroke="#4fb3bf" stroke-width="2.5"/>
+          <!-- O(n) -->
+          <path d="M 60 300 L 680 90" fill="none" stroke="#c99a5b" stroke-width="2.5"/>
+          <!-- O(n log n) -->
+          <path d="M 60 300 C 250 250, 420 60, 680 -60" fill="none" stroke="#a888c9" stroke-width="2.5"/>
+          <!-- O(n^2) -->
+          <path d="M 60 300 C 300 300, 420 40, 520 -160" fill="none" stroke="#c2665f" stroke-width="2.5"/>
+        </g>
+
+        <!-- leyenda -->
+        <g font-family="Helvetica Neue, Arial" font-size="12">
+          <circle cx="490" cy="35" r="4" fill="#5fae76"/><text x="500" y="39" fill="#b7c2cc">O(1)</text>
+          <circle cx="490" cy="55" r="4" fill="#4fb3bf"/><text x="500" y="59" fill="#b7c2cc">O(log n)</text>
+          <circle cx="490" cy="75" r="4" fill="#c99a5b"/><text x="500" y="79" fill="#b7c2cc">O(n)</text>
+          <circle cx="600" cy="35" r="4" fill="#a888c9"/><text x="610" y="39" fill="#b7c2cc">O(n log n)</text>
+          <circle cx="600" cy="55" r="4" fill="#c2665f"/><text x="610" y="59" fill="#b7c2cc">O(n²)</text>
+        </g>
+      </svg>
+      <figcaption><b>Figura 1.</b> Crecimiento comparativo de las clases de complejidad más comunes. Nótese cómo O(n²) se dispara mucho antes que O(n log n) al crecer n.</figcaption>
+    </figure>
+  </section>
+
+  <!-- SECCIÓN 3 -->
+  <section id="seccion-3">
+    <h2 class="sec-title">3. Tipos de complejidad<span class="sec-num">Tiempo, espacio y casos</span></h2>
+    <p>No existe "una" complejidad para un algoritmo: existen varias dimensiones que conviene analizar por separado.</p>
+
+    <div class="grid-2">
+      <div>
+        <h3>Según el recurso medido</h3>
+        <ul style="color:var(--text-1);">
+          <li><b style="color:var(--text-0)">Complejidad temporal:</b> número de operaciones elementales (comparaciones, intercambios) en función de n.</li>
+          <li><b style="color:var(--text-0)">Complejidad espacial:</b> memoria adicional (auxiliar) requerida, más allá de la entrada original.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Según el escenario de entrada</h3>
+        <ul style="color:var(--text-1);">
+          <li><b style="color:var(--text-0)">Peor caso:</b> cota superior de garantía (O).</li>
+          <li><b style="color:var(--text-0)">Mejor caso:</b> cota inferior optimista (Ω).</li>
+          <li><b style="color:var(--text-0)">Caso promedio:</b> comportamiento esperado con entradas típicas (Θ).</li>
+        </ul>
+      </div>
+    </div>
+
+    <p>¿Por qué importa esto específicamente en ordenamiento y búsqueda? Porque ambos dependen críticamente de dos operaciones básicas —<b style="color:var(--text-0)">comparar</b> e <b style="color:var(--text-0)">intercambiar/mover</b>— cuyo número total es exactamente lo que la complejidad temporal cuantifica. Y porque, en sistemas con memoria limitada (dispositivos embebidos, grandes volúmenes de datos), un algoritmo de ordenamiento in-place (O(1) de espacio extra) puede ser preferible a uno más rápido pero con alto costo espacial, como mergesort clásico (O(n)).</p>
+
+    <div class="callout">
+      <b>Conexión con estructuras de datos:</b> la complejidad espacial de un algoritmo de ordenamiento está directamente ligada a la estructura de datos subyacente. Ordenar un arreglo in-place es distinto —en costo y en factibilidad— a ordenar una lista enlazada, donde el acceso aleatorio no existe y el intercambio de nodos tiene un costo diferente. Esta relación es el puente hacia el estudio de estructuras lineales que sigue a esta unidad.
+    </div>
+  </section>
+
+  <!-- SECCIÓN 4 -->
+  <section id="seccion-4">
+    <h2 class="sec-title">4. Ordenamiento como precondición de búsqueda eficiente<span class="sec-num">Impacto</span></h2>
+    <p>La razón por la que el ordenamiento se estudia inmediatamente antes de la búsqueda no es casual: <b style="color:var(--text-0)">el orden de los datos determina qué algoritmos de búsqueda son aplicables</b> y, con ello, la eficiencia alcanzable.</p>
+
+    <ul style="color:var(--text-1);">
+      <li>Sobre un conjunto <b>desordenado</b>, la única estrategia general es la <b style="color:var(--text-0)">búsqueda lineal</b>, con costo O(n): en el peor caso hay que revisar todos los elementos.</li>
+      <li>Sobre un conjunto <b>ordenado</b>, la <b style="color:var(--text-0)">búsqueda binaria</b> reduce el costo a O(log n), descartando la mitad del espacio de búsqueda en cada comparación.</li>
+    </ul>
+
+    <p>Esto plantea una decisión de diseño real: si un conjunto de datos se va a consultar muchas veces, invertir una vez en ordenarlo (por ejemplo O(n log n) con mergesort o quicksort) puede amortizarse rápidamente, porque cada búsqueda posterior pasa de O(n) a O(log n).</p>
+
+    <figure>
+      <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg">
+        <line x1="60" y1="260" x2="680" y2="260" stroke="#2a3542" stroke-width="1.5"/>
+        <line x1="60" y1="20" x2="60" y2="260" stroke="#2a3542" stroke-width="1.5"/>
+        <text x="670" y="280" fill="#7d8b98" font-size="13" font-family="Helvetica Neue, Arial" text-anchor="end">tamaño del conjunto (n)</text>
+        <text x="10" y="15" fill="#7d8b98" font-size="13" font-family="Helvetica Neue, Arial">operaciones</text>
+
+        <!-- barras agrupadas para n = 10, 100, 1000, 10000 (escala log visual) -->
+        <!-- grupo 1 -->
+        <g font-family="Helvetica Neue, Arial" font-size="11" fill="#b7c2cc">
+          <rect x="100" y="252" width="26" height="8" fill="#c2665f"/>
+          <rect x="130" y="245" width="26" height="15" fill="#4fb3bf"/>
+          <text x="128" y="272" text-anchor="middle" fill="#7d8b98">n=10</text>
+
+          <rect x="220" y="235" width="26" height="25" fill="#c2665f"/>
+          <rect x="250" y="240" width="26" height="20" fill="#4fb3bf"/>
+          <text x="248" y="272" text-anchor="middle" fill="#7d8b98">n=100</text>
+
+          <rect x="340" y="185" width="26" height="75" fill="#c2665f"/>
+          <rect x="370" y="230" width="26" height="30" fill="#4fb3bf"/>
+          <text x="368" y="272" text-anchor="middle" fill="#7d8b98">n=1.000</text>
+
+          <rect x="460" y="40" width="26" height="220" fill="#c2665f"/>
+          <rect x="490" y="222" width="26" height="38" fill="#4fb3bf"/>
+          <text x="488" y="272" text-anchor="middle" fill="#7d8b98">n=10.000</text>
+        </g>
+
+        <g font-family="Helvetica Neue, Arial" font-size="12">
+          <rect x="560" y="30" width="10" height="10" fill="#c2665f"/><text x="576" y="39" fill="#b7c2cc">Búsqueda lineal O(n)</text>
+          <rect x="560" y="50" width="10" height="10" fill="#4fb3bf"/><text x="576" y="59" fill="#b7c2cc">Búsqueda binaria O(log n)</text>
+        </g>
+      </svg>
+      <figcaption><b>Figura 2.</b> Costo comparativo (escala visual, no lineal) entre búsqueda lineal y binaria a medida que crece n. La brecha se amplía drásticamente conforme aumenta el volumen de datos.</figcaption>
+    </figure>
+
+    <div class="callout">
+      <b>Algoritmos de búsqueda más eficientes:</b> sobre datos ordenados y de acceso aleatorio (arreglos), la búsqueda binaria O(log n) es óptima para búsqueda por comparación. Sobre estructuras con acceso indexado directo, estructuras auxiliares como tablas hash pueden alcanzar O(1) amortizado, a costa de perder el orden y de un consumo de memoria adicional —otro ejemplo del compromiso tiempo/espacio que se retomará al estudiar tablas hash como estructura de datos.</div>
+  </section>
+
+  <!-- SECCIÓN 5 -->
+  <section id="seccion-5">
+    <h2 class="sec-title">5. Panorama comparativo de algoritmos<span class="sec-num">Referencia rápida</span></h2>
+    <p>La siguiente tabla resume los algoritmos de ordenamiento estudiados hasta el momento y los ubica según sus tres complejidades temporales, su complejidad espacial, estabilidad y adaptabilidad.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Algoritmo</th>
+          <th class="mono">Mejor caso</th>
+          <th class="mono">Caso promedio</th>
+          <th class="mono">Peor caso</th>
+          <th class="mono">Espacio</th>
+          <th>Estable</th>
+          <th>Adaptativo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Burbuja</td>
+          <td class="mono">O(n)</td>
+          <td class="mono">O(n²)</td>
+          <td class="mono">O(n²)</td>
+          <td class="mono">O(1)</td>
+          <td><span class="tag ok">Sí</span></td>
+          <td><span class="tag ok">Sí</span></td>
+        </tr>
+        <tr>
+          <td>Inserción</td>
+          <td class="mono">O(n)</td>
+          <td class="mono">O(n²)</td>
+          <td class="mono">O(n²)</td>
+          <td class="mono">O(1)</td>
+          <td><span class="tag ok">Sí</span></td>
+          <td><span class="tag ok">Sí</span></td>
+        </tr>
+        <tr>
+          <td>Selección</td>
+          <td class="mono">O(n²)</td>
+          <td class="mono">O(n²)</td>
+          <td class="mono">O(n²)</td>
+          <td class="mono">O(1)</td>
+          <td><span class="tag danger">No</span></td>
+          <td><span class="tag danger">No</span></td>
+        </tr>
+        <tr>
+          <td>Mergesort</td>
+          <td class="mono">O(n log n)</td>
+          <td class="mono">O(n log n)</td>
+          <td class="mono">O(n log n)</td>
+          <td class="mono">O(n)</td>
+          <td><span class="tag ok">Sí</span></td>
+          <td><span class="tag danger">No</span></td>
+        </tr>
+        <tr>
+          <td>Quicksort</td>
+          <td class="mono">O(n log n)</td>
+          <td class="mono">O(n log n)</td>
+          <td class="mono">O(n²)</td>
+          <td class="mono">O(log n)</td>
+          <td><span class="tag danger">No</span></td>
+          <td><span class="tag warn">Parcial</span></td>
+        </tr>
+        <tr>
+          <td>Heapsort</td>
+          <td class="mono">O(n log n)</td>
+          <td class="mono">O(n log n)</td>
+          <td class="mono">O(n log n)</td>
+          <td class="mono">O(1)</td>
+          <td><span class="tag danger">No</span></td>
+          <td><span class="tag danger">No</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table>
+      <thead>
+        <tr><th>Algoritmo de búsqueda</th><th>Requisito de entrada</th><th class="mono">Mejor caso</th><th class="mono">Peor caso</th><th class="mono">Espacio</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Búsqueda lineal</td><td>Ninguno (ordenado o no)</td><td class="mono">O(1)</td><td class="mono">O(n)</td><td class="mono">O(1)</td></tr>
+        <tr><td>Búsqueda binaria</td><td>Conjunto ordenado, acceso aleatorio</td><td class="mono">O(1)</td><td class="mono">O(log n)</td><td class="mono">O(1)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout"><b>Cota teórica:</b> ningún algoritmo de ordenamiento basado en comparaciones puede hacerlo mejor que Ω(n log n) en el peor caso; es un límite demostrable mediante árboles de decisión, no una limitación de implementación. Esto explica por qué mergesort, quicksort y heapsort —todos O(n log n)— se consideran "óptimos" dentro de su clase.</div>
+  </section>
+
+  <!-- SECCIÓN 6 -->
+  <section id="seccion-6">
+    <h2 class="sec-title">6. Criterios para elegir un algoritmo de ordenamiento<span class="sec-num">Decisión de diseño</span></h2>
+    <p>Elegir un algoritmo de ordenamiento no es solo mirar la fila de "peor caso" en una tabla. En la práctica profesional se ponderan varios criterios simultáneamente:</p>
+
+    <ol class="steps">
+      <li><b style="color:var(--text-0)">Complejidad temporal (peor, promedio, mejor caso):</b> ¿el algoritmo tendrá un comportamiento predecible con los datos reales que va a recibir, o puede degradarse en escenarios adversos (p. ej. quicksort con datos ya ordenados)?</li>
+      <li><b style="color:var(--text-0)">Complejidad espacial (memoria auxiliar):</b> ¿se dispone de memoria suficiente para un algoritmo no in-place como mergesort, o el entorno (embebido, gran volumen de datos) exige O(1) o O(log n) de espacio extra?</li>
+      <li><b style="color:var(--text-0)">Estabilidad:</b> ¿el orden relativo de elementos con claves iguales debe preservarse? Esto es crítico cuando se ordena por múltiples criterios en pasos sucesivos (p. ej. ordenar primero por apellido y luego, de forma estable, por fecha de ingreso).</li>
+      <li><b style="color:var(--text-0)">Adaptabilidad:</b> ¿el algoritmo aprovecha el orden parcial ya existente en los datos? Inserción es muy eficiente sobre datos casi ordenados; selección no mejora nunca, sin importar la entrada.</li>
+      <li><b style="color:var(--text-0)">Tamaño y naturaleza de los datos:</b> para conjuntos pequeños, algoritmos O(n²) simples pueden ser más rápidos en la práctica que O(n log n) debido a constantes ocultas y baja sobrecarga; muchas bibliotecas usan algoritmos híbridos por esta razón (p. ej. Timsort).</li>
+      <li><b style="color:var(--text-0)">Estructura de datos subyacente:</b> ¿se ordena un arreglo (acceso aleatorio) o una lista enlazada (acceso secuencial)? Esto condiciona la viabilidad y el costo real de cada algoritmo, y es la conexión directa con la siguiente unidad del curso.</li>
+    </ol>
+
+    <div class="callout"><b>Regla práctica de ingeniería:</b> no existe "el mejor algoritmo de ordenamiento" en abstracto; existe el algoritmo más adecuado para un conjunto de restricciones concretas (tamaño de datos, memoria disponible, necesidad de estabilidad, grado de orden previo). Identificar esas restricciones antes de elegir el algoritmo es, en sí mismo, parte del análisis de complejidad.</div>
+  </section>
+
+  <!-- SECCIÓN 7 -->
+  <section id="seccion-7">
+    <h2 class="sec-title">7. De la complejidad a las estructuras lineales<span class="sec-num">Puente conceptual</span></h2>
+    <p>El análisis de complejidad desarrollado en esta unidad no es un cierre, sino la base con la que se evaluará cada estructura de datos lineal que se introduzca a continuación: <b style="color:var(--text-0)">arreglos, listas enlazadas (simples, dobles y circulares), pilas y colas</b>.</p>
+
+    <table>
+      <thead>
+        <tr><th>Operación</th><th>Arreglo</th><th>Lista enlazada</th><th>Pila</th><th>Cola</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Acceso por índice</td><td class="mono">O(1)</td><td class="mono">O(n)</td><td class="mono">—</td><td class="mono">—</td></tr>
+        <tr><td>Inserción al inicio</td><td class="mono">O(n)</td><td class="mono">O(1)</td><td class="mono">O(1)</td><td class="mono">O(1)</td></tr>
+        <tr><td>Inserción al final</td><td class="mono">O(1)*</td><td class="mono">O(1)**</td><td class="mono">—</td><td class="mono">O(1)</td></tr>
+        <tr><td>Búsqueda</td><td class="mono">O(n) / O(log n)†</td><td class="mono">O(n)</td><td class="mono">O(n)</td><td class="mono">O(n)</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.85rem; color:var(--text-2);">* Amortizado, si hay espacio disponible en la estructura subyacente. ** Con referencia a la cola de la lista. † O(log n) solo si el arreglo está ordenado y se aplica búsqueda binaria — el vínculo directo con las secciones 2 a 4 de este documento.</p>
+
+    <p>Esta tabla anticipa la pregunta que guiará el resto del curso: <i>¿qué estructura de datos permite implementar cada operación con la menor complejidad posible, dado el patrón de uso esperado?</i> Esa es, precisamente, la pregunta que el análisis de complejidad enseña a formular con rigor.</p>
+  </section>
+
+  <!-- SECCIÓN 8 -->
+  <section id="seccion-8">
+    <h2 class="sec-title">8. Glosario y referencias<span class="sec-num">Cierre</span></h2>
+    <dl class="glossary">
+      <dt>Algoritmo in-place</dt>
+      <dd>Algoritmo que reordena los datos utilizando una cantidad constante (o casi constante) de memoria auxiliar adicional, sin necesitar una copia completa de la estructura.</dd>
+      <dt>Algoritmo estable</dt>
+      <dd>Algoritmo de ordenamiento que preserva el orden relativo original de los elementos con claves equivalentes.</dd>
+      <dt>Algoritmo adaptativo</dt>
+      <dd>Algoritmo cuyo desempeño mejora cuando la entrada ya presenta cierto grado de orden.</dd>
+      <dt>Análisis amortizado</dt>
+      <dd>Técnica de análisis que promedia el costo de una operación a lo largo de una secuencia de operaciones, en lugar de evaluar cada una de forma aislada en el peor caso.</dd>
+      <dt>Cota de comparación (Ω(n log n))</dt>
+      <dd>Límite teórico inferior demostrado para cualquier algoritmo de ordenamiento basado exclusivamente en comparaciones entre elementos.</dd>
+    </dl>
+
+    <div class="callout">
+      <b>Sugerencia de trabajo autónomo:</b> implementar un pequeño instrumentador que cuente comparaciones e intercambios reales al ejecutar cada algoritmo de la sección 5 sobre arreglos de distinto tamaño y grado de orden previo, y contrastar los conteos empíricos contra las cotas teóricas de la tabla. Este ejercicio consolida la relación entre el análisis formal y el comportamiento observado.
+    </div>
+  </section>
+
+  <footer>
+    <span>Estructuras de Datos · Semestre 2026B · Universidad Santiago de Cali</span>
+    <span>Material de apoyo docente — uso interno del curso</span>
+  </footer>
+
+</div>
+</body>
+</html>
