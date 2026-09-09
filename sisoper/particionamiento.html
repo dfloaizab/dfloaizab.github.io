@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Particionamiento de Memoria — Sistemas Operativos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/tomorrow-night.min.css">
+<style>
+  :root{
+    --bg:#0a0d13;
+    --bg-raised:#10141d;
+    --bg-card:#141a25;
+    --border:#232c3a;
+    --border-soft:#1a212c;
+    --text:#dde4ee;
+    --text-dim:#8792a3;
+    --text-faint:#5c6779;
+
+    --hw:#e0a458;
+    --hw-bg:rgba(224,164,88,.09);
+    --sw:#5cc8b3;
+    --sw-bg:rgba(92,200,179,.09);
+    --swap:#cf7a52;
+    --swap-bg:rgba(207,122,82,.1);
+    --seg:#a48ce0;
+    --seg-bg:rgba(164,140,224,.1);
+    --danger:#d1706f;
+    --danger-bg:rgba(209,112,111,.1);
+
+    --mono:'IBM Plex Mono', ui-monospace, monospace;
+    --sans:'IBM Plex Sans', system-ui, sans-serif;
+    --radius:10px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(224,164,88,.07), transparent 60%),
+      radial-gradient(ellipse 900px 600px at 100% 20%, rgba(92,200,179,.06), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  code, .mono{font-family:var(--mono);}
+  ::selection{background:rgba(224,164,88,.35); color:#fff;}
+
+  header.hero{
+    padding:64px 28px 40px;
+    border-bottom:1px solid var(--border-soft);
+    background:linear-gradient(180deg, rgba(224,164,88,.05), transparent 70%);
+  }
+  .hero-inner{max-width:1180px; margin:0 auto; display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:center;}
+  .kicker{font-family:var(--mono); font-size:.8rem; color:var(--hw); display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+  .kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--hw); box-shadow:0 0 10px var(--hw);}
+  h1.title{font-family:var(--mono); font-weight:600; font-size:clamp(1.9rem, 3.4vw, 2.7rem); margin:0 0 14px; line-height:1.15; letter-spacing:-.01em; color:#f2f5fa;}
+  .hero p.lede{color:var(--text-dim); font-size:1.05rem; max-width:52ch; margin:0;}
+  .hero-svg-wrap{display:flex; justify-content:center;}
+
+  .layout{max-width:1180px; margin:0 auto; display:grid; grid-template-columns:230px 1fr; gap:44px; padding:40px 28px 100px;}
+  nav.side{position:sticky; top:24px; align-self:start; max-height:calc(100vh - 48px); overflow-y:auto;}
+  nav.side a{display:block; padding:7px 12px; font-size:.86rem; color:var(--text-dim); text-decoration:none; border-left:2px solid transparent; border-radius:0 6px 6px 0; transition:color .15s, border-color .15s, background .15s;}
+  nav.side a:hover{color:var(--text); background:var(--bg-raised);}
+  nav.side a.active{color:var(--hw); border-left-color:var(--hw); background:var(--hw-bg); font-weight:500;}
+  nav.side .navhead{font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); padding:0 12px 8px;}
+
+  main{min-width:0;}
+  section{margin-bottom:64px; scroll-margin-top:24px;}
+  section h2{font-family:var(--mono); font-size:1.4rem; color:#f2f5fa; margin:0 0 18px; padding-bottom:12px; border-bottom:1px solid var(--border-soft); display:flex; align-items:center; gap:10px;}
+  section h3{font-size:1.08rem; color:var(--text); margin:26px 0 12px; font-weight:600;}
+  p{color:#c3ccd9; max-width:74ch;}
+  section p, section li{color:#c3ccd9;}
+  strong{color:#eef2f7; font-weight:600;}
+  em{color:var(--text-dim); font-style:italic;}
+
+  ul.objectives{padding-left:0; list-style:none; display:grid; gap:10px; margin:0;}
+  ul.objectives li{padding:12px 16px; background:var(--bg-card); border:1px solid var(--border-soft); border-radius:var(--radius); position:relative; padding-left:38px; max-width:none;}
+  ul.objectives li::before{content:"✓"; position:absolute; left:14px; top:12px; color:var(--sw); font-weight:700;}
+
+  .card{background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; margin:16px 0;}
+  .card h3{margin-top:0;}
+  .card.hw{border-color:rgba(224,164,88,.3); background:linear-gradient(180deg, var(--hw-bg), var(--bg-card) 60%);}
+  .card.sw{border-color:rgba(92,200,179,.3); background:linear-gradient(180deg, var(--sw-bg), var(--bg-card) 60%);}
+  .card.swap{border-color:rgba(207,122,82,.32); background:linear-gradient(180deg, var(--swap-bg), var(--bg-card) 60%);}
+  .card.seg{border-color:rgba(164,140,224,.32); background:linear-gradient(180deg, var(--seg-bg), var(--bg-card) 60%);}
+  .card.note{border-left:3px solid var(--hw); border-radius:6px;}
+  .card.note h3{color:var(--hw); font-family:var(--mono); font-size:.95rem;}
+
+  .req-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:14px; margin:16px 0;}
+
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:.92rem;}
+  thead th{font-family:var(--mono); font-weight:500; text-align:left; color:var(--text-dim); font-size:.78rem; padding:9px 12px; border-bottom:1px solid var(--border); letter-spacing:.02em;}
+  tbody td{padding:9px 12px; border-bottom:1px solid var(--border-soft); color:#c3ccd9;}
+  tbody tr:hover td{background:var(--bg-raised);}
+  .tablewrap{overflow-x:auto; border:1px solid var(--border-soft); border-radius:var(--radius);}
+  .tablewrap table{margin:0;}
+  code.inline{background:var(--bg-raised); border:1px solid var(--border-soft); padding:1px 6px; border-radius:4px; font-size:.88em; color:#f0d8ae;}
+  .badge{font-family:var(--mono); font-size:.68rem; padding:2px 7px; border-radius:5px; font-weight:600; letter-spacing:.03em;}
+  .badge.hw{background:var(--hw-bg); color:var(--hw); border:1px solid rgba(224,164,88,.4);}
+  .badge.sw{background:var(--sw-bg); color:var(--sw); border:1px solid rgba(92,200,179,.4);}
+  .badge.seg{background:var(--seg-bg); color:var(--seg); border:1px solid rgba(164,140,224,.4);}
+  .ok{color:var(--sw);} .no{color:var(--danger);}
+
+  .diagram-frame{background:var(--bg-raised); border:1px solid var(--border-soft); border-radius:var(--radius); padding:18px; margin:18px 0; display:flex; justify-content:center; overflow-x:auto;}
+  .diagram-frame svg{max-width:100%; height:auto;}
+  .fill-hw{fill:var(--hw);} .fill-sw{fill:var(--sw);} .fill-swap{fill:var(--swap);}
+  .fill-seg{fill:var(--seg);} .fill-danger{fill:var(--danger);} .fill-text{fill:var(--text);}
+  .fill-dim{fill:var(--text-dim);} .fill-none{fill:none;}
+  .stroke-hw{stroke:var(--hw);} .stroke-sw{stroke:var(--sw);} .stroke-swap{stroke:var(--swap);}
+  .stroke-seg{stroke:var(--seg);} .stroke-dim{stroke:var(--text-faint);} .stroke-danger{stroke:var(--danger);}
+  .dsvg-label{font-family:var(--mono); font-size:12px;}
+  .dsvg-title{font-family:var(--mono); font-size:12.5px; font-weight:600;}
+
+  .steps{display:grid; gap:10px; margin:16px 0;}
+  .step{display:grid; grid-template-columns:32px 1fr; gap:14px; align-items:start;}
+  .step-num{width:32px; height:32px; border-radius:8px; background:var(--bg-raised); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:.85rem; color:var(--hw);}
+  .step-body{padding-top:5px; color:#c3ccd9;}
+  .step-body strong{color:#eef2f7;}
+
+  .code-block{margin:18px 0; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+  .code-head{display:flex; justify-content:space-between; align-items:center; padding:9px 16px; background:var(--bg-raised); border-bottom:1px solid var(--border); font-family:var(--mono); font-size:.78rem; color:var(--text-dim);}
+  .code-head .lang{color:var(--hw); font-weight:600;}
+  pre{margin:0; padding:18px; overflow-x:auto; font-size:.83rem; line-height:1.55;}
+  pre code.hljs{background:transparent; padding:0;}
+
+  ol.guide{padding-left:20px; color:#c3ccd9;}
+  ol.guide li{margin-bottom:8px; max-width:74ch;}
+
+  .ref-box{display:grid; grid-template-columns:44px 1fr; gap:14px; padding:16px 0; border-bottom:1px solid var(--border-soft);}
+  .ref-box:last-child{border-bottom:none;}
+  .ref-icon{width:44px; height:44px; border-radius:8px; background:var(--bg-raised); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-family:var(--mono); color:var(--hw); font-weight:700;}
+  .ref-content strong{display:block; margin-bottom:8px; color:#eef2f7;}
+  .chapters ul{margin:0 0 8px; padding-left:20px;}
+  .chapters li{font-size:.92rem; margin-bottom:4px;}
+
+  footer{text-align:center; padding:32px 28px 60px; color:var(--text-faint); font-family:var(--mono); font-size:.78rem;}
+
+  @media (max-width: 900px){
+    .hero-inner{grid-template-columns:1fr;}
+    .hero-svg-wrap{order:-1;}
+    .layout{grid-template-columns:1fr; padding:28px 18px 80px;}
+    nav.side{position:static; max-height:none; display:flex; overflow-x:auto; gap:4px; padding-bottom:10px; margin-bottom:8px; border-bottom:1px solid var(--border-soft);}
+    nav.side .navhead{display:none;}
+    nav.side a{white-space:nowrap; border-left:none; border-bottom:2px solid transparent; border-radius:6px 6px 0 0;}
+    nav.side a.active{border-left-color:transparent; border-bottom-color:var(--hw);}
+    .req-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="kicker"><span class="dot"></span>SISTEMAS OPERATIVOS · GESTIÓN DE MEMORIA</div>
+      <h1 class="title">Particionamiento<br>de Memoria</h1>
+      <p class="lede">Cómo repartía el SO la RAM entre procesos antes —y como alternativa más simple— de la memoria virtual: particiones fijas, particiones dinámicas y los algoritmos que deciden dónde cabe cada proceso.</p>
+    </div>
+    <div class="hero-svg-wrap">
+      <svg viewBox="0 0 380 190" width="380" height="190" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="10" width="360" height="34" class="fill-none stroke-sw" stroke-width="1.4"/>
+        <text x="190" y="31" text-anchor="middle" class="dsvg-label fill-sw">SO (fijo, residente)</text>
+        <rect x="10" y="50" width="90" height="42" class="fill-none stroke-hw" stroke-width="1.4"/>
+        <text x="55" y="75" text-anchor="middle" class="dsvg-label fill-hw">P1</text>
+        <rect x="100" y="50" width="60" height="42" class="fill-none stroke-dim" stroke-width="1.4" stroke-dasharray="4 3"/>
+        <text x="130" y="75" text-anchor="middle" class="dsvg-label fill-dim" font-size="10">libre</text>
+        <rect x="160" y="50" width="120" height="42" class="fill-none stroke-hw" stroke-width="1.4"/>
+        <text x="220" y="75" text-anchor="middle" class="dsvg-label fill-hw">P2</text>
+        <rect x="280" y="50" width="90" height="42" class="fill-none stroke-dim" stroke-width="1.4" stroke-dasharray="4 3"/>
+        <text x="325" y="75" text-anchor="middle" class="dsvg-label fill-dim" font-size="10">libre</text>
+        <text x="190" y="110" text-anchor="middle" class="dsvg-label fill-dim" font-size="10.5">particiones de tamaño variable, huecos entre procesos</text>
+        <text x="190" y="128" text-anchor="middle" class="dsvg-label fill-dim" font-size="10.5">(fragmentación externa)</text>
+        <path d="M55 92 V150" class="stroke-hw" stroke-dasharray="2 2"/>
+        <path d="M220 92 V150" class="stroke-hw" stroke-dasharray="2 2"/>
+        <text x="190" y="168" text-anchor="middle" class="dsvg-label fill-dim" font-size="10">¿dónde cabe el próximo proceso? → first-fit / best-fit / worst-fit</text>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="side" id="sidenav">
+    <div class="navhead">Contenido</div>
+    <a href="#objetivos">Objetivos</a>
+    <a href="#contexto">Contexto</a>
+    <a href="#fijo-igual">Fijo, tamaño igual</a>
+    <a href="#fijo-desigual">Fijo, tamaño desigual</a>
+    <a href="#dinamico">Particionamiento dinámico</a>
+    <a href="#algoritmos">Algoritmos de colocación</a>
+    <a href="#ejemplo">Ejemplo resuelto</a>
+    <a href="#estructuras">Estructuras de control</a>
+    <a href="#comparacion">Comparación general</a>
+    <a href="#buddy">Sistema buddy</a>
+    <a href="#hacia-mv">Hacia la memoria virtual</a>
+    <a href="#lab">Laboratorio en C</a>
+    <a href="#referencias">Referencias</a>
+  </nav>
+
+  <main>
+
+    <section id="objetivos">
+      <h2>Objetivos de la sección</h2>
+      <ul class="objectives">
+        <li>Explicar por qué la multiprogramación exige repartir la RAM entre varios procesos.</li>
+        <li>Distinguir particionamiento <strong>fijo (estático)</strong> de <strong>dinámico</strong>, y de tamaño <strong>igual</strong> vs. <strong>desigual</strong>.</li>
+        <li>Diferenciar fragmentación <strong>interna</strong> (propia del particionamiento fijo) de <strong>externa</strong> (propia del dinámico).</li>
+        <li>Aplicar y comparar los algoritmos de colocación: <em>first-fit</em>, <em>best-fit</em>, <em>worst-fit</em> y <em>next-fit</em>.</li>
+        <li>Reconocer las estructuras de control (lista de huecos, bitmaps) que el SO usa para llevar la cuenta de la memoria libre.</li>
+        <li>Ubicar el particionamiento como antecedente histórico de la paginación y la segmentación.</li>
+      </ul>
+    </section>
+
+    <section id="contexto">
+      <h2>Contexto: repartir la RAM antes de la memoria virtual</h2>
+      <p>Antes de que la memoria virtual permitiera "fingir" más RAM de la que existe físicamente, los sistemas operativos ya necesitaban resolver un problema más básico: si varios procesos van a convivir en memoria al mismo tiempo (multiprogramación), <strong>¿cómo se divide la RAM entre ellos?</strong> El particionamiento es la familia de técnicas que responde esa pregunta.</p>
+      <div class="card hw">
+        <h3>Idea central</h3>
+        <p>El SO divide la RAM disponible (descontando la porción que ocupa el propio kernel) en particiones, y asigna una partición completa a cada proceso que se carga en memoria. Cada proceso ve solo su partición; un registro base y uno límite (o un par de registros de relocalización) delimitan lo que puede tocar.</p>
+      </div>
+      <p>Este esquema es más simple que la paginación o la segmentación, pero paga ese costo en <strong>fragmentación</strong>: memoria reservada que ningún proceso está usando realmente. Cómo y dónde aparece esa fragmentación es la diferencia central entre los esquemas que siguen.</p>
+    </section>
+
+    <section id="fijo-igual">
+      <h2>Particionamiento fijo — tamaño igual</h2>
+      <p>La RAM disponible se divide, desde el arranque del sistema, en <strong>N particiones del mismo tamaño</strong>. El número y tamaño de las particiones no cambia mientras el sistema está en ejecución.</p>
+
+      <div class="diagram-frame">
+        <svg viewBox="0 0 420 130" width="420" height="130" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="14" width="400" height="30" class="fill-none stroke-sw" stroke-width="1.4"/>
+          <text x="210" y="34" text-anchor="middle" class="dsvg-label fill-sw">SO</text>
+          <rect x="10" y="50" width="98" height="60" class="fill-none stroke-hw" stroke-width="1.4"/>
+          <text x="59" y="74" text-anchor="middle" class="dsvg-label fill-hw">P1 (60K)</text>
+          <rect x="59" y="82" width="49" height="28" class="fill-none stroke-dim" stroke-width="1" stroke-dasharray="3 2"/>
+          <text x="83" y="99" text-anchor="middle" class="dsvg-label fill-dim" font-size="9">interna</text>
+          <rect x="108" y="50" width="98" height="60" class="fill-none stroke-hw" stroke-width="1.4"/>
+          <text x="157" y="74" text-anchor="middle" class="dsvg-label fill-hw">P2 (95K)</text>
+          <rect x="157" y="105" width="49" height="5" class="fill-none stroke-dim" stroke-width="1" stroke-dasharray="3 2"/>
+          <rect x="206" y="50" width="98" height="60" class="fill-none stroke-dim" stroke-width="1.4" stroke-dasharray="4 3"/>
+          <text x="255" y="84" text-anchor="middle" class="dsvg-label fill-dim">partición libre</text>
+          <rect x="304" y="50" width="98" height="60" class="fill-none stroke-hw" stroke-width="1.4"/>
+          <text x="353" y="74" text-anchor="middle" class="dsvg-label fill-hw">P3 (40K)</text>
+          <rect x="304" y="82" width="98" height="28" class="fill-none stroke-dim" stroke-width="1" stroke-dasharray="3 2"/>
+          <text x="353" y="99" text-anchor="middle" class="dsvg-label fill-dim" font-size="9">interna</text>
+          <text x="210" y="126" text-anchor="middle" class="dsvg-label fill-dim" font-size="10.5">4 particiones de 100K cada una — el espacio sobrante dentro de cada una se pierde</text>
+        </svg>
+      </div>
+
+      <div class="card swap">
+        <h3>Fragmentación interna</h3>
+        <p>Si un proceso pide menos memoria de la que mide su partición, el resto de esa partición queda reservado para él pero <strong>no lo usa nadie más</strong>: es <strong>fragmentación interna</strong>. Un proceso de 40K en una partición de 100K desperdicia 60K que ningún otro proceso puede aprovechar mientras esa partición esté ocupada.</p>
+      </div>
+
+      <h3>Limitaciones</h3>
+      <ul>
+        <li>El <strong>grado de multiprogramación</strong> queda fijo: si hay N particiones, como máximo N procesos caben en RAM al mismo tiempo, sin importar qué tan pequeños sean.</li>
+        <li>Un proceso más grande que la partición más grande <strong>simplemente no puede ejecutarse</strong>, aunque sumando el espacio libre de varias particiones alcanzara.</li>
+        <li>La asignación es trivial: cuando llega un proceso, se busca una partición libre de tamaño suficiente (o se hace cola si no hay).</li>
+      </ul>
+    </section>
+
+    <section id="fijo-desigual">
+      <h2>Particionamiento fijo — tamaño desigual</h2>
+      <p>Variante que atenúa el problema anterior: se definen particiones fijas pero <strong>de distintos tamaños</strong> (p. ej. varias pequeñas, algunas medianas, una o dos grandes), definidas de antemano según el perfil de carga esperado.</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Partición</th><th>Tamaño</th><th>Uso típico</th></tr></thead>
+          <tbody>
+            <tr><td>P0</td><td>8 K</td><td>Procesos pequeños / utilitarios</td></tr>
+            <tr><td>P1</td><td>8 K</td><td>Procesos pequeños / utilitarios</td></tr>
+            <tr><td>P2</td><td>16 K</td><td>Procesos medianos</td></tr>
+            <tr><td>P3</td><td>32 K</td><td>Procesos medianos-grandes</td></tr>
+            <tr><td>P4</td><td>128 K</td><td>Procesos grandes</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card hw">
+        <h3>Regla de colocación</h3>
+        <p>Cada proceso se asigna a la <strong>partición libre más pequeña que aún le queda</strong> (una variante de <em>best-fit</em> aplicada sobre un conjunto fijo de tamaños). Esto reduce la fragmentación interna promedio frente al esquema de tamaño igual, aunque no la elimina: un proceso de 9K todavía desperdicia 7K en una partición de 16K.</p>
+      </div>
+      <p>El costo de esta mejora es <strong>planeación</strong>: si el perfil real de los procesos no coincide con el que se anticipó al definir las particiones, puede sobrar espacio en un tamaño de partición y faltar en otro — con procesos en cola esperando una partición grande mientras las pequeñas están vacías.</p>
+    </section>
+
+    <section id="dinamico">
+      <h2>Particionamiento dinámico</h2>
+      <p>En vez de fijar los tamaños de antemano, el SO crea una partición <strong>del tamaño exacto</strong> que cada proceso solicita, en el momento en que se carga. Al terminar el proceso, esa partición se libera como un <strong>hueco</strong> (<em>hole</em>) disponible para el siguiente.</p>
+
+      <div class="diagram-frame">
+        <svg viewBox="0 0 460 190" width="460" height="190" xmlns="http://www.w3.org/2000/svg">
+          <text x="10" y="16" class="dsvg-label fill-dim">t0 — arranque</text>
+          <rect x="10" y="22" width="440" height="24" class="fill-none stroke-sw" stroke-width="1.3"/>
+          <text x="230" y="38" text-anchor="middle" class="dsvg-label fill-sw" font-size="10.5">SO</text>
+
+          <text x="10" y="62" class="dsvg-label fill-dim">t1 — P1(200K), P2(150K), P3(80K) cargados</text>
+          <rect x="10" y="68" width="150" height="24" class="fill-none stroke-hw" stroke-width="1.3"/>
+          <text x="85" y="84" text-anchor="middle" class="dsvg-label fill-hw" font-size="10">P1</text>
+          <rect x="160" y="68" width="112" height="24" class="fill-none stroke-hw" stroke-width="1.3"/>
+          <text x="216" y="84" text-anchor="middle" class="dsvg-label fill-hw" font-size="10">P2</text>
+          <rect x="272" y="68" width="60" height="24" class="fill-none stroke-hw" stroke-width="1.3"/>
+          <text x="302" y="84" text-anchor="middle" class="dsvg-label fill-hw" font-size="10">P3</text>
+          <rect x="332" y="68" width="118" height="24" class="fill-none stroke-dim" stroke-width="1.3" stroke-dasharray="4 3"/>
+          <text x="391" y="84" text-anchor="middle" class="dsvg-label fill-dim" font-size="10">libre</text>
+
+          <text x="10" y="110" class="dsvg-label fill-dim">t2 — termina P2: queda un hueco en su lugar</text>
+          <rect x="10" y="116" width="150" height="24" class="fill-none stroke-hw" stroke-width="1.3"/>
+          <text x="85" y="132" text-anchor="middle" class="dsvg-label fill-hw" font-size="10">P1</text>
+          <rect x="160" y="116" width="112" height="24" class="fill-none stroke-swap" stroke-width="1.3" stroke-dasharray="4 3"/>
+          <text x="216" y="132" text-anchor="middle" class="dsvg-label fill-swap" font-size="10">hueco</text>
+          <rect x="272" y="116" width="60" height="24" class="fill-none stroke-hw" stroke-width="1.3"/>
+          <text x="302" y="132" text-anchor="middle" class="dsvg-label fill-hw" font-size="10">P3</text>
+          <rect x="332" y="116" width="118" height="24" class="fill-none stroke-dim" stroke-width="1.3" stroke-dasharray="4 3"/>
+          <text x="391" y="132" text-anchor="middle" class="dsvg-label fill-dim" font-size="10">libre</text>
+
+          <text x="10" y="158" class="dsvg-label fill-danger">fragmentación externa: dos huecos separados,</text>
+          <text x="10" y="174" class="dsvg-label fill-danger">ninguno adyacente al otro, aunque sumados alcancen para P4</text>
+        </svg>
+      </div>
+
+      <div class="card swap">
+        <h3>Fragmentación externa</h3>
+        <p>Con el tiempo, procesos de distintos tamaños entran y salen dejando huecos dispersos por toda la RAM. Puede haber memoria total libre de sobra para un nuevo proceso, pero <strong>repartida en huecos demasiado pequeños</strong> individualmente — ninguno le sirve. Esto es fragmentación <strong>externa</strong>: el problema está fuera de las particiones, no dentro de ellas.</p>
+      </div>
+
+      <h3>Compactación</h3>
+      <p>Una forma de combatir la fragmentación externa es la <strong>compactación</strong>: el SO desplaza los procesos en memoria para juntar todo el espacio libre en un único bloque contiguo. Es efectiva, pero costosa: implica copiar en memoria potencialmente muchos procesos y actualizar todas sus referencias, así que solo se ejecuta ocasionalmente (o cuando el sistema realmente lo necesita).</p>
+    </section>
+
+    <section id="algoritmos">
+      <h2>Algoritmos de colocación</h2>
+      <p>Cuando llega un proceso y hay varios huecos disponibles, el SO debe decidir <strong>cuál</strong> usar. Cuatro estrategias clásicas (Stallings, Cap. 7; Tanenbaum, Cap. 3.2):</p>
+
+      <div class="req-grid">
+        <div class="card sw">
+          <h3>First-fit</h3>
+          <p>Recorre la lista de huecos en orden de dirección y usa el <strong>primero</strong> que sea suficientemente grande. Es el más rápido de calcular.</p>
+        </div>
+        <div class="card hw">
+          <h3>Best-fit</h3>
+          <p>Recorre <strong>toda</strong> la lista y elige el hueco <strong>más pequeño</strong> que aún alcance. Minimiza el desperdicio de ese hueco, pero tiende a dejar fragmentos diminutos e inservibles.</p>
+        </div>
+        <div class="card seg">
+          <h3>Worst-fit</h3>
+          <p>Elige el hueco <strong>más grande</strong> disponible. La idea es que el resto del hueco, tras la asignación, siga siendo lo bastante grande como para ser útil después.</p>
+        </div>
+        <div class="card swap">
+          <h3>Next-fit</h3>
+          <p>Como first-fit, pero retoma la búsqueda a partir de donde quedó la <strong>última asignación</strong> en vez de empezar siempre desde el inicio. Reparte mejor el uso de la memoria a lo largo de toda la RAM.</p>
+        </div>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Algoritmo</th><th>Velocidad</th><th>Tendencia de fragmentación</th></tr></thead>
+          <tbody>
+            <tr><td>First-fit</td><td>Rápido</td><td>Buena en general; acumula huecos pequeños cerca del inicio de la memoria</td></tr>
+            <tr><td>Best-fit</td><td>Lento (recorre todo)</td><td>La peor: deja muchos huecos minúsculos e inútiles</td></tr>
+            <tr><td>Worst-fit</td><td>Lento (recorre todo)</td><td>Evita huecos diminutos, pero agota rápido los huecos grandes</td></tr>
+            <tr><td>Next-fit</td><td>Rápido</td><td>Similar a first-fit; distribuye el desgaste de forma más pareja</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card note">
+        <h3>Nota del profesor</h3>
+        <p>Es un resultado clásico —y algo contraintuitivo— de las simulaciones de Knuth y de Stallings que <strong>best-fit no es, en la práctica, el mejor</strong>: al buscar siempre el ajuste más ceñido, sistemáticamente deja residuos demasiado pequeños para servir a futuros procesos. First-fit suele comportarse mejor en simulación que best-fit y worst-fit, a pesar de su simplicidad.</p>
+      </div>
+    </section>
+
+    <section id="ejemplo">
+      <h2>Ejemplo resuelto</h2>
+      <p>Supongamos la siguiente lista de huecos libres, en orden de dirección física, y una solicitud de <strong>212 K</strong>:</p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Hueco</th><th>Dirección</th><th>Tamaño</th></tr></thead>
+          <tbody>
+            <tr><td>H1</td><td>0x1000</td><td>100 K</td></tr>
+            <tr><td>H2</td><td>0x2000</td><td>500 K</td></tr>
+            <tr><td>H3</td><td>0x3000</td><td>200 K</td></tr>
+            <tr><td>H4</td><td>0x4000</td><td>300 K</td></tr>
+            <tr><td>H5</td><td>0x5000</td><td>600 K</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="steps">
+        <div class="step"><div class="step-num">FF</div><div class="step-body"><strong>First-fit:</strong> H1 (100K) es muy pequeño → sigue a H2 (500K), que sí alcanza. Se asigna <strong>H2</strong>, quedando un hueco residual de 288K.</div></div>
+        <div class="step"><div class="step-num">BF</div><div class="step-body"><strong>Best-fit:</strong> de los huecos que alcanzan (H2=500, H4=300, H5=600), el más pequeño es <strong>H4</strong> (300K) → residual de solo 88K, casi inservible para el próximo proceso mediano.</div></div>
+        <div class="step"><div class="step-num">WF</div><div class="step-body"><strong>Worst-fit:</strong> el hueco más grande de todos es <strong>H5</strong> (600K) → residual de 388K, todavía útil para procesos futuros.</div></div>
+      </div>
+
+      <p>El mismo hueco de partida produce tres asignaciones distintas — y tres huecos residuales de muy distinta utilidad — según el criterio que use el SO.</p>
+    </section>
+
+    <section id="estructuras">
+      <h2>Estructuras de control</h2>
+      <p>El SO necesita saber en todo momento qué parte de la RAM está libre. Dos estructuras típicas:</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Estructura</th><th>Cómo funciona</th><th>Costo</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge sw">SW</span> Lista enlazada de huecos</td><td>Cada nodo guarda dirección base y tamaño de un hueco; se recorre para aplicar first/best/worst-fit</td><td>Barata en memoria; recorrerla cuesta O(n) huecos</td></tr>
+            <tr><td><span class="badge sw">SW</span> Bitmap de memoria</td><td>Un bit por unidad de asignación (p. ej. cada 4 bytes) indica ocupado/libre</td><td>Búsqueda de huecos contiguos más costosa; tamaño del bitmap fijo independiente del número de huecos</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Cada nodo de la lista de huecos suele marcarse además como <em>P</em> (proceso) o <em>H</em> (hueco), y los SO reales mantienen listas separadas de huecos ordenadas por dirección (para detectar huecos adyacentes y fusionarlos) o por tamaño (para acelerar best-fit/worst-fit).</p>
+      <div class="card hw">
+        <h3>Fusión de huecos adyacentes (coalescing)</h3>
+        <p>Cuando un proceso termina, si el hueco que deja queda pegado a otro hueco ya existente (antes, después, o ambos), el gestor de memoria los <strong>fusiona</strong> en un único hueco más grande. Es una forma barata de aliviar la fragmentación externa sin llegar a la compactación completa.</p>
+      </div>
+    </section>
+
+    <section id="comparacion">
+      <h2>Comparación general</h2>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Característica</th><th>Fijo, igual</th><th>Fijo, desigual</th><th>Dinámico</th></tr></thead>
+          <tbody>
+            <tr><td>Tamaño de partición</td><td>Fijo, uniforme</td><td>Fijo, variado</td><td>Exacto según el proceso</td></tr>
+            <tr><td>Fragmentación dominante</td><td>Interna (alta)</td><td>Interna (moderada)</td><td>Externa</td></tr>
+            <tr><td>Grado máx. de multiprogramación</td><td>Fijo = número de particiones</td><td>Fijo = número de particiones</td><td>Variable, según tamaños en uso</td></tr>
+            <tr><td>Complejidad de asignación</td><td>Trivial</td><td>Baja (elegir tamaño más cercano)</td><td>Media/alta (algoritmo de colocación)</td></tr>
+            <tr><td>¿Necesita compactación?</td><td>No</td><td>No</td><td>Sí, para recuperar huecos dispersos</td></tr>
+            <tr><td>Proceso más grande que cualquier partición</td><td>No puede ejecutarse</td><td>No puede ejecutarse</td><td>Puede ejecutarse si hay hueco contiguo suficiente</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="buddy">
+      <h2>Un intermedio: el sistema buddy</h2>
+      <div class="card seg">
+        <p>El <strong>sistema buddy</strong> (Stallings, 7.2) es un punto medio entre particiones fijas y dinámicas: la memoria se divide siempre en bloques de tamaño potencia de 2. Al pedir espacio, un bloque libre se parte a la mitad recursivamente ("buddies") hasta llegar al tamaño potencia de 2 más pequeño que alcance; al liberar, un bloque se fusiona con su buddy si este también está libre. Combina la velocidad de localizar bloques (por su tamaño potencia de 2) con una fusión de huecos más simple que en el esquema dinámico general — a cambio de algo de fragmentación interna, porque el bloque asignado casi nunca coincide exactamente con lo solicitado.</p>
+      </div>
+    </section>
+
+    <section id="hacia-mv">
+      <h2>Hacia la memoria virtual</h2>
+      <p>El particionamiento —fijo o dinámico— comparte una limitación de fondo: <strong>cada proceso debe caber completo y de forma contigua en RAM</strong> para poder ejecutarse. Si el proceso es más grande que la memoria física disponible, o si la fragmentación deja huecos pequeños dispersos, el proceso simplemente no corre, sin importar qué tan ingenioso sea el algoritmo de colocación.</p>
+      <p>La paginación y la segmentación —vistas en la sección de <a href="#" onclick="return false;" class="mono" style="color:var(--hw); text-decoration:underline;">Memoria Virtual</a>— resuelven justamente eso: dejan de exigir contigüidad física, dividiendo el proceso en unidades más pequeñas (páginas o segmentos) que pueden dispersarse por la RAM e incluso vivir parcialmente en disco. El particionamiento es, en ese sentido, el problema que la memoria virtual vino a resolver de raíz.</p>
+    </section>
+
+    <section id="lab">
+      <h2>🔬 Laboratorio: colocación de huecos en ANSI C</h2>
+      <div class="card sw">
+        <strong>Objetivos del laboratorio</strong>
+        <ul>
+          <li>Representar una lista de huecos libres en memoria mediante una lista enlazada en C.</li>
+          <li>Implementar los algoritmos <em>first-fit</em>, <em>best-fit</em> y <em>worst-fit</em> como funciones independientes.</li>
+          <li>Liberar un bloque asignado y fusionarlo con huecos adyacentes (coalescing).</li>
+          <li>Comparar el residuo que deja cada algoritmo sobre la misma secuencia de solicitudes.</li>
+        </ul>
+      </div>
+      <p>El código base declara la estructura de datos y dos funciones ya completas; las funciones marcadas con <code class="inline">// TODO</code> quedan para el laboratorio.</p>
+
+      <div class="code-block">
+        <div class="code-head"><span class="lang">ANSI C</span><span>lab_particionamiento.c</span></div>
+        <pre><code class="language-c">/**
+ * lab_particionamiento.c
+ * Laboratorio: Algoritmos de colocación en particionamiento dinámico
+ *
+ * Sistemas Operativos
+ * Referencia: Stallings, Cap. 7 | Tanenbaum, Cap. 3.2
+ *
+ * Compilar: gcc -ansi -Wall -o lab_particionamiento lab_particionamiento.c
+ */
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+#define MEM_SIZE 1000  /* Tamaño total de memoria simulada (KB) */
+
+/* ── Nodo de la lista de huecos/bloques ─────────────────
+ * La memoria se modela como una lista enlazada de bloques,
+ * cada uno marcado como libre (HOLE) u ocupado (PROC).
+ */
+typedef enum { HOLE, PROC } BlockType;
+
+typedef struct Block {
+    int            start;   /* Dirección de inicio del bloque      */
+    int            size;    /* Tamaño del bloque en KB              */
+    BlockType      type;    /* HOLE (libre) o PROC (ocupado)         */
+    int            pid;     /* Identificador del proceso (si PROC)   */
+    struct Block  *next;
+} Block;
+
+Block *memoria = NULL; /* Cabeza de la lista */
+
+/* ── Prototipos ──────────────────────────────────────────*/
+void  init_memoria(void);
+Block *first_fit(int size);
+Block *best_fit(int size);
+Block *worst_fit(int size);
+int   asignar(Block *hueco, int size, int pid);
+void  liberar(int pid);
+void  fusionar_adyacentes(void);
+void  imprimir_memoria(void);
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: init_memoria
+ * Crea un único bloque libre que cubre toda la memoria.
+ * ════════════════════════════════════════════════════════*/
+void init_memoria(void) {
+    memoria = malloc(sizeof(Block));
+    memoria-&gt;start = 0;
+    memoria-&gt;size  = MEM_SIZE;
+    memoria-&gt;type  = HOLE;
+    memoria-&gt;pid   = -1;
+    memoria-&gt;next  = NULL;
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: first_fit
+ * Recorre la lista y retorna el PRIMER hueco con
+ * tamaño &gt;= size, o NULL si ninguno alcanza.
+ *
+ * TODO (Parte 1): implementar el recorrido.
+ * Pista: recorre 'memoria' con un puntero temporal,
+ * revisa 'type == HOLE' y 'size &gt;= size solicitado'.
+ * ════════════════════════════════════════════════════════*/
+Block *first_fit(int size) {
+    /* TODO: reemplazar por la implementación real */
+    return NULL;
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: best_fit
+ * Retorna el hueco MÁS PEQUEÑO que aún alcance para 'size'.
+ *
+ * TODO (Parte 2): recorrer toda la lista (no basta con
+ * detenerse en el primero que alcance) y quedarte con el
+ * de menor tamaño entre los que sí sirven.
+ * ════════════════════════════════════════════════════════*/
+Block *best_fit(int size) {
+    /* TODO: reemplazar por la implementación real */
+    return NULL;
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: worst_fit
+ * Retorna el hueco MÁS GRANDE de toda la lista, siempre
+ * que alcance para 'size'.
+ *
+ * TODO (Parte 3): análogo a best_fit pero maximizando
+ * en vez de minimizando.
+ * ════════════════════════════════════════════════════════*/
+Block *worst_fit(int size) {
+    /* TODO: reemplazar por la implementación real */
+    return NULL;
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: asignar
+ * Dado un hueco ya elegido por uno de los algoritmos
+ * anteriores, lo convierte en un bloque PROC de tamaño
+ * 'size' y, si sobra espacio, crea un nuevo nodo HOLE
+ * con el residuo justo después.
+ *
+ * Retorna 1 si la asignación fue exitosa, 0 si 'hueco'
+ * es NULL o demasiado pequeño.
+ *
+ * TODO (Parte 4):
+ *   1. Si hueco == NULL o hueco-&gt;size &lt; size, retornar 0.
+ *   2. Si hueco-&gt;size == size, basta con cambiar su tipo
+ *      a PROC y asignar su pid.
+ *   3. Si hueco-&gt;size &gt; size, crear un nuevo Block con el
+ *      residuo (start = hueco-&gt;start + size,
+ *      size = hueco-&gt;size - size, type = HOLE),
+ *      insertarlo después de 'hueco' en la lista, y luego
+ *      ajustar hueco-&gt;size = size, hueco-&gt;type = PROC,
+ *      hueco-&gt;pid = pid.
+ * ════════════════════════════════════════════════════════*/
+int asignar(Block *hueco, int size, int pid) {
+    /* TODO: reemplazar por la implementación real */
+    return 0;
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: liberar
+ * Busca el bloque PROC con el pid dado y lo convierte
+ * de vuelta en HOLE. No fusiona todavía (eso lo hace
+ * fusionar_adyacentes por separado).
+ * ════════════════════════════════════════════════════════*/
+void liberar(int pid) {
+    Block *actual = memoria;
+    while (actual != NULL) {
+        if (actual-&gt;type == PROC &amp;&amp; actual-&gt;pid == pid) {
+            actual-&gt;type = HOLE;
+            actual-&gt;pid  = -1;
+            printf("[LIBERAR] Proceso %d liberado (bloque en %d, %dK).\n",
+                   pid, actual-&gt;start, actual-&gt;size);
+            return;
+        }
+        actual = actual-&gt;next;
+    }
+    printf("[ERROR] No se encontró el proceso %d.\n", pid);
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: fusionar_adyacentes
+ * Recorre la lista y fusiona cada HOLE con el siguiente
+ * nodo si este también es HOLE (coalescing).
+ *
+ * TODO (Parte 5):
+ *   1. Recorrer la lista con un puntero 'actual'.
+ *   2. Mientras actual-&gt;type == HOLE y actual-&gt;next != NULL
+ *      y actual-&gt;next-&gt;type == HOLE:
+ *        - sumar actual-&gt;size += actual-&gt;next-&gt;size
+ *        - eliminar el nodo actual-&gt;next de la lista
+ *          (liberar su memoria con free)
+ *   3. Avanzar al siguiente nodo y repetir.
+ * ════════════════════════════════════════════════════════*/
+void fusionar_adyacentes(void) {
+    /* TODO: reemplazar por la implementación real */
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: imprimir_memoria
+ * Muestra el estado actual de la lista de bloques.
+ * ════════════════════════════════════════════════════════*/
+void imprimir_memoria(void) {
+    Block *actual = memoria;
+    printf("\n── Estado de la memoria ──────────────────────\n");
+    while (actual != NULL) {
+        if (actual-&gt;type == HOLE) {
+            printf("[%4d - %4d] HUECO   (%d K)\n",
+                   actual-&gt;start, actual-&gt;start + actual-&gt;size - 1, actual-&gt;size);
+        } else {
+            printf("[%4d - %4d] PROC %-3d (%d K)\n",
+                   actual-&gt;start, actual-&gt;start + actual-&gt;size - 1, actual-&gt;pid, actual-&gt;size);
+        }
+        actual = actual-&gt;next;
+    }
+}
+
+/* ════════════════════════════════════════════════════════
+ * MAIN — Casos de prueba
+ * ════════════════════════════════════════════════════════*/
+int main(void) {
+    Block *hueco;
+
+    printf("═══════════════════════════════════════════════\n");
+    printf("  Laboratorio: Particionamiento – Sistemas Op.\n");
+    printf("═══════════════════════════════════════════════\n");
+
+    init_memoria();
+    imprimir_memoria();
+
+    /* Cargar tres procesos con first_fit */
+    hueco = first_fit(200);
+    asignar(hueco, 200, 1);
+
+    hueco = first_fit(150);
+    asignar(hueco, 150, 2);
+
+    hueco = first_fit(300);
+    asignar(hueco, 300, 3);
+
+    imprimir_memoria();
+
+    /* Liberar el proceso 2 y fusionar huecos */
+    liberar(2);
+    fusionar_adyacentes();
+    imprimir_memoria();
+
+    /* TODO (Parte 6): usando la memoria resultante, comparar
+     * qué hueco elegiría best_fit(150) frente a worst_fit(150)
+     * y frente a first_fit(150). Imprimir los tres resultados
+     * (dirección y tamaño del hueco elegido) y comentar en un
+     * breve reporte cuál produce el residuo más aprovechable.
+     */
+
+    return 0;
+}
+</code></pre>
+      </div>
+
+      <div class="card note">
+        <h3>Nota del profesor</h3>
+        <p>Presten atención a <code class="inline">asignar()</code>: es la única función que modifica el tamaño de la memoria simulada. Si no se maneja bien el caso "sobra espacio" (creando el nodo residual), la lista queda inconsistente y los siguientes <code class="inline">first_fit</code>/<code class="inline">best_fit</code>/<code class="inline">worst_fit</code> van a operar sobre datos incorrectos sin que el programa avise nada — un error silencioso típico de la gestión manual de listas enlazadas en C.</p>
+      </div>
+
+      <div class="card swap">
+        <h3>📋 Guía de actividades del laboratorio</h3>
+        <ol class="guide">
+          <li><strong>Parte 1-3:</strong> completar <code class="inline">first_fit()</code>, <code class="inline">best_fit()</code> y <code class="inline">worst_fit()</code>.</li>
+          <li><strong>Parte 4:</strong> completar <code class="inline">asignar()</code>, incluyendo la creación del nodo residual.</li>
+          <li><strong>Parte 5:</strong> completar <code class="inline">fusionar_adyacentes()</code> para el coalescing tras liberar procesos.</li>
+          <li><strong>Parte 6:</strong> ejecutar los tres algoritmos sobre la misma memoria resultante y comparar los huecos residuales en un breve reporte.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="referencias">
+      <h2>📚 Referencias bibliográficas</h2>
+
+      <div class="ref-box">
+        <div class="ref-icon">S</div>
+        <div class="ref-content">
+          <strong>Stallings, W. — Operating Systems: Internals and Design Principles</strong>
+          <div class="chapters">
+            <ul>
+              <li><strong>Capítulo 7:</strong> Memory Management — particionamiento fijo, particionamiento dinámico, sistema buddy, algoritmos de colocación.</li>
+              <li><strong>Sección 7.2:</strong> Partitioning — fixed y dynamic partitioning, fragmentación interna y externa.</li>
+            </ul>
+            <em>Edición recomendada: 9ª edición, Pearson.</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-box">
+        <div class="ref-icon">T</div>
+        <div class="ref-content">
+          <strong>Tanenbaum, A. S. — Modern Operating Systems</strong>
+          <div class="chapters">
+            <ul>
+              <li><strong>Cap. 3, sec. 3.2:</strong> A Memory Abstraction: Address Spaces — antecedentes de la partición de memoria y su relación con la relocalización.</li>
+              <li><strong>Cap. 3, sec. 3.1.2:</strong> Multiprogramming with Fixed Partitions.</li>
+            </ul>
+            <em>Edición recomendada: 4ª edición, Pearson.</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-box">
+        <div class="ref-icon">SG</div>
+        <div class="ref-content">
+          <strong>Silberschatz, A., Galvin, P. B., Gagne, G. — Operating System Concepts</strong>
+          <div class="chapters">
+            <ul>
+              <li><strong>Capítulo 9:</strong> Main Memory — particionamiento contiguo, algoritmos de colocación (first/best/worst-fit), fragmentación.</li>
+            </ul>
+            <em>Edición recomendada: 10ª edición, Wiley (lectura complementaria).</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Recursos adicionales</h3>
+        <ul>
+          <li>Knuth, D. E. — <em>The Art of Computer Programming, Vol. 1</em> — análisis clásico del desempeño de first-fit vs. best-fit sobre listas de huecos.</li>
+          <li>Linux Kernel Documentation: <code class="inline">Documentation/mm/</code> — para contrastar con los mecanismos de paginación que reemplazaron al particionamiento puro en los SO modernos.</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>Sistemas Operativos · Particionamiento de Memoria</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  hljs.highlightAll();
+  (function() {
+    const links = document.querySelectorAll('nav.side a');
+    const sections = document.querySelectorAll('section[id]');
+    function onScroll() {
+      let current = '';
+      sections.forEach(s => { if (window.scrollY >= s.offsetTop - 90) current = s.id; });
+      links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
+</body>
+</html>

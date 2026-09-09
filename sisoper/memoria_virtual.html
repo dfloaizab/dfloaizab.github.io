@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de Memoria Virtual — Sistemas Operativos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/tomorrow-night.min.css">
+<style>
+  :root{
+    --bg:#0a0d13;
+    --bg-raised:#10141d;
+    --bg-card:#141a25;
+    --border:#232c3a;
+    --border-soft:#1a212c;
+    --text:#dde4ee;
+    --text-dim:#8792a3;
+    --text-faint:#5c6779;
+
+    --hw:#e0a458;      /* hardware — ámbar */
+    --hw-bg:rgba(224,164,88,.09);
+    --sw:#5cc8b3;      /* software / SO — verde azulado */
+    --sw-bg:rgba(92,200,179,.09);
+    --swap:#cf7a52;    /* disco / swap — cobre */
+    --swap-bg:rgba(207,122,82,.1);
+    --seg:#a48ce0;     /* segmentación — violeta */
+    --seg-bg:rgba(164,140,224,.1);
+    --danger:#d1706f;  /* faltas / errores */
+    --danger-bg:rgba(209,112,111,.1);
+
+    --mono:'IBM Plex Mono', ui-monospace, monospace;
+    --sans:'IBM Plex Sans', system-ui, sans-serif;
+    --radius:10px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(224,164,88,.07), transparent 60%),
+      radial-gradient(ellipse 900px 600px at 100% 20%, rgba(92,200,179,.06), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{color:inherit;}
+  code, .mono{font-family:var(--mono);}
+
+  ::selection{background:rgba(224,164,88,.35); color:#fff;}
+
+  /* ── HERO ─────────────────────────────────────────── */
+  header.hero{
+    padding:64px 28px 40px;
+    border-bottom:1px solid var(--border-soft);
+    background:linear-gradient(180deg, rgba(224,164,88,.05), transparent 70%);
+  }
+  .hero-inner{max-width:1180px; margin:0 auto; display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:center;}
+  .kicker{
+    font-family:var(--mono); font-size:.8rem; color:var(--hw);
+    display:flex; align-items:center; gap:10px; margin-bottom:18px;
+  }
+  .kicker .dot{width:6px;height:6px;border-radius:50%;background:var(--hw); box-shadow:0 0 10px var(--hw);}
+  h1.title{
+    font-family:var(--mono); font-weight:600; font-size:clamp(1.9rem, 3.4vw, 2.7rem);
+    margin:0 0 14px; line-height:1.15; letter-spacing:-.01em; color:#f2f5fa;
+  }
+  .hero p.lede{color:var(--text-dim); font-size:1.05rem; max-width:52ch; margin:0;}
+  .hero-svg-wrap{display:flex; justify-content:center;}
+
+  /* ── LAYOUT ───────────────────────────────────────── */
+  .layout{max-width:1180px; margin:0 auto; display:grid; grid-template-columns:230px 1fr; gap:44px; padding:40px 28px 100px;}
+  nav.side{position:sticky; top:24px; align-self:start; max-height:calc(100vh - 48px); overflow-y:auto;}
+  nav.side a{
+    display:block; padding:7px 12px; font-size:.86rem; color:var(--text-dim);
+    text-decoration:none; border-left:2px solid transparent; border-radius:0 6px 6px 0;
+    transition:color .15s, border-color .15s, background .15s;
+  }
+  nav.side a:hover{color:var(--text); background:var(--bg-raised);}
+  nav.side a.active{color:var(--hw); border-left-color:var(--hw); background:var(--hw-bg); font-weight:500;}
+  nav.side .navhead{font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); padding:0 12px 8px;}
+
+  main{min-width:0;}
+  section{margin-bottom:64px; scroll-margin-top:24px;}
+  section h2{
+    font-family:var(--mono); font-size:1.4rem; color:#f2f5fa; margin:0 0 18px;
+    padding-bottom:12px; border-bottom:1px solid var(--border-soft);
+    display:flex; align-items:center; gap:10px;
+  }
+  section h3{font-size:1.08rem; color:var(--text); margin:26px 0 12px; font-weight:600;}
+  p{color:#c3ccd9; max-width:74ch;}
+  section p, section li{color:#c3ccd9;}
+  strong{color:#eef2f7; font-weight:600;}
+  em{color:var(--text-dim); font-style:italic;}
+
+  ul.objectives{padding-left:0; list-style:none; display:grid; gap:10px; margin:0;}
+  ul.objectives li{
+    padding:12px 16px; background:var(--bg-card); border:1px solid var(--border-soft);
+    border-radius:var(--radius); position:relative; padding-left:38px; max-width:none;
+  }
+  ul.objectives li::before{
+    content:"✓"; position:absolute; left:14px; top:12px; color:var(--sw); font-weight:700;
+  }
+
+  /* ── CARDS ────────────────────────────────────────── */
+  .card{
+    background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:18px 20px; margin:16px 0;
+  }
+  .card h3{margin-top:0;}
+  .card.hw{border-color:rgba(224,164,88,.3); background:linear-gradient(180deg, var(--hw-bg), var(--bg-card) 60%);}
+  .card.sw{border-color:rgba(92,200,179,.3); background:linear-gradient(180deg, var(--sw-bg), var(--bg-card) 60%);}
+  .card.swap{border-color:rgba(207,122,82,.32); background:linear-gradient(180deg, var(--swap-bg), var(--bg-card) 60%);}
+  .card.seg{border-color:rgba(164,140,224,.32); background:linear-gradient(180deg, var(--seg-bg), var(--bg-card) 60%);}
+  .card.note{border-left:3px solid var(--hw); border-radius:6px;}
+  .card.note h3{color:var(--hw); font-family:var(--mono); font-size:.95rem;}
+
+  .req-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:14px; margin:16px 0;}
+
+  /* ── TABLES ───────────────────────────────────────── */
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:.92rem;}
+  thead th{
+    font-family:var(--mono); font-weight:500; text-align:left; color:var(--text-dim);
+    font-size:.78rem; padding:9px 12px; border-bottom:1px solid var(--border); letter-spacing:.02em;
+  }
+  tbody td{padding:9px 12px; border-bottom:1px solid var(--border-soft); color:#c3ccd9;}
+  tbody tr:hover td{background:var(--bg-raised);}
+  table.compact td, table.compact th{padding:7px 10px;}
+  .tablewrap{overflow-x:auto; border:1px solid var(--border-soft); border-radius:var(--radius);}
+  .tablewrap table{margin:0;}
+  code.inline{background:var(--bg-raised); border:1px solid var(--border-soft); padding:1px 6px; border-radius:4px; font-size:.88em; color:#f0d8ae;}
+
+  .badge{font-family:var(--mono); font-size:.68rem; padding:2px 7px; border-radius:5px; font-weight:600; letter-spacing:.03em;}
+  .badge.hw{background:var(--hw-bg); color:var(--hw); border:1px solid rgba(224,164,88,.4);}
+  .badge.sw{background:var(--sw-bg); color:var(--sw); border:1px solid rgba(92,200,179,.4);}
+  .ok{color:var(--sw);} .no{color:var(--danger);}
+
+  /* ── DIAGRAMS ─────────────────────────────────────── */
+  .diagram-frame{
+    background:var(--bg-raised); border:1px solid var(--border-soft); border-radius:var(--radius);
+    padding:18px; margin:18px 0; display:flex; justify-content:center; overflow-x:auto;
+  }
+  .diagram-frame svg{max-width:100%; height:auto;}
+  .fill-hw{fill:var(--hw);} .fill-sw{fill:var(--sw);} .fill-swap{fill:var(--swap);}
+  .fill-seg{fill:var(--seg);} .fill-danger{fill:var(--danger);} .fill-text{fill:var(--text);}
+  .fill-dim{fill:var(--text-dim);} .fill-none{fill:none;}
+  .stroke-hw{stroke:var(--hw);} .stroke-sw{stroke:var(--sw);} .stroke-swap{stroke:var(--swap);}
+  .stroke-seg{stroke:var(--seg);} .stroke-dim{stroke:var(--text-faint);}
+  .dsvg-label{font-family:var(--mono); font-size:12px;}
+  .dsvg-title{font-family:var(--mono); font-size:12.5px; font-weight:600;}
+
+  /* ── STEPS ────────────────────────────────────────── */
+  .steps{display:grid; gap:10px; margin:16px 0;}
+  .step{display:grid; grid-template-columns:32px 1fr; gap:14px; align-items:start;}
+  .step-num{
+    width:32px; height:32px; border-radius:8px; background:var(--bg-raised); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:.85rem; color:var(--hw);
+  }
+  .step-body{padding-top:5px; color:#c3ccd9;}
+  .step-body strong{color:#eef2f7;}
+
+  /* ── CODE ─────────────────────────────────────────── */
+  .code-block{margin:18px 0; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+  .code-head{
+    display:flex; justify-content:space-between; align-items:center; padding:9px 16px;
+    background:var(--bg-raised); border-bottom:1px solid var(--border);
+    font-family:var(--mono); font-size:.78rem; color:var(--text-dim);
+  }
+  .code-head .lang{color:var(--hw); font-weight:600;}
+  pre{margin:0; padding:18px; overflow-x:auto; font-size:.83rem; line-height:1.55;}
+  pre code.hljs{background:transparent; padding:0;}
+
+  /* ── LAB GUIDE ────────────────────────────────────── */
+  ol.guide{padding-left:20px; color:#c3ccd9;}
+  ol.guide li{margin-bottom:8px; max-width:74ch;}
+
+  /* ── REFERENCES ───────────────────────────────────── */
+  .ref-box{display:grid; grid-template-columns:44px 1fr; gap:14px; padding:16px 0; border-bottom:1px solid var(--border-soft);}
+  .ref-box:last-child{border-bottom:none;}
+  .ref-icon{width:44px; height:44px; border-radius:8px; background:var(--bg-raised); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; font-family:var(--mono); color:var(--hw); font-weight:700;}
+  .ref-content strong{display:block; margin-bottom:8px; color:#eef2f7;}
+  .chapters ul{margin:0 0 8px; padding-left:20px;}
+  .chapters li{font-size:.92rem; margin-bottom:4px;}
+
+  footer{text-align:center; padding:32px 28px 60px; color:var(--text-faint); font-family:var(--mono); font-size:.78rem;}
+
+  @media (max-width: 900px){
+    .hero-inner{grid-template-columns:1fr;}
+    .hero-svg-wrap{order:-1;}
+    .layout{grid-template-columns:1fr; padding:28px 18px 80px;}
+    nav.side{
+      position:static; max-height:none; display:flex; overflow-x:auto; gap:4px;
+      padding-bottom:10px; margin-bottom:8px; border-bottom:1px solid var(--border-soft);
+    }
+    nav.side .navhead{display:none;}
+    nav.side a{white-space:nowrap; border-left:none; border-bottom:2px solid transparent; border-radius:6px 6px 0 0;}
+    nav.side a.active{border-left-color:transparent; border-bottom-color:var(--hw);}
+    .req-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="kicker"><span class="dot"></span>SISTEMAS OPERATIVOS · 2026A</div>
+      <h1 class="title">Gestión de<br>Memoria Virtual</h1>
+      <p class="lede">Paginación, segmentación y los mecanismos de hardware y software que le permiten a un proceso creer que tiene toda la memoria para sí mismo.</p>
+    </div>
+    <div class="hero-svg-wrap">
+      <svg viewBox="0 0 380 220" width="380" height="220" xmlns="http://www.w3.org/2000/svg">
+        <text x="60" y="24" class="dsvg-label fill-dim">dir. lógica</text>
+        <rect x="10" y="34" width="100" height="34" rx="6" class="fill-none stroke-sw" stroke-width="1.5"/>
+        <text x="60" y="55" text-anchor="middle" class="dsvg-title fill-sw">0x3A4F</text>
+        <path d="M110 51 H150" class="stroke-dim" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="150" y="30" width="80" height="42" rx="8" class="fill-none stroke-hw" stroke-width="1.5"/>
+        <text x="190" y="47" text-anchor="middle" class="dsvg-label fill-hw">MMU</text>
+        <text x="190" y="61" text-anchor="middle" class="dsvg-label fill-dim" font-size="9.5">+ TLB</text>
+        <path d="M230 51 H270" class="stroke-dim" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="270" y="34" width="100" height="34" rx="6" class="fill-none stroke-hw" stroke-width="1.5"/>
+        <text x="320" y="55" text-anchor="middle" class="dsvg-title fill-hw">0x1A4F</text>
+        <text x="320" y="24" text-anchor="middle" class="dsvg-label fill-dim">dir. física</text>
+
+        <path d="M190 72 V96" class="stroke-dim" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="90" y="96" width="90" height="52" rx="8" class="fill-none stroke-sw" stroke-width="1.5"/>
+        <text x="135" y="118" text-anchor="middle" class="dsvg-label fill-sw" font-weight="600">RAM</text>
+        <text x="135" y="134" text-anchor="middle" class="dsvg-label fill-dim" font-size="9.5">páginas activas</text>
+        <rect x="200" y="96" width="90" height="52" rx="8" class="fill-none stroke-swap" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <text x="245" y="118" text-anchor="middle" class="dsvg-label fill-swap" font-weight="600">SWAP</text>
+        <text x="245" y="134" text-anchor="middle" class="dsvg-label fill-dim" font-size="9.5">en disco</text>
+        <path d="M180 122 H200" class="stroke-dim" stroke-width="1.5" stroke-dasharray="2 2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+        <text x="190" y="112" text-anchor="middle" class="dsvg-label fill-dim" font-size="9">page fault</text>
+
+        <text x="190" y="184" text-anchor="middle" class="dsvg-label fill-dim" font-size="10.5">solo lo que se usa "ahora" vive en RAM;</text>
+        <text x="190" y="200" text-anchor="middle" class="dsvg-label fill-dim" font-size="10.5">el resto espera en swap hasta que se necesita</text>
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" class="fill-dim"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="side" id="sidenav">
+    <div class="navhead">Contenido</div>
+    <a href="#objetivos">Objetivos</a>
+    <a href="#qué-es">¿Qué es la MV?</a>
+    <a href="#espacio-intercambio">Espacio de intercambio</a>
+    <a href="#requisitos">5 requisitos</a>
+    <a href="#reloc">Relocalización</a>
+    <a href="#proteccion">Protección</a>
+    <a href="#comparticion">Compartición</a>
+    <a href="#dir-logicas">Direcciones lógicas</a>
+    <a href="#dir-fisicas">Direcciones físicas</a>
+    <a href="#mecanismos">Mecanismos HW/SW</a>
+    <a href="#paginacion">Paginación</a>
+    <a href="#segmentacion">Segmentación</a>
+    <a href="#lab-paginacion">Lab: paginación</a>
+    <a href="#lab-segmentacion">Lab: segmentación</a>
+    <a href="#referencias">Referencias</a>
+  </nav>
+
+  <main>
+
+    <section id="objetivos">
+      <h2>Objetivos de la sección</h2>
+      <ul class="objectives">
+        <li>Explicar el concepto de memoria virtual y su propósito en los sistemas operativos modernos.</li>
+        <li>Describir el espacio de intercambio (<em>swap space</em>) y su rol en la ilusión de memoria ampliada.</li>
+        <li>Reconocer los requisitos clásicos de gestión de memoria (relocalización, protección, compartición, organización lógica y física) y cómo la memoria virtual los satisface.</li>
+        <li>Distinguir entre direcciones lógicas y físicas, y comprender el proceso de traducción.</li>
+        <li>Identificar los mecanismos de hardware y software que hacen posible la memoria virtual.</li>
+        <li>Aplicar los esquemas de paginación y segmentación para traducir direcciones, con ejemplos paso a paso.</li>
+        <li>Implementar (o completar) código ANSI C que simule la gestión de memoria virtual con paginación y segmentación en el laboratorio.</li>
+      </ul>
+    </section>
+
+    <section id="qué-es">
+      <h2>¿Qué es la memoria virtual?</h2>
+      <p>La <strong>memoria virtual</strong> es una técnica de gestión de memoria que permite a un proceso utilizar más espacio de memoria del que físicamente existe en la RAM. El sistema operativo crea la <em>ilusión</em> de un espacio de direcciones muy grande (usualmente 32 o 64 bits) al mantener en disco las partes del proceso que no se usan activamente, cargándolas a RAM bajo demanda.</p>
+
+      <div class="card hw">
+        <h3>Idea central</h3>
+        <p>Solo las páginas o segmentos que se están ejecutando <strong>ahora mismo</strong> necesitan estar en RAM. El resto puede permanecer en disco. El SO gestiona qué partes están en memoria y cuáles no, de forma transparente para el proceso.</p>
+      </div>
+
+      <h3>Beneficios principales</h3>
+      <ul>
+        <li>Permite ejecutar procesos cuyo tamaño supera la RAM disponible.</li>
+        <li>Facilita la <strong>multiprogramación</strong>: más procesos simultáneos compitiendo por la misma RAM física.</li>
+        <li>Proporciona aislamiento y protección entre procesos.</li>
+        <li>Simplifica la programación: cada proceso cree tener toda la memoria para sí.</li>
+      </ul>
+    </section>
+
+    <section id="espacio-intercambio">
+      <h2>Espacio de intercambio (<em>swap space</em>)</h2>
+      <p>El <strong>espacio de intercambio</strong> (o <em>swap</em>) es una región del disco duro o SSD reservada para almacenar temporalmente las páginas o segmentos que el SO ha <em>desalojado</em> de la RAM para liberar espacio.</p>
+
+      <div class="card swap">
+        <h3>Operaciones clave</h3>
+        <ul>
+          <li><strong>Page-out (swap-out):</strong> el SO mueve una página de RAM a disco y la marca como no presente en la tabla de páginas.</li>
+          <li><strong>Page-in (swap-in):</strong> al acceder a una página no presente ocurre un <em>page fault</em>; el SO la carga del disco a RAM.</li>
+        </ul>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Concepto</th><th>Descripción</th><th>Ubicación</th></tr></thead>
+          <tbody>
+            <tr><td>RAM (memoria física)</td><td>Páginas activas del proceso</td><td>DRAM</td></tr>
+            <tr><td>Swap space</td><td>Páginas inactivas desalojadas</td><td>Disco / SSD</td></tr>
+            <tr><td>Page fault</td><td>Interrupción al acceder una página ausente</td><td>HW → SO</td></tr>
+            <tr><td>Algoritmo de reemplazo</td><td>Decide qué página desalojar (LRU, FIFO, Clock…)</td><td>SO (kernel)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>En Linux, el swap puede ser una <strong>partición dedicada</strong> o un <strong>archivo</strong> (<code class="inline">swapfile</code>). En Windows se denomina <em>archivo de paginación</em> (<code class="inline">pagefile.sys</code>).</p>
+    </section>
+
+    <section id="requisitos">
+      <h2>Los 5 requisitos de la gestión de memoria</h2>
+      <p><strong>Stallings</strong> (Cap. 8) enumera de forma explícita cinco requisitos que cualquier esquema de gestión de memoria debe cumplir. <strong>Tanenbaum</strong> no los lista con los mismos cinco nombres, pero cubre los mismos problemas de fondo al hablar de espacios de direcciones y protección (Cap. 3). La memoria virtual los satisface todos:</p>
+
+      <div class="req-grid">
+        <div class="card sw">
+          <h3>1. Relocalización</h3>
+          <p>Los procesos no saben en qué dirección física se cargarán. La MMU traduce en tiempo de ejecución la dirección lógica a la física real, así el proceso puede moverse en memoria sin recompilar.</p>
+        </div>
+        <div class="card hw">
+          <h3>2. Protección</h3>
+          <p>Cada proceso accede únicamente a su propio espacio de direcciones. La MMU verifica en cada acceso los permisos de lectura, escritura y ejecución.</p>
+        </div>
+        <div class="card seg">
+          <h3>3. Compartición</h3>
+          <p>Varios procesos pueden mapear la misma región física (p. ej. <code class="inline">libc.so</code>) sin romper la protección de cada uno.</p>
+        </div>
+        <div class="card swap">
+          <h3>4. Organización lógica</h3>
+          <p>La memoria se organiza en unidades lógicas —páginas o segmentos— que el programador y el SO manejan de forma independiente.</p>
+        </div>
+        <div class="card sw">
+          <h3>5. Organización física</h3>
+          <p>El SO decide la ubicación física de los datos (RAM o swap) de forma transparente; el programador no gestiona el disco manualmente.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="reloc">
+      <h2>Relocalización</h2>
+      <p>Resuelve el problema de que un programa se compila con referencias a direcciones fijas, pero en tiempo de ejecución puede cargarse en cualquier lugar de la memoria física.</p>
+
+      <div class="diagram-frame">
+        <svg viewBox="0 0 460 130" width="460" height="130" xmlns="http://www.w3.org/2000/svg">
+          <text x="10" y="18" class="dsvg-label fill-dim">Programa compilado</text>
+          <text x="270" y="18" class="dsvg-label fill-dim">Tiempo de ejecución</text>
+
+          <text x="10" y="46" class="dsvg-label fill-text" font-size="12.5">MOV R1, [0x1000]</text>
+          <rect x="170" y="34" width="70" height="26" rx="5" class="fill-none stroke-sw" stroke-width="1.4"/>
+          <text x="205" y="51" text-anchor="middle" class="dsvg-label fill-sw" font-size="11">0x1000</text>
+          <path d="M240 47 H280" class="stroke-dim" marker-end="url(#arrow2)"/>
+          <rect x="280" y="34" width="30" height="26" rx="5" class="fill-none stroke-hw" stroke-width="1.4"/>
+          <text x="295" y="51" text-anchor="middle" class="dsvg-label fill-hw" font-size="10">MMU</text>
+          <path d="M310 47 H350" class="stroke-dim" marker-end="url(#arrow2)"/>
+          <rect x="350" y="34" width="80" height="26" rx="5" class="fill-none stroke-hw" stroke-width="1.4"/>
+          <text x="390" y="51" text-anchor="middle" class="dsvg-label fill-hw" font-size="11">0x45000</text>
+
+          <text x="10" y="92" class="dsvg-label fill-text" font-size="12.5">JMP 0x2000</text>
+          <rect x="170" y="80" width="70" height="26" rx="5" class="fill-none stroke-sw" stroke-width="1.4"/>
+          <text x="205" y="97" text-anchor="middle" class="dsvg-label fill-sw" font-size="11">0x2000</text>
+          <path d="M240 93 H280" class="stroke-dim" marker-end="url(#arrow2)"/>
+          <rect x="280" y="80" width="30" height="26" rx="5" class="fill-none stroke-hw" stroke-width="1.4"/>
+          <text x="295" y="97" text-anchor="middle" class="dsvg-label fill-hw" font-size="10">MMU</text>
+          <path d="M310 93 H350" class="stroke-dim" marker-end="url(#arrow2)"/>
+          <rect x="350" y="80" width="80" height="26" rx="5" class="fill-none stroke-hw" stroke-width="1.4"/>
+          <text x="390" y="97" text-anchor="middle" class="dsvg-label fill-hw" font-size="11">0x46000</text>
+          <defs><marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="fill-dim"/></marker></defs>
+        </svg>
+      </div>
+      <p>Con memoria virtual la relocalización es <strong>dinámica y continua</strong>: la tabla de páginas puede cambiar el mapeo en cualquier momento, por ejemplo al hacer <em>swap</em> de una página.</p>
+    </section>
+
+    <section id="proteccion">
+      <h2>Protección</h2>
+      <p>Cada entrada en la tabla de páginas lleva bits de protección. En x86-64, los más relevantes son:</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Bit</th><th>Nombre</th><th>Significado</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge hw">P</span></td><td>Present</td><td>Página en memoria física</td></tr>
+            <tr><td><span class="badge hw">R/W</span></td><td>Read/Write</td><td>0 = solo lectura · 1 = lectura/escritura</td></tr>
+            <tr><td><span class="badge hw">U/S</span></td><td>User/Supervisor</td><td>0 = solo kernel · 1 = accesible en modo usuario</td></tr>
+            <tr><td><span class="badge hw">NX</span></td><td>No-Execute</td><td>Prohíbe ejecutar código en esa página</td></tr>
+            <tr><td><span class="badge hw">D</span></td><td>Dirty</td><td>Página modificada desde la última carga</td></tr>
+            <tr><td><span class="badge hw">A</span></td><td>Accessed</td><td>Página accedida recientemente</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Si un proceso intenta escribir en una página de solo lectura, la MMU lanza una excepción de protección <strong>antes</strong> de que el acceso llegue a ejecutarse.</p>
+    </section>
+
+    <section id="comparticion">
+      <h2>Compartición</h2>
+      <p>Permite que múltiples procesos accedan a los mismos marcos físicos, reduciendo el uso total de RAM. Casos de uso típicos:</p>
+      <ul>
+        <li><strong>Bibliotecas compartidas:</strong> <code class="inline">libc.so</code>, <code class="inline">libpthread.so</code> mapeadas en el espacio de muchos procesos.</li>
+        <li><strong>Memoria compartida IPC:</strong> <code class="inline">shmget()</code> / <code class="inline">mmap()</code> en POSIX.</li>
+        <li><strong>Copy-on-Write (CoW):</strong> tras <code class="inline">fork()</code>, padre e hijo comparten páginas hasta que uno escribe; solo entonces se duplica esa página.</li>
+      </ul>
+      <div class="diagram-frame">
+        <svg viewBox="0 0 420 130" width="420" height="130" xmlns="http://www.w3.org/2000/svg">
+          <text x="70" y="20" text-anchor="middle" class="dsvg-title fill-sw">Proceso A</text>
+          <text x="350" y="20" text-anchor="middle" class="dsvg-title fill-seg">Proceso B</text>
+          <rect x="20" y="34" width="100" height="30" rx="5" class="fill-none stroke-sw" stroke-width="1.4"/>
+          <text x="70" y="53" text-anchor="middle" class="dsvg-label fill-sw" font-size="11">Pág 3 [R/W]</text>
+          <rect x="300" y="34" width="100" height="30" rx="5" class="fill-none stroke-seg" stroke-width="1.4"/>
+          <text x="350" y="53" text-anchor="middle" class="dsvg-label fill-seg" font-size="11">Pág 7 [R]</text>
+          <path d="M120 49 H160" class="stroke-dim" marker-end="url(#arrow3)"/>
+          <path d="M300 49 H260" class="stroke-dim" marker-end="url(#arrow3)"/>
+          <rect x="160" y="80" width="100" height="34" rx="6" class="fill-none stroke-hw" stroke-width="1.6"/>
+          <text x="210" y="101" text-anchor="middle" class="dsvg-label fill-hw" font-size="11">Marco físico 50</text>
+          <path d="M170 64 V80" class="stroke-dim" marker-end="url(#arrow3)"/>
+          <path d="M250 64 V80" class="stroke-dim" marker-end="url(#arrow3)"/>
+          <defs><marker id="arrow3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="fill-dim"/></marker></defs>
+        </svg>
+      </div>
+      <p>Misma página física, permisos distintos por proceso — así una biblioteca compartida se ve de solo lectura para unos procesos y de lectura/escritura para otros, sin duplicar el contenido en RAM.</p>
+    </section>
+
+    <section id="dir-logicas">
+      <h2>Direcciones lógicas (virtuales)</h2>
+      <p>Una <strong>dirección lógica</strong> (o virtual) es la que genera la CPU al ejecutar instrucciones. Es la dirección que el proceso "ve" y usa; no corresponde necesariamente a una posición física en RAM. El compilador y el enlazador producen programas que usan exclusivamente direcciones lógicas.</p>
+
+      <div class="diagram-frame">
+        <svg viewBox="0 0 380 100" width="380" height="100" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="14" width="220" height="36" class="fill-none stroke-sw" stroke-width="1.5"/>
+          <text x="120" y="37" text-anchor="middle" class="dsvg-label fill-sw" font-size="12">Número de página (20 bits)</text>
+          <rect x="230" y="14" width="140" height="36" class="fill-none stroke-hw" stroke-width="1.5"/>
+          <text x="300" y="37" text-anchor="middle" class="dsvg-label fill-hw" font-size="12">Desplazamiento (12 bits)</text>
+          <text x="10" y="66" class="dsvg-label fill-dim" font-size="11">bit 31</text>
+          <text x="215" y="66" text-anchor="end" class="dsvg-label fill-dim" font-size="11">bit 12  11</text>
+          <text x="360" y="66" text-anchor="end" class="dsvg-label fill-dim" font-size="11">bit 0</text>
+          <path d="M10 78 V85 H230 V78" class="fill-none stroke-dim"/>
+          <text x="120" y="98" text-anchor="middle" class="dsvg-label fill-dim" font-size="10.5">se traduce vía tabla de páginas</text>
+          <path d="M230 78 V85 H370 V78" class="fill-none stroke-dim"/>
+          <text x="300" y="98" text-anchor="middle" class="dsvg-label fill-dim" font-size="10.5">pasa sin cambios</text>
+        </svg>
+      </div>
+      <p>Ejemplo para un sistema de 32 bits con páginas de 4 KB (2¹²): los 20 bits altos identifican la página lógica y los 12 bits bajos el desplazamiento dentro de ella.</p>
+
+      <div class="card note">
+        <h3>Nota del profesor</h3>
+        <p>En la práctica, una tabla de páginas de un solo nivel para 20 bits tendría 2²⁰ (más de un millón) de entradas por proceso — inviable en RAM. Por eso los sistemas reales usan <strong>tablas de páginas multinivel</strong> o <strong>invertidas</strong> (Stallings 8.1, Tanenbaum 3.3.4), que solo mantienen en memoria las ramas del árbol que el proceso realmente usa. Para efectos de este curso trabajamos con una tabla plana de una sola página lógica → un marco, que ilustra el mecanismo sin la complejidad adicional del árbol.</p>
+      </div>
+    </section>
+
+    <section id="dir-fisicas">
+      <h2>Direcciones físicas</h2>
+      <p>Una <strong>dirección física</strong> es la ubicación real en la DRAM a la que accede el bus de memoria. La MMU la calcula a partir de la dirección lógica consultando la tabla de páginas:</p>
+      <div class="card hw">
+        <p class="mono" style="margin:0; color:var(--hw); font-size:.95rem;">dirección_física = (marco_físico × tamaño_de_página) + desplazamiento</p>
+      </div>
+      <div class="card sw">
+        <h3>TLB — Translation Lookaside Buffer</h3>
+        <p>Para evitar consultar la tabla de páginas en RAM en cada acceso, la MMU incluye una caché asociativa llamada <strong>TLB</strong>. Si la traducción está en el TLB (<em>TLB hit</em>), la dirección física se obtiene en el orden de un ciclo de reloj — mucho más rápido que ir hasta RAM. Si no está (<em>TLB miss</em>), la MMU consulta la tabla de páginas en RAM y guarda el resultado en el TLB para el próximo acceso.</p>
+      </div>
+    </section>
+
+    <section id="mecanismos">
+      <h2>Mecanismos y estructuras de HW y SW</h2>
+
+      <h3>Hardware</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Componente</th><th>Función</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge hw">HW</span> MMU</td><td>Traduce direcciones lógicas → físicas en cada acceso a memoria</td></tr>
+            <tr><td><span class="badge hw">HW</span> TLB</td><td>Caché de traducciones recientes; reduce la latencia de la MMU</td></tr>
+            <tr><td><span class="badge hw">HW</span> Registro CR3 (x86)</td><td>Apunta a la tabla de páginas del proceso actual</td></tr>
+            <tr><td><span class="badge hw">HW</span> Bit de presencia (P)</td><td>Indica si la página está en RAM; genera page fault si P=0</td></tr>
+            <tr><td><span class="badge hw">HW</span> Bits R/W, NX, U/S</td><td>Imponen permisos de acceso en cada entrada de tabla</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Software (sistema operativo)</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Estructura / mecanismo</th><th>Función</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge sw">SW</span> Tabla de páginas</td><td>Mapea páginas lógicas → marcos físicos por proceso</td></tr>
+            <tr><td><span class="badge sw">SW</span> Tabla de segmentos</td><td>Mapea segmentos lógicos → base + límite en memoria física</td></tr>
+            <tr><td><span class="badge sw">SW</span> PCB (Process Control Block)</td><td>Contiene el puntero a la tabla de páginas del proceso</td></tr>
+            <tr><td><span class="badge sw">SW</span> Manejador de page fault</td><td>ISR que carga la página del swap, actualiza la tabla y retoma el proceso</td></tr>
+            <tr><td><span class="badge sw">SW</span> Algoritmo de reemplazo</td><td>Elige la página víctima (LRU, Clock, NRU…)</td></tr>
+            <tr><td><span class="badge sw">SW</span> Gestor de swap</td><td>Administra el área de intercambio en disco</td></tr>
+            <tr><td><span class="badge sw">SW</span> Mapa de marcos libres</td><td>Bitmap o lista de marcos de RAM disponibles</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Flujo completo de un acceso a memoria virtual</h3>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-body">La CPU genera una <strong>dirección lógica</strong> al ejecutar una instrucción.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-body">La MMU busca la traducción en el <strong>TLB</strong>. Si hay <em>hit</em>, obtiene el marco físico directamente.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body">Si hay <em>TLB miss</em>, la MMU consulta la <strong>tabla de páginas</strong> en RAM.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-body">Si la página <strong>no está en RAM</strong> (bit P=0), se genera un <strong>page fault</strong> (interrupción de hardware).</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-body">El SO toma el control: localiza la página en el <strong>swap</strong>, elige un marco libre (o aplica un algoritmo de reemplazo) y carga la página.</div></div>
+        <div class="step"><div class="step-num">6</div><div class="step-body">El SO actualiza la <strong>tabla de páginas</strong> y el TLB, luego retoma el proceso desde la instrucción que falló.</div></div>
+        <div class="step"><div class="step-num">7</div><div class="step-body">La MMU forma la <strong>dirección física</strong> = (marco × tamaño de página) + desplazamiento, y el acceso se completa.</div></div>
+      </div>
+    </section>
+
+    <section id="paginacion">
+      <h2>Memoria virtual con paginación</h2>
+      <p>La <strong>paginación</strong> divide el espacio lógico en bloques de tamaño fijo llamados <strong>páginas</strong>, y la memoria física en bloques del mismo tamaño llamados <strong>marcos</strong>. El SO mantiene una <em>tabla de páginas</em> por proceso.</p>
+
+      <div class="card sw">
+        <h3>Parámetros del ejemplo</h3>
+        <ul>
+          <li>Espacio lógico: <strong>16 bits</strong> → 64 KB</li>
+          <li>Tamaño de página: <strong>4 KB = 2¹²</strong></li>
+          <li>Bits de página: <strong>4 bits</strong> (16 páginas posibles)</li>
+          <li>Bits de desplazamiento: <strong>12 bits</strong></li>
+          <li>Memoria física: <strong>32 KB</strong> → 8 marcos</li>
+        </ul>
+      </div>
+
+      <h3>Tabla de páginas del proceso P1</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Pág. lógica</th><th>Marco físico</th><th>Presente</th><th>R/W</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td>3</td><td class="ok">✓</td><td>R/W</td></tr>
+            <tr><td>1</td><td>7</td><td class="ok">✓</td><td>R only</td></tr>
+            <tr><td>2</td><td>—</td><td class="no">✗ (en swap)</td><td>R/W</td></tr>
+            <tr><td>3</td><td>1</td><td class="ok">✓</td><td>R/W</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Ejemplo de traducción paso a paso</h3>
+      <p>Dirección lógica: <code class="inline">0x3A4F</code> (binario <code class="inline">0011 1010 0100 1111</code>)</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-body"><strong>Separar:</strong> 4 bits de página + 12 bits de desplazamiento → página = <code class="inline">0011</code>₂ = <strong>3</strong>, desplazamiento = <code class="inline">0xA4F</code>.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-body"><strong>Consultar tabla:</strong> página 3 → marco <strong>1</strong>, presente = ✓.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><strong>Calcular dirección física:</strong> 1 × 4096 + 0xA4F = 4096 + 2639 = <strong>0x1A4F</strong>.</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-body"><strong>Acceso a RAM</strong> en la posición <code class="inline">0x1A4F</code>. ✓</div></div>
+      </div>
+
+      <div class="diagram-frame">
+        <svg viewBox="0 0 420 200" width="420" height="200" xmlns="http://www.w3.org/2000/svg">
+          <text x="10" y="18" class="dsvg-label fill-dim">dir. lógica: 0x3A4F</text>
+          <rect x="10" y="26" width="46" height="30" class="fill-none stroke-sw" stroke-width="1.4"/>
+          <text x="33" y="46" text-anchor="middle" class="dsvg-title fill-sw">3</text>
+          <rect x="56" y="26" width="100" height="30" class="fill-none stroke-hw" stroke-width="1.4"/>
+          <text x="106" y="46" text-anchor="middle" class="dsvg-title fill-hw" font-size="12">0xA4F</text>
+          <text x="33" y="70" text-anchor="middle" class="dsvg-label fill-dim" font-size="10">página</text>
+          <text x="106" y="70" text-anchor="middle" class="dsvg-label fill-dim" font-size="10">desplazamiento</text>
+
+          <path d="M33 56 V90" class="stroke-sw" marker-end="url(#arrow4)"/>
+          <rect x="0" y="90" width="130" height="46" rx="6" class="fill-none stroke-sw" stroke-width="1.4"/>
+          <text x="65" y="107" text-anchor="middle" class="dsvg-label fill-sw" font-size="10.5">Tabla de páginas</text>
+          <text x="65" y="123" text-anchor="middle" class="dsvg-label fill-text" font-size="11">pág 3 → marco 1</text>
+
+          <path d="M65 136 V160" class="stroke-sw" marker-end="url(#arrow4)"/>
+          <path d="M106 56 V160" class="stroke-hw" marker-end="url(#arrow4)"/>
+          <rect x="10" y="160" width="46" height="30" class="fill-none stroke-sw" stroke-width="1.4"/>
+          <text x="33" y="180" text-anchor="middle" class="dsvg-title fill-sw">1</text>
+          <rect x="56" y="160" width="100" height="30" class="fill-none stroke-hw" stroke-width="1.4"/>
+          <text x="106" y="180" text-anchor="middle" class="dsvg-title fill-hw" font-size="12">0xA4F</text>
+          <text x="185" y="180" class="dsvg-label fill-dim" font-size="11">= dir. física 0x1A4F</text>
+          <defs><marker id="arrow4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="fill-dim"/></marker></defs>
+        </svg>
+      </div>
+
+      <div class="card swap">
+        <h3>¿Qué pasa si accedemos a la página 2?</h3>
+        <p>La página 2 tiene presente = ✗ (está en swap). La MMU genera un <strong>page fault</strong>. El SO lo maneja: carga la página del disco, asigna un marco libre, actualiza la tabla de páginas y retoma el proceso.</p>
+      </div>
+    </section>
+
+    <section id="segmentacion">
+      <h2>Memoria virtual con segmentación</h2>
+      <p>La <strong>segmentación</strong> divide el espacio lógico en unidades de <strong>tamaño variable</strong> con significado semántico: código, datos, pila, heap, etc. Cada segmento tiene una base (dirección física de inicio) y un límite (tamaño máximo).</p>
+
+      <div class="diagram-frame">
+        <svg viewBox="0 0 420 160" width="420" height="160" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="14" width="60" height="30" class="fill-none stroke-seg" stroke-width="1.4"/>
+          <text x="40" y="34" text-anchor="middle" class="dsvg-title fill-seg" font-size="12">seg</text>
+          <rect x="70" y="14" width="100" height="30" class="fill-none stroke-hw" stroke-width="1.4"/>
+          <text x="120" y="34" text-anchor="middle" class="dsvg-title fill-hw" font-size="12">offset</text>
+          <path d="M40 44 V70" class="stroke-seg" marker-end="url(#arrow5)"/>
+          <rect x="0" y="70" width="150" height="30" rx="6" class="fill-none stroke-seg" stroke-width="1.4"/>
+          <text x="75" y="90" text-anchor="middle" class="dsvg-label fill-seg" font-size="11">tabla de segmentos</text>
+          <path d="M75 100 V118" class="stroke-seg" marker-end="url(#arrow5)"/>
+          <text x="75" y="132" text-anchor="middle" class="dsvg-label fill-dim" font-size="10">base, límite</text>
+          <path d="M120 44 V132" class="stroke-hw" stroke-dasharray="3 2"/>
+          <text x="230" y="90" text-anchor="middle" class="dsvg-label fill-dim" font-size="10.5">¿offset &gt; límite?</text>
+          <text x="230" y="106" text-anchor="middle" class="dsvg-label fill-danger" font-size="10.5">→ trap (violación de segmento)</text>
+          <path d="M150 132 H340" class="stroke-dim" marker-end="url(#arrow5)"/>
+          <text x="230" y="150" text-anchor="middle" class="dsvg-label fill-text" font-size="11.5">dir. física = base + offset</text>
+          <defs><marker id="arrow5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="fill-dim"/></marker></defs>
+        </svg>
+      </div>
+
+      <h3>Tabla de segmentos del proceso P1</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Seg.</th><th>Nombre</th><th>Base física</th><th>Límite</th><th>Permisos</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td>Código</td><td>0x4000</td><td>0x0FFF (4095 B)</td><td>R/X</td></tr>
+            <tr><td>1</td><td>Datos</td><td>0x1000</td><td>0x07FF (2047 B)</td><td>R/W</td></tr>
+            <tr><td>2</td><td>Pila</td><td>0x9000</td><td>0x0FFF (4095 B)</td><td>R/W</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Ejemplo de traducción paso a paso</h3>
+      <p>Dirección lógica: <code class="inline">(segmento = 1, desplazamiento = 0x200)</code></p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-body"><strong>Extraer número de segmento:</strong> s = 1.</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-body"><strong>Consultar tabla de segmentos:</strong> segmento 1 → base = <code class="inline">0x1000</code>, límite = <code class="inline">0x07FF</code>.</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><strong>Verificar límite:</strong> 0x200 ≤ 0x7FF ✓ (no hay violación).</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-body"><strong>Calcular dirección física:</strong> 0x1000 + 0x200 = <strong>0x1200</strong>.</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-body"><strong>Acceso a RAM</strong> en la posición 0x1200. ✓</div></div>
+      </div>
+
+      <div class="card swap">
+        <h3>¿Qué pasa con desplazamiento = 0x900?</h3>
+        <p>0x900 &gt; límite 0x7FF. La MMU genera una <strong>excepción de segmentación</strong> (SIGSEGV en Unix). El SO termina el proceso o genera un core dump.</p>
+      </div>
+
+      <h3>Comparación paginación vs. segmentación</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Característica</th><th>Paginación</th><th>Segmentación</th></tr></thead>
+          <tbody>
+            <tr><td>Tamaño de unidad</td><td>Fijo (p. ej. 4 KB)</td><td>Variable</td></tr>
+            <tr><td>Fragmentación</td><td>Interna</td><td>Externa</td></tr>
+            <tr><td>Visibilidad del usuario</td><td>Transparente</td><td>Visible (segmento, offset)</td></tr>
+            <tr><td>Compartición</td><td>Por páginas</td><td>Por segmentos (más natural)</td></tr>
+            <tr><td>Protección</td><td>Por página</td><td>Por segmento (más semántica)</td></tr>
+            <tr><td>Implementación moderna</td><td>Dominante (x86-64, ARM)</td><td>Combinada con paginación (x86 legacy)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="lab-paginacion">
+      <h2>🔬 Laboratorio: paginación en ANSI C</h2>
+      <div class="card sw">
+        <strong>Objetivos del laboratorio</strong>
+        <ul>
+          <li>Simular una tabla de páginas simple en C.</li>
+          <li>Implementar la traducción de dirección lógica → física.</li>
+          <li>Manejar el caso de página no presente (page fault simulado).</li>
+          <li>Observar el efecto del tamaño de página en el rendimiento.</li>
+        </ul>
+      </div>
+      <p>El código base está <strong>parcialmente implementado</strong>. Las secciones marcadas con <code class="inline">// TODO</code> son las que debes completar.</p>
+
+      <div class="code-block">
+        <div class="code-head"><span class="lang">ANSI C</span><span>lab_paginacion.c</span></div>
+        <pre><code class="language-c">/**
+ * lab_paginacion.c
+ * Laboratorio: Simulación de Memoria Virtual con Paginación
+ *
+ * Sistemas Operativos
+ * Referencia: Stallings, Cap. 8 | Tanenbaum, Cap. 3.3
+ *
+ * Compilar: gcc -ansi -Wall -o lab_paginacion lab_paginacion.c
+ */
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+/* ── Constantes del sistema simulado ───────────────────── */
+#define PAGE_SIZE       4096   /* Tamaño de página: 4 KB   */
+#define NUM_PAGES       16     /* Páginas lógicas por proc */
+#define NUM_FRAMES      8      /* Marcos físicos totales   */
+#define ADDR_BITS       16     /* Bits de dirección lógica */
+#define PAGE_BITS       4      /* log2(NUM_PAGES)          */
+#define OFFSET_BITS     12     /* log2(PAGE_SIZE)          */
+
+/* ── Estructura de entrada en la tabla de páginas ────────
+ * Cada entrada representa una página lógica del proceso.
+ * Stallings, Fig. 8.8 | Tanenbaum, Fig. 3-11
+ */
+typedef struct {
+    int  frame_number; /* Marco físico asignado (-1 si no está en RAM) */
+    int  present;      /* 1 = en RAM, 0 = en swap / no asignada        */
+    int  dirty;        /* 1 = página modificada (necesita swap-out)     */
+    int  referenced;   /* 1 = accedida recientemente (para algoritmo reemplazo) */
+    int  read_only;    /* 1 = solo lectura, 0 = lectura/escritura       */
+} PageTableEntry;
+
+/* ── Tabla de páginas (por proceso) ─────────────────────*/
+PageTableEntry page_table[NUM_PAGES];
+
+/* ── Mapa de marcos físicos ──────────────────────────────
+ * frame_map[i] = 1 si el marco i está ocupado, 0 si libre
+ */
+int frame_map[NUM_FRAMES];
+
+/* ── Estadísticas de acceso ──────────────────────────────*/
+int total_accesses  = 0;
+int page_faults     = 0;
+int tlb_hits        = 0;  /* Simulado: si referenced==1 → "TLB hit" */
+
+/* ── Prototipos ──────────────────────────────────────────*/
+void  init_page_table(void);
+int   find_free_frame(void);
+void  handle_page_fault(int page_num);
+long  translate_address(long logical_addr, int write_access);
+void  print_page_table(void);
+void  print_stats(void);
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: init_page_table
+ * Inicializa la tabla de páginas: todas las páginas
+ * comienzan sin asignar (not present).
+ * ════════════════════════════════════════════════════════*/
+void init_page_table(void) {
+    int i;
+    for (i = 0; i &lt; NUM_PAGES; i++) {
+        page_table[i].frame_number = -1;
+        page_table[i].present      =  0;
+        page_table[i].dirty        =  0;
+        page_table[i].referenced   =  0;
+        page_table[i].read_only    =  0;
+    }
+    memset(frame_map, 0, sizeof(frame_map));
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: find_free_frame
+ * Busca el primer marco físico libre.
+ * Retorna: índice del marco libre, o -1 si no hay ninguno.
+ * ════════════════════════════════════════════════════════*/
+int find_free_frame(void) {
+    int i;
+    for (i = 0; i &lt; NUM_FRAMES; i++) {
+        if (frame_map[i] == 0) {
+            return i;
+        }
+    }
+    return -1; /* Sin marcos libres: necesita reemplazo */
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: handle_page_fault
+ * Manejador simplificado de page fault.
+ * En un SO real, esta función leería la página del disco.
+ *
+ * Parámetro: page_num → número de página lógica que falló.
+ * ════════════════════════════════════════════════════════*/
+void handle_page_fault(int page_num) {
+    int frame;
+    page_faults++;
+    printf("[PAGE FAULT] Página %d no está en RAM.\n", page_num);
+
+    frame = find_free_frame();
+
+    if (frame == -1) {
+        /* TODO (Parte 2): Implementar un algoritmo de reemplazo de páginas.
+         *
+         * Pasos sugeridos:
+         *   1. Recorrer la tabla de páginas en busca de la página víctima
+         *      (usa el bit 'referenced' para implementar el algoritmo Clock
+         *       o simplemente elige la primera página con referenced == 0).
+         *   2. Si la víctima tiene dirty == 1, simula escribirla al swap
+         *      (basta con imprimir un mensaje indicando el swap-out).
+         *   3. Marca la entrada de la víctima como not present y libera su marco.
+         *   4. Asigna ese marco a la nueva página (page_num).
+         *
+         * Ejemplo de mensaje de swap-out:
+         *   printf("[SWAP-OUT] Página %d → disco\n", victim);
+         */
+        printf("[ERROR] Sin marcos libres. Implementar reemplazo (TODO Parte 2).\n");
+        exit(1);
+    }
+
+    /* Cargar la página en el marco libre encontrado */
+    frame_map[frame]                    = 1;
+    page_table[page_num].frame_number   = frame;
+    page_table[page_num].present        = 1;
+    page_table[page_num].referenced     = 1;
+    page_table[page_num].dirty          = 0;
+
+    printf("[PAGE-IN] Página %d cargada en marco físico %d.\n", page_num, frame);
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: translate_address
+ * Traduce una dirección lógica a dirección física.
+ *
+ * Parámetros:
+ *   logical_addr : dirección lógica de 16 bits
+ *   write_access : 1 si es escritura, 0 si es lectura
+ *
+ * Retorna: dirección física, o -1 si hay error de protección.
+ * ════════════════════════════════════════════════════════*/
+long translate_address(long logical_addr, int write_access) {
+    int  page_num;
+    int  offset;
+    long physical_addr;
+
+    total_accesses++;
+
+    /* TODO (Parte 1): Extraer el número de página y el desplazamiento
+     * de la dirección lógica.
+     *
+     * Pista: usa operaciones de bits.
+     *   - El número de página ocupa los PAGE_BITS más significativos.
+     *   - El desplazamiento ocupa los OFFSET_BITS menos significativos.
+     *
+     * Fórmulas:
+     *   page_num = logical_addr &gt;&gt; OFFSET_BITS
+     *   offset   = logical_addr &amp;  (PAGE_SIZE - 1)
+     *
+     * Reemplaza las líneas siguientes con tu implementación:
+     */
+    page_num = 0;  /* TODO: calcular correctamente */
+    offset   = 0;  /* TODO: calcular correctamente */
+
+    printf("\n[TRADUCCION] Dir. lógica: 0x%04lX  →  Pág: %d, Offset: 0x%03X\n",
+           logical_addr, page_num, offset);
+
+    /* Verificar rango de página */
+    if (page_num &lt; 0 || page_num &gt;= NUM_PAGES) {
+        printf("[ERROR] Número de página %d fuera de rango.\n", page_num);
+        return -1;
+    }
+
+    /* TODO (Parte 1b): Verificar protección de escritura.
+     * Si write_access == 1 y page_table[page_num].read_only == 1,
+     * imprimir un mensaje de error de protección y retornar -1.
+     *
+     * Mensaje sugerido:
+     *   printf("[PROTECCION] Escritura denegada en página %d (solo lectura).\n", page_num);
+     */
+
+    /* Verificar presencia (puede generar page fault) */
+    if (!page_table[page_num].present) {
+        handle_page_fault(page_num);
+    } else {
+        /* TLB hit simulado: la página ya estaba en memoria */
+        tlb_hits++;
+        printf("[TLB HIT] Página %d → Marco %d\n",
+               page_num, page_table[page_num].frame_number);
+    }
+
+    /* TODO (Parte 1c): Calcular la dirección física.
+     *
+     * Fórmula:
+     *   physical_addr = (frame_number * PAGE_SIZE) + offset
+     *
+     * Además:
+     *   - Si write_access == 1, marcar page_table[page_num].dirty = 1.
+     *   - Actualizar page_table[page_num].referenced = 1.
+     *   - Retornar physical_addr.
+     *
+     * Reemplaza el return siguiente con tu implementación:
+     */
+    physical_addr = 0; /* TODO: calcular correctamente */
+    printf("[RESULTADO] Dir. física: 0x%05lX\n", physical_addr);
+    return physical_addr;
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: print_page_table
+ * Imprime el estado actual de la tabla de páginas.
+ * ════════════════════════════════════════════════════════*/
+void print_page_table(void) {
+    int i;
+    printf("\n╔══════════════════════════════════════════════════╗\n");
+    printf("║           TABLA DE PÁGINAS (proceso P1)          ║\n");
+    printf("╠════════╦════════╦═════════╦═══════╦═══════════╣\n");
+    printf("║  Pág.  ║ Marco  ║Presente ║ Dirty ║ Ref.      ║\n");
+    printf("╠════════╬════════╬═════════╬═══════╬═══════════╣\n");
+    for (i = 0; i &lt; NUM_PAGES; i++) {
+        if (page_table[i].present || page_table[i].frame_number != -1) {
+            printf("║  %3d   ║  %3d   ║   %s     ║   %s   ║   %s       ║\n",
+                i,
+                page_table[i].frame_number,
+                page_table[i].present    ? "✓" : "✗",
+                page_table[i].dirty      ? "✓" : "✗",
+                page_table[i].referenced ? "✓" : "✗");
+        }
+    }
+    printf("╚════════╩════════╩═════════╩═══════╩═══════════╝\n");
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: print_stats — Muestra estadísticas finales.
+ * ════════════════════════════════════════════════════════*/
+void print_stats(void) {
+    printf("\n══════ ESTADÍSTICAS ══════\n");
+    printf("Accesos totales : %d\n", total_accesses);
+    printf("Page faults     : %d (%.1f%%)\n", page_faults,
+           total_accesses ? 100.0 * page_faults / total_accesses : 0.0);
+    printf("TLB hits        : %d (%.1f%%)\n", tlb_hits,
+           total_accesses ? 100.0 * tlb_hits / total_accesses : 0.0);
+}
+
+/* ════════════════════════════════════════════════════════
+ * MAIN — Casos de prueba
+ * ════════════════════════════════════════════════════════*/
+int main(void) {
+    printf("═══════════════════════════════════════════════\n");
+    printf("  Laboratorio: Paginación – Sistemas Operativos\n");
+    printf("═══════════════════════════════════════════════\n");
+
+    init_page_table();
+
+    /* Marcar página 1 como solo lectura (p. ej., segmento de código) */
+    page_table[1].read_only = 1;
+
+    /* ── Secuencia de accesos de prueba ─────────────────*/
+    translate_address(0x3A4F, 0);  /* Lectura: pág 3, offset 0xA4F */
+    translate_address(0x3100, 1);  /* Escritura: pág 3 (ya en RAM) */
+    translate_address(0x2050, 0);  /* Lectura: pág 2 (page fault)  */
+    translate_address(0x1000, 1);  /* Escritura en pág 1 (read-only → error) */
+
+    /* TODO (Parte 3): Agregar al menos 5 accesos adicionales que:
+     *   - Accesen páginas diferentes para provocar varios page faults.
+     *   - Incluyan al menos una escritura en una página válida (dirty bit).
+     *   - Accedan dos veces a la misma página para observar el TLB hit.
+     *
+     * Ejemplo:
+     *   translate_address(0x5ABC, 0);
+     *   translate_address(0x5DEF, 1);
+     *   ...
+     */
+
+    print_page_table();
+    print_stats();
+    return 0;
+}
+</code></pre>
+      </div>
+
+      <div class="card note">
+        <h3>Nota del profesor</h3>
+        <p>Fíjense en el <em>orden</em> de las verificaciones dentro de <code class="inline">translate_address()</code>: la protección de escritura (Parte 1b) se revisa <strong>antes</strong> que la presencia en RAM. Eso no es casualidad — un acceso ilegal debe rechazarse sin importar si la página está cargada o no. Si invirtieran el orden, terminarían cargando en RAM (con su respectivo page fault) una página a la que de todas formas le iban a negar el acceso.</p>
+      </div>
+
+      <div class="card swap">
+        <h3>📋 Guía de actividades del laboratorio</h3>
+        <ol class="guide">
+          <li><strong>Parte 1:</strong> completar <code class="inline">translate_address()</code>: extraer página/offset, verificar protección y calcular dirección física.</li>
+          <li><strong>Parte 2:</strong> implementar el algoritmo de reemplazo de páginas en <code class="inline">handle_page_fault()</code> cuando no hay marcos libres.</li>
+          <li><strong>Parte 3:</strong> agregar 5 accesos adicionales y documentar el comportamiento observado en un breve reporte.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="lab-segmentacion">
+      <h2>🔬 Laboratorio: segmentación en ANSI C</h2>
+      <div class="card sw">
+        <strong>Objetivos del laboratorio</strong>
+        <ul>
+          <li>Simular una tabla de segmentos en C.</li>
+          <li>Implementar la traducción de dirección lógica (segmento, offset) → física.</li>
+          <li>Detectar violaciones de segmento (offset &gt; límite).</li>
+          <li>Comparar el comportamiento con la paginación del laboratorio anterior.</li>
+        </ul>
+      </div>
+
+      <div class="code-block">
+        <div class="code-head"><span class="lang">ANSI C</span><span>lab_segmentacion.c</span></div>
+        <pre><code class="language-c">/**
+ * lab_segmentacion.c
+ * Laboratorio: Simulación de Memoria Virtual con Segmentación
+ *
+ * Sistemas Operativos
+ * Referencia: Stallings, Cap. 8 | Tanenbaum, Cap. 3.4
+ *
+ * Compilar: gcc -ansi -Wall -o lab_seg lab_segmentacion.c
+ */
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+/* ── Constantes ─────────────────────────────────────────*/
+#define MAX_SEGMENTS    8      /* Máximo de segmentos por proceso */
+#define MEM_SIZE        65536  /* Memoria física total: 64 KB     */
+
+/* ── Permisos de segmento (bitmask) ─────────────────────*/
+#define SEG_READ    0x01  /* Permiso de lectura  */
+#define SEG_WRITE   0x02  /* Permiso de escritura */
+#define SEG_EXEC    0x04  /* Permiso de ejecución */
+
+/* ── Estructura de entrada en la tabla de segmentos ─────
+ * Cada entrada describe un segmento lógico del proceso.
+ * Stallings, Fig. 8.12 | Tanenbaum, Fig. 3-29
+ */
+typedef struct {
+    unsigned long base;   /* Dirección física de inicio del segmento */
+    unsigned long limit;  /* Tamaño máximo del segmento (en bytes)   */
+    int           valid;  /* 1 = segmento válido/cargado, 0 = inválido */
+    int           perms;  /* Bitmask de permisos: SEG_READ | SEG_WRITE | SEG_EXEC */
+    char          name[16]; /* Nombre descriptivo (código, datos, pila...) */
+} SegmentEntry;
+
+/* ── Tabla de segmentos del proceso ─────────────────────*/
+SegmentEntry seg_table[MAX_SEGMENTS];
+int          num_segments = 0;
+
+/* ── Estadísticas ────────────────────────────────────────*/
+int total_accesses     = 0;
+int seg_faults         = 0;   /* Accesos inválidos (offset &gt; limit o seg inválido) */
+int protection_errors  = 0;   /* Intentos de acceso sin permiso */
+
+/* ── Prototipos ──────────────────────────────────────────*/
+void  init_seg_table(void);
+int   add_segment(unsigned long base, unsigned long limit, int perms, const char *name);
+long  translate_seg_address(int seg_num, unsigned long offset, int access_type);
+void  print_seg_table(void);
+void  print_stats(void);
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: init_seg_table
+ * Inicializa la tabla de segmentos vacía.
+ * ════════════════════════════════════════════════════════*/
+void init_seg_table(void) {
+    int i;
+    for (i = 0; i &lt; MAX_SEGMENTS; i++) {
+        seg_table[i].valid = 0;
+        seg_table[i].base  = 0;
+        seg_table[i].limit = 0;
+        seg_table[i].perms = 0;
+        seg_table[i].name[0] = '\0';
+    }
+    num_segments = 0;
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: add_segment
+ * Agrega un nuevo segmento a la tabla.
+ *
+ * Retorna: índice del segmento, o -1 si la tabla está llena
+ *          o los parámetros son inválidos.
+ * ════════════════════════════════════════════════════════*/
+int add_segment(unsigned long base, unsigned long limit,
+                int perms, const char *name) {
+    int idx;
+
+    /* TODO (Parte 1): Validar que:
+     *   a) Hay espacio en la tabla (num_segments &lt; MAX_SEGMENTS).
+     *   b) base + limit no supera MEM_SIZE (no desborda la memoria física).
+     *   c) limit &gt; 0 (segmento no vacío).
+     *
+     * Si alguna validación falla, imprimir un mensaje descriptivo
+     * y retornar -1.
+     *
+     * Reemplaza el bloque siguiente con tu validación:
+     */
+    if (num_segments &gt;= MAX_SEGMENTS) {
+        printf("[ERROR] Tabla de segmentos llena.\n");
+        return -1;
+    }
+
+    /* TODO (Parte 1b): Agregar la validación de desbordamiento de memoria */
+
+    idx = num_segments++;
+    seg_table[idx].base  = base;
+    seg_table[idx].limit = limit;
+    seg_table[idx].perms = perms;
+    seg_table[idx].valid = 1;
+
+    /* Copiar nombre de forma segura (máx 15 chars + nul) */
+    snprintf(seg_table[idx].name, sizeof(seg_table[idx].name), "%s", name);
+
+    printf("[SEG] Segmento %d '%s': base=0x%05lX, límite=0x%05lX\n",
+           idx, name, base, limit);
+    return idx;
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: translate_seg_address
+ * Traduce una dirección lógica (segmento + offset) a física.
+ *
+ * Parámetros:
+ *   seg_num     : número de segmento
+ *   offset      : desplazamiento dentro del segmento
+ *   access_type : SEG_READ, SEG_WRITE, o SEG_EXEC
+ *
+ * Retorna: dirección física, o -1 si hay error.
+ * ════════════════════════════════════════════════════════*/
+long translate_seg_address(int seg_num, unsigned long offset, int access_type) {
+    long physical_addr;
+
+    total_accesses++;
+
+    printf("\n[TRADUCCION] Seg=%d, Offset=0x%05lX, Acceso=%s\n",
+           seg_num, offset,
+           (access_type == SEG_READ)  ? "LECTURA" :
+           (access_type == SEG_WRITE) ? "ESCRITURA" : "EJECUCION");
+
+    /* Verificar número de segmento válido */
+    if (seg_num &lt; 0 || seg_num &gt;= num_segments || !seg_table[seg_num].valid) {
+        printf("[SEG FAULT] Segmento %d no existe o es inválido.\n", seg_num);
+        seg_faults++;
+        return -1;
+    }
+
+    /* TODO (Parte 2): Verificar que offset &lt;= seg_table[seg_num].limit.
+     * Si el offset supera el límite, se trata de una violación de segmento.
+     *
+     * Pasos:
+     *   1. Comparar offset con seg_table[seg_num].limit.
+     *   2. Si offset &gt; limit, incrementar seg_faults, imprimir mensaje y retornar -1.
+     *
+     * Mensaje sugerido:
+     *   printf("[SEG FAULT] Offset 0x%lX &gt; Límite 0x%lX en segmento %d ('%s').\n",
+     *          offset, seg_table[seg_num].limit, seg_num, seg_table[seg_num].name);
+     */
+
+    /* TODO (Parte 2b): Verificar permisos de acceso.
+     * Si (seg_table[seg_num].perms &amp; access_type) == 0, el acceso no está permitido.
+     *
+     * Pasos:
+     *   1. Hacer AND entre perms y access_type.
+     *   2. Si el resultado es 0, incrementar protection_errors, imprimir mensaje y retornar -1.
+     *
+     * Mensaje sugerido:
+     *   printf("[PROTECCION] Acceso %s denegado en segmento '%s'.\n",
+     *          ..., seg_table[seg_num].name);
+     */
+
+    /* TODO (Parte 2c): Calcular la dirección física.
+     *
+     * Fórmula:
+     *   physical_addr = seg_table[seg_num].base + offset
+     *
+     * Imprimir:
+     *   printf("[OK] Dir. física: 0x%05lX (base 0x%05lX + offset 0x%05lX)\n",
+     *          physical_addr, seg_table[seg_num].base, offset);
+     *
+     * Retornar physical_addr.
+     */
+    physical_addr = -1; /* TODO: reemplazar con el cálculo correcto */
+    return physical_addr;
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: print_seg_table — Imprime la tabla de segmentos.
+ * ════════════════════════════════════════════════════════*/
+void print_seg_table(void) {
+    int i;
+    printf("\n╔═══════════════════════════════════════════════════════════╗\n");
+    printf("║            TABLA DE SEGMENTOS (proceso P1)                ║\n");
+    printf("╠═════╦══════════╦══════════════╦══════════════╦═══════════╣\n");
+    printf("║ Seg ║  Nombre  ║     Base     ║    Límite    ║  Permisos ║\n");
+    printf("╠═════╬══════════╬══════════════╬══════════════╬═══════════╣\n");
+    for (i = 0; i &lt; num_segments; i++) {
+        printf("║  %d  ║ %-8s ║   0x%05lX   ║   0x%05lX   ║   %c%c%c     ║\n",
+            i,
+            seg_table[i].name,
+            seg_table[i].base,
+            seg_table[i].limit,
+            (seg_table[i].perms &amp; SEG_READ)  ? 'R' : '-',
+            (seg_table[i].perms &amp; SEG_WRITE) ? 'W' : '-',
+            (seg_table[i].perms &amp; SEG_EXEC)  ? 'X' : '-');
+    }
+    printf("╚═════╩══════════╩══════════════╩══════════════╩═══════════╝\n");
+}
+
+/* ════════════════════════════════════════════════════════
+ * FUNCIÓN: print_stats — Muestra estadísticas finales.
+ * ════════════════════════════════════════════════════════*/
+void print_stats(void) {
+    printf("\n══════ ESTADÍSTICAS ══════\n");
+    printf("Accesos totales   : %d\n", total_accesses);
+    printf("Seg faults        : %d\n", seg_faults);
+    printf("Errores protección: %d\n", protection_errors);
+    printf("Accesos válidos   : %d\n",
+           total_accesses - seg_faults - protection_errors);
+}
+
+/* ════════════════════════════════════════════════════════
+ * MAIN — Configuración y casos de prueba
+ * ════════════════════════════════════════════════════════*/
+int main(void) {
+    printf("════════════════════════════════════════════════════\n");
+    printf("  Laboratorio: Segmentación – Sistemas Operativos   \n");
+    printf("════════════════════════════════════════════════════\n");
+
+    init_seg_table();
+
+    /* ── Definir segmentos del proceso ──────────────────
+     * add_segment(base_física, límite, permisos, nombre)
+     */
+    add_segment(0x4000, 0x0FFF, SEG_READ | SEG_EXEC,         "codigo");
+    add_segment(0x1000, 0x07FF, SEG_READ | SEG_WRITE,         "datos");
+    add_segment(0x9000, 0x0FFF, SEG_READ | SEG_WRITE,         "pila");
+
+    print_seg_table();
+
+    /* ── Secuencia de accesos de prueba ─────────────────*/
+    /* Acceso válido: lectura en segmento de código */
+    translate_seg_address(0, 0x0100, SEG_READ);
+
+    /* Acceso válido: escritura en segmento de datos */
+    translate_seg_address(1, 0x0200, SEG_WRITE);
+
+    /* Violación de segmento: offset &gt; límite en datos */
+    translate_seg_address(1, 0x0900, SEG_READ);
+
+    /* Violación de protección: escritura en segmento de código */
+    translate_seg_address(0, 0x0050, SEG_WRITE);
+
+    /* Segmento inválido */
+    translate_seg_address(5, 0x0010, SEG_READ);
+
+    /* TODO (Parte 3): Agregar al menos 4 accesos adicionales:
+     *   - Un acceso válido de ejecución en el segmento de código.
+     *   - Un acceso de lectura y otro de escritura en la pila.
+     *   - Una violación de segmento en la pila (offset muy grande).
+     *   - Agrega un cuarto segmento de tu elección (heap, lib, etc.)
+     *     y realiza al menos un acceso válido a él.
+     */
+
+    print_stats();
+    return 0;
+}
+</code></pre>
+      </div>
+
+      <div class="card note">
+        <h3>Nota del profesor</h3>
+        <p>El TODO 1b pide validar que <code class="inline">base + limit</code> no supere <code class="inline">MEM_SIZE</code>. Ojo con el caso borde: como <code class="inline">limit</code> aquí se usa como el mayor <em>offset</em> válido (no como el tamaño en bytes), la comprobación correcta es <code class="inline">base + limit &gt;= MEM_SIZE</code> → error, no <code class="inline">&gt;</code>. Compárenlo con cómo <code class="inline">translate_seg_address()</code> usa <code class="inline">offset &lt;= limit</code> como válido para que ambos criterios sean consistentes.</p>
+      </div>
+
+      <div class="card swap">
+        <h3>📋 Guía de actividades del laboratorio</h3>
+        <ol class="guide">
+          <li><strong>Parte 1:</strong> completar <code class="inline">add_segment()</code> con las validaciones de desbordamiento de memoria.</li>
+          <li><strong>Parte 2:</strong> completar <code class="inline">translate_seg_address()</code>: verificar límite, verificar permisos, calcular dirección física.</li>
+          <li><strong>Parte 3:</strong> agregar 4 accesos adicionales según las instrucciones del TODO.</li>
+          <li><strong>Parte 4 (extra):</strong> modificar <code class="inline">add_segment()</code> para detectar y reportar fragmentación externa (segmentos que se solapan con regiones ya ocupadas).</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="referencias">
+      <h2>📚 Referencias bibliográficas</h2>
+
+      <div class="ref-box">
+        <div class="ref-icon">S</div>
+        <div class="ref-content">
+          <strong>Stallings, W. — Operating Systems: Internals and Design Principles</strong>
+          <div class="chapters">
+            <ul>
+              <li><strong>Capítulo 7:</strong> Memory Management — relocalización, protección, compartición, segmentación básica.</li>
+              <li><strong>Capítulo 8:</strong> Virtual Memory — paginación, tablas de páginas multinivel, TLB, algoritmos de reemplazo, working set.</li>
+              <li><strong>Capítulo 8, sección 8.1:</strong> Hardware and Control Structures.</li>
+              <li><strong>Capítulo 8, sección 8.3:</strong> Unix and Solaris Memory Management.</li>
+            </ul>
+            <em>Edición recomendada: 9ª edición, Pearson.</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-box">
+        <div class="ref-icon">T</div>
+        <div class="ref-content">
+          <strong>Tanenbaum, A. S. — Modern Operating Systems</strong>
+          <div class="chapters">
+            <ul>
+              <li><strong>Cap. 3, sec. 3.1:</strong> No Memory Abstraction — introducción histórica.</li>
+              <li><strong>Cap. 3, sec. 3.2:</strong> A Memory Abstraction: Address Spaces — relocalización dinámica.</li>
+              <li><strong>Cap. 3, sec. 3.3:</strong> Virtual Memory — paginación, tablas de páginas multinivel e invertidas, TLB.</li>
+              <li><strong>Cap. 3, sec. 3.4:</strong> Page Replacement Algorithms — FIFO, Segunda Oportunidad (Clock), LRU, NFU, Working Set.</li>
+              <li><strong>Cap. 3, sec. 3.7:</strong> Segmentation — segmentación pura y con paginación (MULTICS).</li>
+            </ul>
+            <em>Edición recomendada: 4ª edición, Pearson.</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-box">
+        <div class="ref-icon">SG</div>
+        <div class="ref-content">
+          <strong>Silberschatz, A., Galvin, P. B., Gagne, G. — Operating System Concepts</strong>
+          <div class="chapters">
+            <ul>
+              <li><strong>Capítulo 9:</strong> Main Memory — paginación, segmentación, traducción de direcciones.</li>
+              <li><strong>Capítulo 10:</strong> Virtual Memory — demand paging, page replacement, thrashing.</li>
+            </ul>
+            <em>Edición recomendada: 10ª edición, Wiley (lectura complementaria).</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Recursos adicionales</h3>
+        <ul>
+          <li>Intel® 64 and IA-32 Architectures Software Developer's Manual, Vol. 3A — capítulos 3 y 4 (paginación y segmentación en x86-64).</li>
+          <li>Linux Kernel Documentation: <code class="inline">Documentation/mm/</code> — implementación real de la gestión de memoria virtual en Linux.</li>
+          <li>Bovet, D. P. &amp; Cesati, M. — <em>Understanding the Linux Kernel</em>, 3ª ed., O'Reilly. Capítulos 2 y 9.</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>Sistemas Operativos · Gestión de Memoria Virtual · 2026A</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  hljs.highlightAll();
+
+  (function() {
+    const links = document.querySelectorAll('nav.side a');
+    const sections = document.querySelectorAll('section[id]');
+    function onScroll() {
+      let current = '';
+      sections.forEach(s => { if (window.scrollY >= s.offsetTop - 90) current = s.id; });
+      links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
+</body>
+</html>
