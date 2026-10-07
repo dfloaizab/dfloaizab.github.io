@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sistemas Operativos: Sincronización, Interbloqueos y Cierre de la Unidad 2</title>
+<style>
+:root{--bg-color:#0a0a0f;--card-bg:#14141c;--text-color:#eaeef2;--accent-color:#7c4dff;--secondary-color:#18e7c5;--warning-color:#ffb86b;--danger-color:#ff6b6b;--code-bg:#1e1e2a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background-color:var(--bg-color);color:var(--text-color);line-height:1.5;padding:20px}
+.container{max-width:1300px;margin:0 auto}
+header{text-align:center;padding:30px 0 20px;border-bottom:2px solid var(--accent-color);margin-bottom:40px}
+h1{font-size:2.2rem;letter-spacing:-.5px;background:linear-gradient(135deg,#b77cff,#18e7c5);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{color:var(--secondary-color);border-left:5px solid var(--secondary-color);padding-left:18px;margin:40px 0 20px;font-size:1.7rem}
+h3{color:var(--accent-color);margin:6px 0 12px;font-size:1.3rem;display:inline-block;border-bottom:1px dashed var(--accent-color)}
+.card{background:var(--card-bg);border-radius:24px;padding:24px;margin-bottom:28px;border:1px solid #2c2c3a;box-shadow:0 8px 20px rgba(0,0,0,.6)}
+.grid-2cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:28px;margin-bottom:28px}
+.grid-2cols .card{margin-bottom:0}
+pre{background:var(--code-bg);padding:18px;border-radius:18px;overflow-x:auto;font-family:'Fira Code','Cascadia Code',monospace;font-size:.82rem;border-left:4px solid var(--accent-color);margin:16px 0;color:#d6deeb}
+code{font-family:monospace;background:#2a2a36;padding:2px 6px;border-radius:8px;font-size:.9em}
+.badge{background:#2c2c3a;border-radius:40px;padding:4px 12px;font-size:.75rem;font-weight:bold;color:var(--secondary-color);display:inline-block;margin:2px 2px 2px 0}
+.warn{border-left:4px solid var(--warning-color);background:#1d1a14;padding:12px 16px;border-radius:12px;margin:14px 0;font-size:.92rem}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:640px}
+th{color:var(--secondary-color);text-align:left;border-bottom:2px solid var(--accent-color);padding:8px}
+td{padding:8px;border-bottom:1px solid #2c2c3a;vertical-align:top}
+ul,ol{padding-left:1.6rem;margin:12px 0}li{margin:6px 0}
+details{background:#1b1b26;border-radius:14px;padding:10px 14px;margin:8px 0}
+summary{cursor:pointer;color:var(--warning-color)}
+.footnote{font-size:.75rem;text-align:center;margin-top:50px;padding:20px;border-top:1px solid #2c2c3a;color:#8f8f9e}
+.lvl-b{color:var(--secondary-color)}.lvl-m{color:var(--warning-color)}.lvl-a{color:var(--danger-color)}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>Sistemas Operativos - Universidad Santiago de Cali</h1>
+<p>Unidad 2 · Sincronización, Interbloqueos y Cierre de la Unidad de Procesos</p>
+</header>
+
+<h2>1. El problema: condiciones de carrera</h2>
+<div class="card">
+<p>Cuando varios procesos acceden a datos compartidos (memoria compartida, archivos) y el resultado depende del <strong>orden de intercalación</strong> de sus instrucciones, hay una <strong>condición de carrera</strong>. Incluso <code>(*cnt)++</code> no es atómico: son tres pasos (leer, sumar, escribir) y el planificador puede interrumpir entre ellos, perdiendo actualizaciones.</p>
+<div class="grid-2cols">
+<pre>
+/* carrera.c: SIN sincronización */
+int *cnt = mmap(NULL, sizeof(int),
+    PROT_READ|PROT_WRITE,
+    MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+*cnt = 0;
+for (int i = 0; i &lt; 2; i++)
+    if (fork() == 0) {
+        for (int j = 0; j &lt; 1000000; j++)
+            (*cnt)++;
+        _exit(0);
+    }
+wait(NULL); wait(NULL);
+printf("%d (esperado 2000000)\n", *cnt);</pre>
+<pre>
+/* CON semáforo en la región compartida */
+typedef struct { sem_t m; int cnt; } Shm;
+Shm *s = mmap(NULL, sizeof(Shm), PROT_READ|PROT_WRITE,
+    MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+sem_init(&amp;s-&gt;m, 1, 1);  s-&gt;cnt = 0;
+/* en cada hijo: */
+sem_wait(&amp;s-&gt;m);
+s-&gt;cnt++;            /* sección crítica */
+sem_post(&amp;s-&gt;m);</pre>
+</div>
+<p><span class="badge">Compilar</span> <code>gcc -Wall -std=c99 -D_DEFAULT_SOURCE prog.c -o prog -pthread</code> · Ejecute la versión sin sincronizar varias veces: el resultado cambia.</p>
+</div>
+
+<h2>2. Sección crítica y propiedades de una solución</h2>
+<div class="grid-2cols">
+<div class="card">
+<h3>Estructura</h3>
+<pre>
+entrada();      /* solicitar acceso */
+  SECCION CRITICA
+salida();       /* liberar */
+  seccion restante</pre>
+<p>La <strong>sección crítica</strong> es el fragmento de código que accede a un recurso compartido y no debe ser ejecutado por más de un proceso a la vez.</p>
+</div>
+<div class="card">
+<h3>Tres requisitos</h3>
+<ul>
+<li><strong>Exclusión mutua:</strong> a lo sumo un proceso dentro de la sección crítica.</li>
+<li><strong>Progreso:</strong> si nadie está dentro, la decisión de quién entra no puede posponerse indefinidamente ni depender de procesos ajenos a la competencia.</li>
+<li><strong>Espera acotada:</strong> un proceso que solicita entrar no espera por siempre (sin inanición).</li>
+</ul>
+<p>Además: no suponer nada sobre velocidad relativa ni número de CPU.</p>
+</div>
+</div>
+
+<h2>3. Mecanismos de sincronización</h2>
+<div class="card">
+<div class="tw"><table>
+<tr><th>Mecanismo</th><th>Idea</th><th>Ventaja</th><th>Cuidado</th></tr>
+<tr><td>Espera activa (spinlock, Peterson, <code>test_and_set</code>)</td><td>El proceso itera hasta poder entrar</td><td>Sin cambio de contexto; útil si la espera es muy corta</td><td>Gasta CPU; mal en un solo núcleo</td></tr>
+<tr><td>Semáforo binario / mutex</td><td>0/1: <code>wait</code> bloquea, <code>post</code> despierta</td><td>El proceso espera dormido</td><td>Orden incorrecto → interbloqueo</td></tr>
+<tr><td>Semáforo contador</td><td>Cuenta unidades disponibles de un recurso</td><td>Controla pools y buffers acotados</td><td>Olvidar un <code>post</code> bloquea a otros</td></tr>
+<tr><td>Monitor / variable de condición</td><td>Exclusión mutua implícita + <code>wait/signal</code> sobre condiciones</td><td>Más estructurado, menos errores</td><td>En C se arma con mutex + cond (unidad 3)</td></tr>
+</table></div>
+<p style="margin-top:12px"><strong>Semáforo</strong> (Dijkstra): entero no negativo con dos operaciones atómicas. <code>wait(S)</code> (P): si S&gt;0 decrementa; si no, bloquea. <code>post(S)</code> (V): incrementa y despierta a un bloqueado. POSIX: <code>sem_init/sem_wait/sem_post</code> (sin nombre, <code>pshared=1</code> entre procesos) y <code>sem_open</code> (con nombre).</p>
+<div class="warn"><strong>Puente a hilos:</strong> <code>sem_wait/post</code> con <code>S=1</code> equivale a <code>pthread_mutex_lock/unlock</code>; la espera por una condición (buffer vacío/lleno) se resuelve con <code>pthread_cond_wait/signal</code>. Lo que aprenda aquí se reutiliza casi sin cambios.</div>
+</div>
+
+<h2>4. Problemas clásicos de sincronización</h2>
+<div class="grid-2cols">
+<div class="card">
+<h3>Productor-Consumidor</h3>
+<p>Buffer acotado de N posiciones: semáforos <code>vacio=N</code>, <code>lleno=0</code>, <code>mutex=1</code>. El código completo con memoria compartida está en la página de IPC. Regla clave: <strong>primero el semáforo de conteo, después el mutex</strong>.</p>
+<h3>Lectores-Escritores</h3>
+<p>Varios lectores simultáneos; los escritores acceden en exclusiva. Variante con prioridad a lectores (puede causar inanición de escritores):</p>
+<pre>
+/* lector */                 /* escritor */
+sem_wait(&amp;mutex);            sem_wait(&amp;escritura);
+if (++lectores == 1)         ... escribir ...
+    sem_wait(&amp;escritura);    sem_post(&amp;escritura);
+sem_post(&amp;mutex);
+... leer ...
+sem_wait(&amp;mutex);
+if (--lectores == 0)
+    sem_post(&amp;escritura);
+sem_post(&amp;mutex);</pre>
+</div>
+<div class="card">
+<h3>Filósofos cenando</h3>
+<p>5 filósofos y 5 tenedores (semáforos). Si todos toman primero el tenedor izquierdo, hay <strong>interbloqueo</strong>. Soluciones:</p>
+<ul>
+<li>Permitir máximo 4 a la mesa (semáforo contador).</li>
+<li><strong>Orden global:</strong> tomar siempre primero el tenedor de menor índice.</li>
+<li>Filósofo asimétrico (uno invierte el orden).</li>
+</ul>
+<pre>
+void tomar(int i) {
+    int a = i, b = (i + 1) % 5;
+    if (a &gt; b) { int t = a; a = b; b = t; }  /* orden global */
+    sem_wait(&amp;tenedor[a]);
+    sem_wait(&amp;tenedor[b]);
+}
+void soltar(int i) {
+    sem_post(&amp;tenedor[i]);
+    sem_post(&amp;tenedor[(i + 1) % 5]);
+}</pre>
+<p>Cada filósofo es un proceso (<code>fork</code>) y los tenedores viven en memoria compartida.</p>
+</div>
+</div>
+
+<h2>5. Interbloqueos (deadlock) integrados</h2>
+<div class="grid-2cols">
+<div class="card">
+<h3>Condiciones de Coffman (las 4 a la vez)</h3>
+<ol>
+<li><strong>Exclusión mutua:</strong> recursos no compartibles.</li>
+<li><strong>Retener y esperar:</strong> se tiene un recurso mientras se pide otro.</li>
+<li><strong>Sin expropiación:</strong> el recurso solo se libera voluntariamente.</li>
+<li><strong>Espera circular:</strong> P0 espera a P1, ..., Pn espera a P0.</li>
+</ol>
+<p>Grafo de asignación: con una instancia por recurso, <strong>ciclo = deadlock</strong>; con varias instancias, ciclo es necesario pero no suficiente.</p>
+<div class="tw"><table>
+<tr><th>Estrategia</th><th>Cómo</th><th>Ejemplo en C/Linux</th></tr>
+<tr><td>Prevención</td><td>Romper una condición</td><td>Orden global de semáforos</td></tr>
+<tr><td>Evitación</td><td>Solo estados seguros</td><td>Banquero</td></tr>
+<tr><td>Detección</td><td>Buscar ciclos y recuperar</td><td>Matriz de asignación; abortar o expropiar</td></tr>
+<tr><td>Ignorar</td><td>"Algoritmo del avestruz"</td><td>Lo que hace Linux con recursos de usuario</td></tr>
+</table></div>
+</div>
+<div class="card">
+<h3>Banquero resuelto (1 tipo de recurso, 12 unidades)</h3>
+<div class="tw"><table style="min-width:420px">
+<tr><th>Proc.</th><th>Max</th><th>Asignado</th><th>Necesita</th></tr>
+<tr><td>P0</td><td>10</td><td>5</td><td>5</td></tr>
+<tr><td>P1</td><td>4</td><td>2</td><td>2</td></tr>
+<tr><td>P2</td><td>9</td><td>2</td><td>7</td></tr>
+</table></div>
+<p><strong>Disponible = 12 − 9 = 3.</strong></p>
+<ol>
+<li>P1 necesita 2 ≤ 3 → termina; disponible = 5.</li>
+<li>P0 necesita 5 ≤ 5 → termina; disponible = 10.</li>
+<li>P2 necesita 7 ≤ 10 → termina; disponible = 12.</li>
+</ol>
+<p>Secuencia segura <code>&lt;P1, P0, P2&gt;</code> → el estado es <span class="badge">SEGURO</span></p>
+<p><strong>Solicitud:</strong> P2 pide 1 unidad. Si se concede: disponible = 2; P2 asignado = 3, necesita 6. Solo P1 (2 ≤ 2) puede terminar → disponible = 4; ni P0 (5) ni P2 (6) caben. Estado <span class="badge" style="color:#ff6b6b">INSEGURO</span> → <strong>se rechaza</strong> aunque haya 3 libres.</p>
+</div>
+</div>
+
+<h2>Laboratorio Evaluable: sincronize.c</h2>
+<div class="card">
+<p><strong>Instrucción:</strong> Resuelva en ANSI C sobre Linux. Compile sin advertencias, verifique retornos, limpie semáforos/memoria compartida y justifique con evidencia (salidas repetidas, <code>strace</code>).</p>
+<div class="tw"><table>
+<tr><th>#</th><th>Nivel</th><th>Actividad</th></tr>
+<tr><td>1</td><td class="lvl-b">Básico</td><td>Reproduzca la carrera del contador con 4 procesos y 1 000 000 de incrementos c/u. Ejecútelo 10 veces, tabule resultados y corríjalo con semáforo.</td></tr>
+<tr><td>2</td><td class="lvl-b">Básico</td><td>Compare tiempos del contador protegido con semáforo frente al no protegido; explique el costo de sincronizar.</td></tr>
+<tr><td>3</td><td class="lvl-m">Medio</td><td>Lectores-escritores con memoria compartida (3 lectores, 2 escritores). Muestre la inanición de escritores y proponga una variante justa.</td></tr>
+<tr><td>4</td><td class="lvl-m">Medio</td><td>Filósofos cenando con procesos: primero la versión que se interbloquea (con <code>sleep</code> entre tenedores), luego dos soluciones distintas.</td></tr>
+<tr><td>5</td><td class="lvl-m">Medio</td><td>Programe el Banquero (matrices Max/Alloc/Need, vector Available): <code>es_seguro()</code> y <code>solicitar(pid, req[])</code>. Valide con el ejemplo resuelto.</td></tr>
+<tr><td>6</td><td class="lvl-a">Avanzado</td><td>Detección de deadlock: construya la matriz de asignación/solicitud, detecte el ciclo y elija una víctima con un criterio justificado.</td></tr>
+<tr><td>7</td><td class="lvl-a">Reto</td><td>Un "banco" con transferencias entre cuentas en memoria compartida y un semáforo por cuenta. Cause el deadlock A→B / B→A y resuélvalo con orden global.</td></tr>
+</table></div>
+<pre>
+/* sincronize.c · COMPILAR: gcc -Wall -std=c99 -D_DEFAULT_SOURCE sincronize.c -o sincronize -pthread */
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;semaphore.h&gt;
+#include &lt;sys/mman.h&gt;
+#include &lt;sys/wait.h&gt;
+
+#define NP 3   /* procesos del Banquero */
+#define NR 1   /* tipos de recurso */
+int disponible[NR];
+int maximo[NP][NR], asignado[NP][NR], necesita[NP][NR];
+
+int es_seguro(void) { /* TODO: copia de 'disponible', buscar P con necesita &lt;= trabajo,
+                         liberar sus recursos y repetir; seguro si terminan todos */ return 0; }
+int solicitar(int pid, int req[NR]) { /* TODO: validar req &lt;= necesita y &lt;= disponible;
+                         asignar tentativamente; si !es_seguro() revertir y rechazar */ return 0; }
+
+int main(void) { /* TODO: inicializar con el ejemplo del banquero y probar P2 pide 1 */ return 0; }</pre>
+<p><strong>Rúbrica (100 pts):</strong> corrección sin carreras ni deadlock (40) · gestión de recursos y limpieza (20) · manejo de errores (15) · evidencia y análisis (25).</p>
+</div>
+
+<h2>6. Límites de los procesos: la motivación para los hilos</h2>
+<div class="card">
+<ul>
+<li><strong>Costo de creación:</strong> <code>fork</code> duplica (con copy-on-write) tablas de páginas, descriptores y PCB.</li>
+<li><strong>Cambio de contexto pesado:</strong> cambiar de espacio de direcciones invalida TLB y degrada la caché.</li>
+<li><strong>Compartir datos es caro:</strong> toda IPC exige llamadas al sistema, copias o regiones compartidas explícitas con sincronización manual.</li>
+<li><strong>Escalabilidad:</strong> un servidor con 10 000 clientes no puede ser 10 000 procesos pesados.</li>
+</ul>
+<div class="warn"><strong>La pregunta de la Unidad 3:</strong> ¿y si varios flujos de ejecución <em>compartieran por defecto</em> memoria, archivos abiertos y código dentro de un mismo proceso? Esa es la idea del <strong>hilo</strong>: más rápido de crear y de comunicar, pero con todas las carreras y deadlocks de esta unidad ahora a nivel de variables globales.</div>
+</div>
+
+<h2>7. Proyecto integrador: mini-shell (mishell.c)</h2>
+<div class="card">
+<p>Integra generalidades de procesos, planificación, IPC y sincronización. <strong>Requisitos:</strong></p>
+<ol>
+<li>Prompt, lectura de línea y ejecución con <code>fork</code> + <code>execvp</code> + <code>waitpid</code>; <code>exit</code> y <code>cd</code> como comandos internos.</li>
+<li>Pipelines <code>cmd1 | cmd2 | cmd3</code> con <code>pipe</code> + <code>dup2</code>.</li>
+<li>Redirección <code>&gt;</code>, <code>&gt;&gt;</code> y <code>&lt;</code> con <code>open</code> + <code>dup2</code>.</li>
+<li>Segundo plano <code>&amp;</code> con manejador de <code>SIGCHLD</code> (sin zombis); <code>SIGINT</code> no mata la shell, solo al proceso en primer plano.</li>
+<li>Comando interno <code>sched rr|fcfs|spn</code> que ejecute el simulador de la página de planificación con procesos ingresados por el usuario.</li>
+<li>Comando <code>stats</code> que lea desde una región compartida la cantidad de comandos ejecutados, protegida con semáforo.</li>
+</ol>
+<pre>
+while (1) {
+    printf("mishell&gt; "); fflush(stdout);
+    if (!fgets(linea, sizeof linea, stdin)) break;
+    int n = tokenizar(linea, args);            /* TODO */
+    if (n == 0 || interno(args)) continue;     /* exit, cd, sched, stats */
+    pid_t pid = fork();
+    if (pid == 0) { execvp(args[0], args); perror("execvp"); _exit(127); }
+    if (!segundo_plano) waitpid(pid, NULL, 0);
+}</pre>
+<p><strong>Evaluación:</strong> funcionalidad (50) · robustez (errores, fugas, zombis) (20) · uso correcto de IPC y sincronización (15) · informe y sustentación (15).</p>
+</div>
+
+<h2>8. Resumen de la Unidad 2 · Procesos</h2>
+<div class="card">
+<div class="tw"><table>
+<tr><th>Tema</th><th>Ideas clave</th><th>Llamadas / conceptos en Linux</th></tr>
+<tr><td><strong>Generalidades</strong></td><td>Proceso = programa en ejecución; PCB; estados (nuevo, listo, ejecución, bloqueado, terminado); cambio de contexto; creación y terminación</td><td><code>fork, exec, wait, exit</code>, zombis y huérfanos, <code>/proc</code></td></tr>
+<tr><td><strong>Planificación</strong></td><td>FCFS, SPN/SRTF, Round Robin, prioridades, colas multinivel y CFS; métricas: retorno, espera, respuesta; quantum</td><td><code>vruntime</code>, árbol rojo-negro, <code>nice</code>, <code>renice</code></td></tr>
+<tr><td><strong>IPC</strong></td><td>Paso de mensajes vs memoria compartida; criterios de elección según parentesco, dirección y volumen</td><td><code>pipe, mkfifo, sigaction, mq_*, shm_open/mmap</code>, sockets UNIX</td></tr>
+<tr><td><strong>Sincronización</strong></td><td>Carreras; sección crítica (exclusión mutua, progreso, espera acotada); semáforos; problemas clásicos</td><td><code>sem_init, sem_wait, sem_post</code></td></tr>
+<tr><td><strong>Interbloqueos</strong></td><td>4 condiciones de Coffman; prevención, evitación (Banquero), detección y recuperación</td><td>Orden global de recursos</td></tr>
+</table></div>
+<h3 style="margin-top:20px">Cinco ideas para llevarse</h3>
+<ol>
+<li>El proceso es la unidad de <strong>aislamiento y de asignación de recursos</strong>; el planificador decide quién usa la CPU y cuándo.</li>
+<li>La planificación es un compromiso entre justicia, tiempo de respuesta y rendimiento: no existe el algoritmo perfecto.</li>
+<li>Aislamiento implica que comunicar cuesta; elegir el mecanismo de IPC adecuado es una decisión de diseño.</li>
+<li>Compartir datos sin sincronizar produce errores intermitentes, los más difíciles de depurar.</li>
+<li>El interbloqueo se previene con diseño (orden global de adquisición) mucho mejor que se cura en producción.</li>
+</ol>
+<h3>Autoevaluación (clic para ver la respuesta)</h3>
+<details><summary>1. ¿Por qué un lector de pipe no recibe EOF si no cierra su copia del extremo de escritura?</summary>Porque el kernel solo reporta EOF cuando <em>todos</em> los descriptores de escritura están cerrados, incluida la copia heredada por el lector.</details>
+<details><summary>2. ¿Qué diferencia a Round Robin de SRTF?</summary>RR reparte la CPU por quantum sin conocer la duración; SRTF expropia al proceso con menor tiempo restante, optimiza la espera pero puede causar inanición de los largos.</details>
+<details><summary>3. ¿Por qué no usar <code>printf</code> en un manejador de señal?</summary>No es async-signal-safe: puede interrumpir una llamada interna de stdio y corromper su estado. Use <code>write</code> o una bandera <code>sig_atomic_t</code>.</details>
+<details><summary>4. ¿Cuándo es mejor memoria compartida que una cola de mensajes?</summary>Cuando el volumen o la frecuencia de datos es alto: evita copias del kernel, pero exige sincronización explícita.</details>
+<details><summary>5. ¿Qué requisito de la sección crítica incumple una solución que puede dejar esperando a un proceso indefinidamente?</summary>La espera acotada (inanición).</details>
+<details><summary>6. Un estado inseguro, ¿implica deadlock?</summary>No, implica que <em>podría</em> ocurrir; el Banquero rechaza la solicitud por precaución.</details>
+<details><summary>7. ¿Cómo evita el orden global de recursos la espera circular?</summary>Si todos adquieren en el mismo orden, no puede formarse un ciclo en el grafo de espera.</details>
+<details><summary>8. ¿Por qué los hilos son más livianos que los procesos?</summary>Comparten espacio de direcciones y recursos del proceso; solo tienen pila, registros y contador de programa propios, así que crear y cambiar de contexto cuesta menos.</details>
+</div>
+
+<footer class="footnote">Sistemas Operativos, Universidad Santiago de Cali, 2026</footer>
+</div>
+</body>
+</html>
