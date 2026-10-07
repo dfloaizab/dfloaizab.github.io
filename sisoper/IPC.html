@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sistemas Operativos: Comunicación entre Procesos (IPC) en Linux con ANSI C</title>
+<style>
+:root{--bg-color:#0a0a0f;--card-bg:#14141c;--text-color:#eaeef2;--accent-color:#7c4dff;--secondary-color:#18e7c5;--warning-color:#ffb86b;--danger-color:#ff6b6b;--code-bg:#1e1e2a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background-color:var(--bg-color);color:var(--text-color);line-height:1.5;padding:20px}
+.container{max-width:1300px;margin:0 auto}
+header{text-align:center;padding:30px 0 20px;border-bottom:2px solid var(--accent-color);margin-bottom:40px}
+h1{font-size:2.2rem;letter-spacing:-.5px;background:linear-gradient(135deg,#b77cff,#18e7c5);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{color:var(--secondary-color);border-left:5px solid var(--secondary-color);padding-left:18px;margin:40px 0 20px;font-size:1.7rem}
+h3{color:var(--accent-color);margin:6px 0 12px;font-size:1.3rem;display:inline-block;border-bottom:1px dashed var(--accent-color)}
+.card{background:var(--card-bg);border-radius:24px;padding:24px;margin-bottom:28px;border:1px solid #2c2c3a;box-shadow:0 8px 20px rgba(0,0,0,.6)}
+.grid-2cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:28px}
+.grid-2cols .card{margin-bottom:0}
+pre{background:var(--code-bg);padding:18px;border-radius:18px;overflow-x:auto;font-family:'Fira Code','Cascadia Code',monospace;font-size:.82rem;border-left:4px solid var(--accent-color);margin:16px 0;color:#d6deeb}
+code{font-family:monospace;background:#2a2a36;padding:2px 6px;border-radius:8px;font-size:.9em}
+.badge{background:#2c2c3a;border-radius:40px;padding:4px 12px;font-size:.75rem;font-weight:bold;color:var(--secondary-color);display:inline-block;margin:2px 2px 2px 0}
+.warn{border-left:4px solid var(--warning-color);background:#1d1a14;padding:12px 16px;border-radius:12px;margin:14px 0;font-size:.92rem}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:640px}
+th{color:var(--secondary-color);text-align:left;border-bottom:2px solid var(--accent-color);padding:8px}
+td{padding:8px;border-bottom:1px solid #2c2c3a;vertical-align:top}
+ul,ol{padding-left:1.6rem;margin:12px 0}li{margin:6px 0}
+.footnote{font-size:.75rem;text-align:center;margin-top:50px;padding:20px;border-top:1px solid #2c2c3a;color:#8f8f9e}
+.lvl-b{color:var(--secondary-color)}.lvl-m{color:var(--warning-color)}.lvl-a{color:var(--danger-color)}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>Sistemas Operativos - Universidad Santiago de Cali</h1>
+<p>Comunicación entre Procesos (IPC) en Linux con ANSI C · Guía teórico-práctica y banco de actividades</p>
+</header>
+
+<h2>1. ¿Por qué IPC? Mapa de mecanismos</h2>
+<div class="card">
+<p>Cada proceso tiene su propio espacio de direcciones: no puede leer ni escribir la memoria de otro. Cuando los procesos deben cooperar (modularidad, paralelismo, compartir información) el SO ofrece mecanismos de <strong>comunicación entre procesos</strong>. Hay dos modelos conceptuales: <strong>paso de mensajes</strong> (el kernel copia los datos: pipes, FIFOs, colas, sockets) y <strong>memoria compartida</strong> (rápida, pero exige sincronización explícita).</p>
+<div class="tw"><table>
+<tr><th>Mecanismo</th><th>Modelo</th><th>Parentesco</th><th>Dirección</th><th>Persistencia</th><th>Llamadas clave</th></tr>
+<tr><td>Pipe anónimo</td><td>Flujo de bytes</td><td>Solo relacionados (fork)</td><td>Unidireccional</td><td>Vive con los procesos</td><td><code>pipe, read, write</code></td></tr>
+<tr><td>FIFO (named pipe)</td><td>Flujo de bytes</td><td>Cualquiera</td><td>Unidireccional</td><td>Archivo en el FS</td><td><code>mkfifo, open</code></td></tr>
+<tr><td>Señales</td><td>Notificación</td><td>Cualquiera (permisos)</td><td>Sin datos (1 evento)</td><td>No</td><td><code>kill, sigaction</code></td></tr>
+<tr><td>Cola de mensajes POSIX</td><td>Mensajes con prioridad</td><td>Cualquiera</td><td>Bidireccional</td><td>Kernel (hasta <code>mq_unlink</code>)</td><td><code>mq_open, mq_send, mq_receive</code></td></tr>
+<tr><td>Memoria compartida POSIX</td><td>Región mapeada</td><td>Cualquiera</td><td>Bidireccional</td><td>Kernel (<code>/dev/shm</code>)</td><td><code>shm_open, ftruncate, mmap</code></td></tr>
+<tr><td>Semáforos POSIX</td><td>Sincronización</td><td>Cualquiera</td><td>—</td><td>Nombrados: sí</td><td><code>sem_open, sem_wait, sem_post</code></td></tr>
+<tr><td>Sockets UNIX</td><td>Flujo o datagrama</td><td>Cualquiera (local)</td><td>Bidireccional</td><td>Archivo (o abstracto)</td><td><code>socket, bind, socketpair</code></td></tr>
+</table></div>
+<p style="margin-top:12px"><span class="badge">Compilar</span> <code>gcc -Wall -std=c99 -D_POSIX_C_SOURCE=200809L prog.c -o prog -lrt -pthread</code></p>
+</div>
+
+<h2>2. Pipes anónimos</h2>
+<div class="grid-2cols">
+<div class="card">
+<h3>Concepto</h3>
+<p><code>pipe(int fd[2])</code> crea un buffer en el kernel (64 KiB por defecto en Linux) con dos descriptores: <code>fd[0]</code> lectura y <code>fd[1]</code> escritura. Tras <code>fork()</code> el hijo hereda ambos; cada proceso debe <strong>cerrar el extremo que no usa</strong>.</p>
+<ul>
+<li><code>read</code> bloquea si el pipe está vacío; devuelve 0 (EOF) cuando <em>todos</em> los extremos de escritura están cerrados.</li>
+<li><code>write</code> bloquea si está lleno; si no hay lectores recibe <code>SIGPIPE</code>.</li>
+<li>Escrituras ≤ <code>PIPE_BUF</code> (4096 B) son atómicas.</li>
+<li>Con <code>dup2</code> se redirige stdin/stdout: así funciona <code>ls | wc -l</code> en el shell.</li>
+</ul>
+<div class="warn"><strong>Error típico:</strong> olvidar cerrar <code>fd[1]</code> en el lector: nunca llega el EOF y el programa se cuelga.</div>
+</div>
+<div class="card">
+<pre>
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+
+int main(void) {
+    int fd[2];
+    if (pipe(fd) == -1) { perror("pipe"); return 1; }
+    pid_t pid = fork();
+    if (pid == 0) {                 /* HIJO: lector */
+        close(fd[1]);
+        char buf[64]; ssize_t n;
+        while ((n = read(fd[0], buf, sizeof buf - 1)) > 0) {
+            buf[n] = '\0';
+            printf("Hijo recibio: %s\n", buf);
+        }
+        close(fd[0]); _exit(0);
+    }
+    close(fd[0]);                   /* PADRE: escritor */
+    const char *m = "Hola desde el padre";
+    write(fd[1], m, strlen(m));
+    close(fd[1]);                   /* provoca EOF en el hijo */
+    wait(NULL);
+    return 0;
+}</pre>
+</div>
+</div>
+
+<h2>3. FIFOs (pipes con nombre)</h2>
+<div class="card">
+<p>Un FIFO es un pipe con entrada en el sistema de archivos; permite comunicar procesos <strong>sin parentesco</strong>. <code>open()</code> bloquea hasta que otro proceso abre el extremo opuesto (salvo <code>O_NONBLOCK</code>). Se crea con <code>mkfifo("/tmp/lab_fifo", 0600)</code> o desde la terminal con <code>mkfifo</code>, y se elimina con <code>unlink</code>.</p>
+<pre>
+/* escritor.c */                          /* lector.c */
+mkfifo("/tmp/lab_fifo", 0600);            int fd = open("/tmp/lab_fifo", O_RDONLY);
+int fd = open("/tmp/lab_fifo", O_WRONLY); char buf[128]; ssize_t n;
+write(fd, "ping", 4);                     while ((n = read(fd, buf, sizeof buf)) > 0)
+close(fd);                                    write(STDOUT_FILENO, buf, n);
+                                          close(fd); unlink("/tmp/lab_fifo");</pre>
+</div>
+
+<h2>4. Señales</h2>
+<div class="grid-2cols">
+<div class="card">
+<h3>Concepto</h3>
+<p>Una señal es una <strong>interrupción por software</strong> asíncrona. Útiles: <code>SIGINT</code> (Ctrl+C), <code>SIGTERM</code> (terminación cortés), <code>SIGKILL</code>/<code>SIGSTOP</code> (no capturables), <code>SIGCHLD</code> (un hijo terminó), <code>SIGUSR1/2</code> (definidas por el usuario), <code>SIGPIPE</code>, <code>SIGALRM</code>.</p>
+<ul>
+<li>Use <code>sigaction</code> y no <code>signal</code> (semántica portable y definida).</li>
+<li>En el manejador solo funciones <em>async-signal-safe</em> (<code>write</code>, <code>_exit</code>); <strong>no</strong> <code>printf</code> ni <code>malloc</code>.</li>
+<li>Comunique con el programa principal mediante <code>volatile sig_atomic_t</code>.</li>
+<li>Las señales estándar no se encolan: varias iguales pendientes se fusionan en una.</li>
+</ul>
+</div>
+<div class="card">
+<pre>
+#include &lt;signal.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+#include &lt;stdio.h&gt;
+
+static volatile sig_atomic_t recibida = 0;
+static void manejador(int s) { (void)s; recibida = 1; }
+
+int main(void) {
+    struct sigaction sa;
+    sa.sa_handler = manejador;
+    sigemptyset(&amp;sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction(SIGUSR1, &amp;sa, NULL);   /* antes del fork */
+
+    pid_t pid = fork();
+    if (pid == 0) {
+        while (!recibida) pause();
+        write(STDOUT_FILENO, "Hijo: SIGUSR1 ok\n", 17);
+        _exit(0);
+    }
+    sleep(1);
+    kill(pid, SIGUSR1);
+    wait(NULL);
+    return 0;
+}</pre>
+<p class="warn">Hay una carrera sutil entre <code>while(!recibida)</code> y <code>pause()</code>. Actividad avanzada: corríjala con <code>sigprocmask</code> + <code>sigsuspend</code>.</p>
+</div>
+</div>
+
+<h2>5. Colas de mensajes POSIX</h2>
+<div class="card">
+<p>Mensajes <strong>delimitados</strong> (no flujo de bytes) con <strong>prioridad</strong>: <code>mq_receive</code> entrega primero el de mayor prioridad. Los nombres empiezan con <code>/</code>. El buffer de recepción debe ser ≥ <code>mq_msgsize</code>. Se listan en <code>/dev/mqueue</code> (si está montado). Enlace con <code>-lrt</code>.</p>
+<pre>
+#include &lt;mqueue.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;stdio.h&gt;
+
+int main(void) {
+    struct mq_attr at = {0};
+    at.mq_maxmsg = 8; at.mq_msgsize = 64;
+    mqd_t q = mq_open("/cola_lab", O_CREAT | O_RDWR, 0600, &amp;at);
+    if (q == (mqd_t)-1) { perror("mq_open"); return 1; }
+
+    mq_send(q, "baja", 5, 1);
+    mq_send(q, "URGENTE", 8, 9);
+
+    char buf[64]; unsigned prio;
+    for (int i = 0; i &lt; 2; i++) {
+        mq_receive(q, buf, sizeof buf, &amp;prio);
+        printf("prio=%u msg=%s\n", prio, buf);   /* URGENTE primero */
+    }
+    mq_close(q); mq_unlink("/cola_lab");
+    return 0;
+}</pre>
+</div>
+
+<h2>6. Memoria compartida + semáforos</h2>
+<div class="card">
+<p>El mecanismo más rápido: tras <code>mmap</code> con <code>MAP_SHARED</code>, ambos procesos ven la misma memoria física sin copias del kernel. <strong>No hay sincronización automática</strong>: se necesitan semáforos (con <code>pshared=1</code> si viven dentro de la región). Patrón clásico: <em>productor-consumidor con buffer acotado</em>.</p>
+<pre>
+#define N 5
+typedef struct { sem_t vacio, lleno, mutex; int buf[N]; int in, out; } Compartido;
+
+/* Creación (proceso padre) */
+int fd = shm_open("/shm_lab", O_CREAT | O_RDWR, 0600);
+ftruncate(fd, sizeof(Compartido));
+Compartido *c = mmap(NULL, sizeof *c, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+sem_init(&amp;c-&gt;vacio, 1, N);  sem_init(&amp;c-&gt;lleno, 1, 0);  sem_init(&amp;c-&gt;mutex, 1, 1);
+
+/* Productor */                          /* Consumidor */
+sem_wait(&amp;c-&gt;vacio);                      sem_wait(&amp;c-&gt;lleno);
+sem_wait(&amp;c-&gt;mutex);                      sem_wait(&amp;c-&gt;mutex);
+c-&gt;buf[c-&gt;in] = dato;                      dato = c-&gt;buf[c-&gt;out];
+c-&gt;in = (c-&gt;in + 1) % N;                   c-&gt;out = (c-&gt;out + 1) % N;
+sem_post(&amp;c-&gt;mutex);                      sem_post(&amp;c-&gt;mutex);
+sem_post(&amp;c-&gt;lleno);                      sem_post(&amp;c-&gt;vacio);
+
+/* Limpieza */
+munmap(c, sizeof *c); close(fd); shm_unlink("/shm_lab");</pre>
+<div class="warn"><strong>Orden de los semáforos:</strong> si el productor toma <code>mutex</code> antes que <code>vacio</code> y el buffer está lleno, se produce un <strong>interbloqueo</strong> (conecta con la unidad de deadlocks).</div>
+</div>
+
+<h2>7. Sockets UNIX (dominio local)</h2>
+<div class="card">
+<p><code>socketpair(AF_UNIX, SOCK_STREAM, 0, sv)</code> crea dos extremos <strong>bidireccionales</strong> conectados (ideal padre-hijo). Para procesos independientes: <code>socket</code> + <code>bind</code> a una ruta (<code>struct sockaddr_un</code>) + <code>listen/accept</code> y <code>connect</code>. Además permiten <strong>pasar descriptores de archivo</strong> entre procesos (<code>SCM_RIGHTS</code>).</p>
+<pre>
+int sv[2];
+socketpair(AF_UNIX, SOCK_STREAM, 0, sv);
+if (fork() == 0) {                       /* hijo */
+    close(sv[0]);
+    char b[32]; ssize_t n = read(sv[1], b, sizeof b);
+    write(sv[1], "eco:", 4); write(sv[1], b, n);
+    _exit(0);
+}
+close(sv[1]);                            /* padre */
+write(sv[0], "hola", 4);
+char r[64]; ssize_t n = read(sv[0], r, sizeof r);
+write(STDOUT_FILENO, r, n); wait(NULL);</pre>
+</div>
+
+<h2>8. Criterios de selección y errores frecuentes</h2>
+<div class="grid-2cols">
+<div class="card">
+<h3>¿Cuál uso?</h3>
+<ul>
+<li>Padre-hijo, flujo simple → <strong>pipe</strong>.</li>
+<li>Procesos independientes, unidireccional → <strong>FIFO</strong>.</li>
+<li>Mensajes discretos con prioridad → <strong>cola POSIX</strong>.</li>
+<li>Grandes volúmenes, baja latencia → <strong>memoria compartida + semáforos</strong>.</li>
+<li>Diálogo bidireccional / cliente-servidor local → <strong>socket UNIX</strong>.</li>
+<li>Solo avisar un evento → <strong>señal</strong>.</li>
+</ul>
+</div>
+<div class="card">
+<h3>Errores y diagnóstico</h3>
+<ul>
+<li>No cerrar extremos sin uso → bloqueos y EOF que no llega.</li>
+<li>No verificar retornos (<code>-1</code> + <code>perror</code>/<code>errno</code>); ignorar lecturas parciales.</li>
+<li>Olvidar <code>unlink/mq_unlink/shm_unlink</code> → recursos huérfanos.</li>
+<li>Procesos zombi por no hacer <code>wait</code>.</li>
+<li>Condiciones de carrera por falta de exclusión mutua.</li>
+</ul>
+<p><span class="badge">ps aux | grep Z</span> <span class="badge">strace -f ./prog</span> <span class="badge">ls /dev/shm /dev/mqueue</span> <span class="badge">lsof -p PID</span> <span class="badge">valgrind --leak-check=full</span> <span class="badge">ipcs</span></p>
+</div>
+</div>
+
+<h2>Laboratorio Evaluable: Banco de actividades (ipc_lab.c)</h2>
+<div class="card">
+<p><strong>Instrucción:</strong> Resuelva las actividades en ANSI C sobre Linux. Cada programa debe compilar sin advertencias con <code>-Wall</code>, verificar el retorno de cada llamada al sistema, liberar todos sus recursos y no dejar procesos zombi. Entregue código + breve informe con capturas de ejecución y <code>strace</code> comentado.</p>
+<div class="tw"><table>
+<tr><th>#</th><th>Nivel</th><th>Actividad</th><th>Conceptos</th></tr>
+<tr><td>1</td><td class="lvl-b">Básico</td><td>Padre envía una cadena al hijo por pipe; el hijo la devuelve en mayúsculas por un segundo pipe (comunicación bidireccional).</td><td>pipe, fork, close, toupper</td></tr>
+<tr><td>2</td><td class="lvl-b">Básico</td><td>Reproduzca <code>ls | wc -l</code> sin usar el shell, con <code>fork</code>, <code>pipe</code>, <code>dup2</code> y <code>execlp</code>.</td><td>dup2, exec</td></tr>
+<tr><td>3</td><td class="lvl-b">Básico</td><td>Dos programas independientes (chat unidireccional) comunicados por un FIFO; termina al recibir "salir".</td><td>mkfifo, open bloqueante</td></tr>
+<tr><td>4</td><td class="lvl-m">Medio</td><td>Cuente señales: el padre envía 5 <code>SIGUSR1</code> espaciadas; el hijo las cuenta y al <code>SIGUSR2</code> imprime el total. Documente por qué pueden perderse señales si no hay pausa.</td><td>sigaction, señales no encoladas</td></tr>
+<tr><td>5</td><td class="lvl-m">Medio</td><td>Manejador de <code>SIGCHLD</code> que recolecte hijos con <code>waitpid(-1, NULL, WNOHANG)</code>; cree 5 hijos con duraciones distintas y verifique que no queden zombis.</td><td>SIGCHLD, waitpid</td></tr>
+<tr><td>6</td><td class="lvl-m">Medio</td><td>Sistema de tareas con cola POSIX: 1 despachador envía trabajos con prioridades; 2 trabajadores los procesan e imprimen PID y prioridad.</td><td>mq_*, prioridad</td></tr>
+<tr><td>7</td><td class="lvl-a">Avanzado</td><td>Productor-consumidor con memoria compartida y semáforos (buffer N=8, 2 productores y 2 consumidores, 100 datos). Demuestre <em>con y sin</em> mutex que se pierden o duplican datos.</td><td>shm_open, mmap, sem_t, carrera</td></tr>
+<tr><td>8</td><td class="lvl-a">Avanzado</td><td>Servidor de eco con socket UNIX que atienda varios clientes concurrentes con <code>fork</code>; el servidor limpia el archivo de socket al recibir <code>SIGINT</code>.</td><td>bind, listen, accept, SIGINT</td></tr>
+<tr><td>9</td><td class="lvl-a">Avanzado</td><td>Mida y grafique la latencia/throughput de pipe, cola POSIX, memoria compartida y socket al enviar 1 000 000 de enteros; compare y justifique.</td><td>clock_gettime, análisis</td></tr>
+<tr><td>10</td><td class="lvl-a">Reto</td><td>Provoque un interbloqueo entre dos procesos con dos semáforos nombrados, detéctelo con <code>strace</code> y corríjalo con orden global de adquisición.</td><td>deadlock, prevención</td></tr>
+</table></div>
+<h3 style="margin-top:20px">Plantilla de arranque</h3>
+<pre>
+/**
+ * ipc_lab.c
+ * Universidad Santiago de Cali, 2026B
+ * Laboratorio #3 Sistemas Operativos - Comunicación entre Procesos
+ * COMPILAR: gcc -Wall -std=c99 -D_POSIX_C_SOURCE=200809L ipc_lab.c -o ipc_lab -lrt -pthread
+ */
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+
+#define VERIFICAR(x) do { if ((x) == -1) { perror(#x); exit(EXIT_FAILURE); } } while (0)
+
+void actividad1_pipe_bidireccional(void) {
+    /* TODO: dos pipes (p2h, h2p); cerrar extremos sin usar; wait al final */
+}
+void actividad4_senales(void)   { /* TODO: sigaction + SIGUSR1/SIGUSR2 */ }
+void actividad7_shm_sem(void)   { /* TODO: shm_open + mmap + sem_init(pshared=1) */ }
+
+int main(int argc, char *argv[]) {
+    if (argc &lt; 2) { fprintf(stderr, "Uso: %s &lt;n_actividad&gt;\n", argv[0]); return 1; }
+    switch (atoi(argv[1])) {
+        case 1: actividad1_pipe_bidireccional(); break;
+        case 4: actividad4_senales(); break;
+        case 7: actividad7_shm_sem(); break;
+        default: fprintf(stderr, "Actividad no implementada\n");
+    }
+    return 0;
+}</pre>
+<h3>Rúbrica sugerida (100 pts)</h3>
+<ul>
+<li><strong>Corrección funcional</strong> (40): resultado esperado y sin condiciones de carrera.</li>
+<li><strong>Gestión de recursos</strong> (25): extremos cerrados, <code>unlink</code>, sin zombis, sin fugas (valgrind).</li>
+<li><strong>Manejo de errores</strong> (15): retornos verificados, mensajes con <code>perror</code>.</li>
+<li><strong>Informe y análisis</strong> (20): evidencia con <code>strace</code>/<code>ipcs</code>, justificación del mecanismo elegido.</li>
+</ul>
+</div>
+
+<footer class="footnote">Sistemas Operativos, Universidad Santiago de Cali, 2026</footer>
+</div>
+</body>
+</html>
