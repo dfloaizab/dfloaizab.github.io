@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estructuras No Lineales: BST y Árboles Autobalanceados | Estructuras de Datos 2026B</title>
+<style>
+:root{color-scheme:dark;--bg-0:#0d1117;--bg-1:#131a22;--bg-2:#182028;--bg-3:#1e2732;--border:#2a3542;--bs:#212b35;--t0:#e6edf3;--t1:#b7c2cc;--t2:#7d8b98;--ac:#4fb3bf;--ac2:#c99a5b;--danger:#c2665f;--ok:#5fae76;--warn:#c9a15b;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:radial-gradient(1200px 600px at 10% -10%,#16202a 0%,transparent 60%),radial-gradient(1000px 700px at 100% 0,#17222b 0%,transparent 55%),var(--bg-0);color:var(--t0);font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;line-height:1.65}
+.wrap{max-width:1050px;margin:0 auto;padding:0 28px 90px}
+header.masthead{padding:56px 28px 34px;border-bottom:1px solid var(--bs);background:linear-gradient(180deg,var(--bg-1),transparent)}
+.mi{max-width:1050px;margin:0 auto}
+.kicker{font-family:"Helvetica Neue",Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;font-size:.72rem;color:var(--ac);margin-bottom:14px;display:flex;gap:10px;align-items:center}
+.kicker::before{content:"";width:22px;height:1px;background:var(--ac)}
+h1.title{font-size:2.1rem;margin:0 0 10px;font-weight:600}
+.subtitle{color:var(--t1);max-width:740px}
+.meta-row{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px 26px;font-family:"Helvetica Neue",Arial,sans-serif;font-size:.82rem;color:var(--t2)}
+.meta-row b{color:var(--t1)}
+nav.toc{margin:34px 0 10px;padding:20px 22px;background:var(--bg-2);border:1px solid var(--bs);border-radius:10px}
+nav.toc h2{font-family:"Helvetica Neue",Arial,sans-serif;font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ac);margin:0 0 12px}
+nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+nav.toc li{margin-bottom:8px;font-size:.94rem}
+nav.toc a{color:var(--t1);text-decoration:none;border-bottom:1px dotted var(--border)}
+nav.toc a:hover{color:var(--ac)}
+section{margin-top:56px}
+h2.sec-title{font-size:1.5rem;border-left:3px solid var(--ac);padding-left:14px;margin-bottom:6px}
+.sec-num{font-family:"Helvetica Neue",Arial,sans-serif;color:var(--ac2);font-size:.78rem;letter-spacing:.1em;margin-left:14px;text-transform:uppercase}
+h3{font-size:1.15rem;margin-top:30px}
+p,li{color:var(--t1)}
+b.k{color:var(--t0)}
+.callout{background:var(--bg-2);border:1px solid var(--bs);border-left:3px solid var(--ac2);border-radius:8px;padding:16px 20px;margin:22px 0;font-size:.95rem;color:var(--t1)}
+.callout b{color:var(--t0)}
+.tw{overflow-x:auto;margin:22px 0}
+table{width:100%;border-collapse:collapse;background:var(--bg-2);border:1px solid var(--bs);font-family:"Helvetica Neue",Arial,sans-serif;font-size:.88rem}
+thead th{background:var(--bg-3);color:var(--ac);text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody td{padding:10px 14px;border-bottom:1px solid var(--bs);color:var(--t1);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+td.mono,.mono{font-family:"SFMono-Regular",Consolas,monospace}
+.tag{display:inline-block;font-size:.72rem;padding:2px 8px;border-radius:20px;border:1px solid var(--border);font-family:"Helvetica Neue",Arial,sans-serif}
+.tag.ok{color:var(--ok);border-color:#2f4a37}.tag.warn{color:var(--warn);border-color:#4a3f2a}.tag.danger{color:var(--danger);border-color:#4a2f2d}
+figure{margin:26px 0;background:var(--bg-2);border:1px solid var(--bs);border-radius:10px;padding:18px}
+figcaption{font-family:"Helvetica Neue",Arial,sans-serif;font-size:.8rem;color:var(--t2);margin-top:10px;text-align:center}
+figcaption b{color:var(--t1)}
+svg{display:block;margin:0 auto;max-width:100%;height:auto}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:760px){.grid-2{grid-template-columns:1fr}nav.toc ol{columns:1}.wrap{padding:0 18px 70px}}
+pre{background:#0a0f14;border:1px solid var(--bs);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:.82rem;line-height:1.5;margin:18px 0}
+code{font-family:"SFMono-Regular",Consolas,monospace;color:var(--ac2);font-size:.88em}
+pre code{color:var(--t1)}
+.steps{counter-reset:step;list-style:none;padding:0;margin:20px 0}
+.steps li{counter-increment:step;position:relative;padding:6px 0 6px 40px;margin-bottom:6px}
+.steps li::before{content:counter(step);position:absolute;left:0;top:4px;width:26px;height:26px;border-radius:50%;background:var(--bg-3);border:1px solid #3a8f9c;color:var(--ac);display:flex;align-items:center;justify-content:center;font-family:"Helvetica Neue",Arial,sans-serif;font-size:.78rem;font-weight:600}
+details.q{background:var(--bg-2);border:1px solid var(--bs);border-radius:8px;padding:12px 18px;margin:12px 0}
+details.q summary{cursor:pointer;color:var(--t0);font-weight:600}
+details.q summary .tag{margin-right:8px}
+details.q[open]{border-color:#3a8f9c}
+details.q .ans{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:.94rem}
+.glossary dt{color:var(--t0);font-weight:600;margin-top:14px}.glossary dd{color:var(--t1);margin-left:0}
+footer{margin-top:80px;padding-top:26px;border-top:1px solid var(--bs);color:var(--t2);font-family:"Helvetica Neue",Arial,sans-serif;font-size:.8rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+</style>
+</head>
+<body>
+<header class="masthead"><div class="mi">
+<div class="kicker">Universidad Santiago de Cali · Facultad de Ingeniería</div>
+<h1 class="title">Estructuras No Lineales: Árboles Binarios de Búsqueda y Autobalanceados</h1>
+<p class="subtitle">Resumen conceptual de la Unidad 2 de Estructuras de Datos: recursión, divide y vencerás, BST, árboles autobalanceados, un ejercicio complementario y preguntas de autoevaluación para el parcial.</p>
+<div class="meta-row"><span><b>Curso:</b> Estructuras de Datos</span><span><b>Periodo:</b> 2026B</span><span><b>Unidad:</b> 2 · Estructuras no lineales</span><span><b>Lenguaje:</b> Java</span></div>
+</div></header>
+
+<div class="wrap">
+<nav class="toc"><h2>Contenido</h2><ol>
+<li><a href="#s1">Recursión y divide y vencerás</a></li>
+<li><a href="#s2">Árboles binarios de búsqueda (BST)</a></li>
+<li><a href="#s3">Recorridos y su elección</a></li>
+<li><a href="#s4">Forma del árbol y complejidad</a></li>
+<li><a href="#s5">Árboles autobalanceados</a></li>
+<li><a href="#s6">Implementación y aplicaciones en Java</a></li>
+<li><a href="#s7">Ejercicio complementario</a></li>
+<li><a href="#s8">Autoevaluación para el parcial</a></li>
+</ol></nav>
+
+<section id="s1">
+<h2 class="sec-title">1. Recursión y divide y vencerás<span class="sec-num">Fundamento</span></h2>
+<p>Un algoritmo es <b class="k">recursivo</b> cuando resuelve un problema en términos de instancias más pequeñas del mismo problema. Toda definición recursiva correcta necesita dos piezas: un <b class="k">caso base</b> (detiene la recursión) y un <b class="k">paso recursivo</b> que se acerque al caso base.</p>
+<div class="callout"><b>Por qué importa en árboles:</b> un árbol es una estructura recursiva por definición (un nodo con un subárbol izquierdo y uno derecho, que a su vez son árboles). Por eso casi todas las operaciones sobre BST se escriben de forma natural y corta con recursión.</div>
+<h3>Divide y vencerás</h3>
+<ol class="steps">
+<li><b class="k">Dividir</b> el problema en subproblemas más pequeños e independientes.</li>
+<li><b class="k">Vencer:</b> resolver cada subproblema recursivamente (o directamente si es trivial).</li>
+<li><b class="k">Combinar</b> las soluciones parciales en la solución final.</li>
+</ol>
+<div class="tw"><table><thead><tr><th>Algoritmo</th><th>Dividir</th><th>Combinar</th><th>Recurrencia</th><th class="mono">Costo</th></tr></thead><tbody>
+<tr><td>Búsqueda binaria</td><td>Mitad del arreglo</td><td>Ninguna (se descarta una mitad)</td><td class="mono">T(n)=T(n/2)+1</td><td class="mono">O(log n)</td></tr>
+<tr><td>Mergesort</td><td>Dos mitades</td><td>Mezcla ordenada O(n)</td><td class="mono">T(n)=2T(n/2)+n</td><td class="mono">O(n log n)</td></tr>
+<tr><td>Quicksort</td><td>Partición por pivote</td><td>Ninguna</td><td class="mono">T(n)=2T(n/2)+n (prom.)</td><td class="mono">O(n log n) / O(n²)</td></tr>
+<tr><td>Búsqueda en BST</td><td>Subárbol izq. o der.</td><td>Ninguna</td><td class="mono">T(h)=T(h-1)+1</td><td class="mono">O(h)</td></tr>
+</tbody></table></div>
+<p style="font-size:.88rem;color:var(--t2)">Errores típicos: omitir el caso base (desbordamiento de pila, <code>StackOverflowError</code>), un paso recursivo que no converge y recalcular subproblemas repetidos sin necesidad.</p>
+</section>
+
+<section id="s2">
+<h2 class="sec-title">2. Árboles binarios de búsqueda<span class="sec-num">Concepto</span></h2>
+<p>Un <b class="k">árbol binario</b> es una estructura jerárquica donde cada nodo tiene a lo sumo dos hijos. Un <b class="k">BST</b> añade una invariante de orden:</p>
+<div class="callout"><b>Propiedad BST:</b> para todo nodo con clave <span class="mono">k</span>, todas las claves del subárbol izquierdo son menores que <span class="mono">k</span> y todas las del subárbol derecho son mayores (o iguales, según la política de duplicados que se adopte).</div>
+<div class="grid-2"><div>
+<h3>Vocabulario</h3>
+<ul><li><b class="k">Raíz, hoja, padre, hijo, hermano.</b></li><li><b class="k">Profundidad</b> de un nodo: aristas desde la raíz.</li><li><b class="k">Altura</b> del árbol: aristas del camino más largo raíz–hoja (vacío = -1, un nodo = 0).</li><li><b class="k">Nivel:</b> conjunto de nodos con la misma profundidad.</li></ul>
+</div><div>
+<h3>Operaciones y costos</h3>
+<ul><li><b class="k">Insertar, buscar, mínimo, máximo:</b> O(h).</li><li><b class="k">Eliminar:</b> O(h), con tres casos (hoja, un hijo, dos hijos → sucesor in-orden).</li><li>Con árbol balanceado h ≈ log n; degenerado h = n.</li></ul>
+</div></div>
+<h3>Eliminación: los tres casos</h3>
+<div class="tw"><table><thead><tr><th>Caso</th><th>Acción</th></tr></thead><tbody>
+<tr><td>Nodo hoja</td><td>Se reemplaza por <code>null</code>.</td></tr>
+<tr><td>Un solo hijo</td><td>El hijo ocupa el lugar del nodo eliminado.</td></tr>
+<tr><td>Dos hijos</td><td>Se copia la clave del <b class="k">sucesor in-orden</b> (mínimo del subárbol derecho) en el nodo y se elimina el sucesor del subárbol derecho.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s3">
+<h2 class="sec-title">3. Recorridos y su elección<span class="sec-num">Decisión de diseño</span></h2>
+<div class="tw"><table><thead><tr><th>Recorrido</th><th>Orden</th><th>Cuándo usarlo</th></tr></thead><tbody>
+<tr><td>In-orden</td><td class="mono">Izq → Raíz → Der</td><td>Obtener las claves <b class="k">ordenadas ascendentemente</b> (listados, validar un BST).</td></tr>
+<tr><td>In-orden inverso</td><td class="mono">Der → Raíz → Izq</td><td>Claves en orden descendente; <b class="k">top-N</b> con detención temprana.</td></tr>
+<tr><td>Pre-orden</td><td class="mono">Raíz → Izq → Der</td><td>Copiar o serializar el árbol (reconstruible); imprimir jerarquías.</td></tr>
+<tr><td>Post-orden</td><td class="mono">Izq → Der → Raíz</td><td>Liberar o eliminar el árbol; calcular altura o tamaños (hijos antes que el padre).</td></tr>
+<tr><td>Por niveles (BFS)</td><td class="mono">Nivel a nivel, con cola</td><td>Imprimir por niveles, hallar el nivel de un nodo.</td></tr>
+</tbody></table></div>
+<div class="callout"><b>Poda:</b> en una consulta por rango [min, max], solo se baja a la izquierda si <span class="mono">min &lt; clave</span> y solo a la derecha si <span class="mono">max &gt; clave</span>. La propiedad BST evita visitar ramas que no pueden contener resultados.</div>
+</section>
+
+<section id="s4">
+<h2 class="sec-title">4. Forma del árbol y complejidad<span class="sec-num">Peor caso vs. promedio</span></h2>
+<p>El costo de las operaciones depende de la <b class="k">altura</b>, y la altura depende del <b class="k">orden de inserción</b>. Insertar claves ya ordenadas produce un árbol degenerado, equivalente a una lista enlazada.</p>
+<figure>
+<svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica Neue, Arial" font-size="13">
+<g stroke="#2a3542" stroke-width="1.5"><line x1="170" y1="50" x2="100" y2="110"/><line x1="170" y1="50" x2="240" y2="110"/><line x1="100" y1="110" x2="60" y2="180"/><line x1="100" y1="110" x2="140" y2="180"/><line x1="240" y1="110" x2="200" y2="180"/><line x1="240" y1="110" x2="280" y2="180"/>
+<line x1="500" y1="40" x2="540" y2="85"/><line x1="540" y1="85" x2="580" y2="130"/><line x1="580" y1="130" x2="620" y2="175"/><line x1="620" y1="175" x2="660" y2="220"/></g>
+<g fill="#182028" stroke="#4fb3bf" stroke-width="1.5"><circle cx="170" cy="50" r="17"/><circle cx="100" cy="110" r="17"/><circle cx="240" cy="110" r="17"/><circle cx="60" cy="180" r="17"/><circle cx="140" cy="180" r="17"/><circle cx="200" cy="180" r="17"/><circle cx="280" cy="180" r="17"/></g>
+<g fill="#182028" stroke="#c2665f" stroke-width="1.5"><circle cx="500" cy="40" r="17"/><circle cx="540" cy="85" r="17"/><circle cx="580" cy="130" r="17"/><circle cx="620" cy="175" r="17"/><circle cx="660" cy="220" r="17"/></g>
+<g fill="#e6edf3" text-anchor="middle"><text x="170" y="55">40</text><text x="100" y="115">20</text><text x="240" y="115">60</text><text x="60" y="185">10</text><text x="140" y="185">30</text><text x="200" y="185">50</text><text x="280" y="185">70</text>
+<text x="500" y="45">10</text><text x="540" y="90">20</text><text x="580" y="135">30</text><text x="620" y="180">40</text><text x="660" y="225">50</text></g>
+<text x="170" y="236" fill="#4fb3bf" text-anchor="middle">Balanceado: h = 2, búsqueda O(log n)</text>
+<text x="500" y="236" fill="#c2665f" text-anchor="middle" dx="-10">Degenerado: h = n-1, O(n)</text>
+</svg>
+<figcaption><b>Figura 1.</b> Mismo conjunto de claves, distinta forma según el orden de inserción.</figcaption></figure>
+<div class="tw"><table><thead><tr><th>Operación</th><th class="mono">BST promedio</th><th class="mono">BST peor caso</th><th class="mono">Autobalanceado</th></tr></thead><tbody>
+<tr><td>Buscar</td><td class="mono">O(log n)</td><td class="mono">O(n)</td><td class="mono">O(log n)</td></tr>
+<tr><td>Insertar</td><td class="mono">O(log n)</td><td class="mono">O(n)</td><td class="mono">O(log n)</td></tr>
+<tr><td>Eliminar</td><td class="mono">O(log n)</td><td class="mono">O(n)</td><td class="mono">O(log n)</td></tr>
+<tr><td>Espacio</td><td class="mono">O(n)</td><td class="mono">O(n)</td><td class="mono">O(n)</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s5">
+<h2 class="sec-title">5. Árboles autobalanceados<span class="sec-num">Conceptos esenciales</span></h2>
+<p>Un árbol <b class="k">autobalanceado</b> mantiene su altura en O(log n) reajustando su estructura automáticamente tras inserciones y eliminaciones, mediante <b class="k">rotaciones</b> que preservan la propiedad BST.</p>
+<h3>AVL</h3>
+<p>Para cada nodo, el <b class="k">factor de balance</b> <span class="mono">FB = altura(izq) − altura(der)</span> debe estar en {-1, 0, 1}. Si tras una operación algún nodo llega a ±2, se rota:</p>
+<div class="tw"><table><thead><tr><th>Caso</th><th>Condición</th><th>Corrección</th></tr></thead><tbody>
+<tr><td>Izquierda–Izquierda</td><td class="mono">FB(nodo)=2, FB(izq)≥0</td><td>Rotación simple a la derecha</td></tr>
+<tr><td>Derecha–Derecha</td><td class="mono">FB(nodo)=-2, FB(der)≤0</td><td>Rotación simple a la izquierda</td></tr>
+<tr><td>Izquierda–Derecha</td><td class="mono">FB(nodo)=2, FB(izq)&lt;0</td><td>Rotación izquierda en el hijo, luego derecha en el nodo</td></tr>
+<tr><td>Derecha–Izquierda</td><td class="mono">FB(nodo)=-2, FB(der)&gt;0</td><td>Rotación derecha en el hijo, luego izquierda en el nodo</td></tr>
+</tbody></table></div>
+<h3>Rojo-Negro y otros</h3>
+<ul><li><b class="k">Rojo-Negro:</b> cada nodo tiene color; la raíz es negra, no hay dos rojos consecutivos y todo camino raíz–hoja tiene igual número de negros. Garantiza h ≤ 2·log₂(n+1). Rebalancea con menos rotaciones que AVL.</li>
+<li><b class="k">Árbol B / B+:</b> nodos con muchas claves, bajo número de accesos a disco; base de bases de datos y sistemas de archivos.</li>
+<li><b class="k">Splay, Treap, AA:</b> variantes con balance amortizado o probabilístico.</li></ul>
+<div class="tw"><table><thead><tr><th>Criterio</th><th>AVL</th><th>Rojo-Negro</th></tr></thead><tbody>
+<tr><td>Balance</td><td>Más estricto (h ≈ 1.44 log n)</td><td>Más laxo (h ≤ 2 log n)</td></tr>
+<tr><td>Búsqueda</td><td><span class="tag ok">Más rápida</span></td><td><span class="tag warn">Ligeramente más lenta</span></td></tr>
+<tr><td>Inserción/eliminación</td><td><span class="tag warn">Más rotaciones</span></td><td><span class="tag ok">Menos rotaciones</span></td></tr>
+<tr><td>Uso típico</td><td>Lecturas frecuentes, índices en memoria</td><td><code>TreeMap</code>/<code>TreeSet</code> de Java, planificador de Linux</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s6">
+<h2 class="sec-title">6. Implementación y aplicaciones en Java<span class="sec-num">Código y uso real</span></h2>
+<h3>Altura y consulta por rango (BST)</h3>
+<pre><code>public int altura(Node n) {
+    if (n == null) return -1;                       // caso base
+    return 1 + Math.max(altura(n.getLeft()), altura(n.getRight()));
+}
+
+private void rango(Node n, int min, int max, ArrayList&lt;Cliente&gt; out) {
+    if (n == null) return;
+    if (min &lt; n.getKey()) rango(n.getLeft(), min, max, out);   // poda izquierda
+    if (min &lt;= n.getKey() &amp;&amp; n.getKey() &lt;= max) out.add((Cliente) n.getValue());
+    if (max &gt; n.getKey()) rango(n.getRight(), min, max, out);  // poda derecha
+}</code></pre>
+<h3>Rotación a la derecha (AVL)</h3>
+<pre><code>// y es el nodo desbalanceado (FB = 2); x es su hijo izquierdo
+Node rotarDerecha(Node y) {
+    Node x = y.getLeft();
+    y.setLeft(x.getRight());   // el subárbol central pasa a y
+    x.setRight(y);             // y baja como hijo derecho de x
+    // actualizar alturas de y y luego de x
+    return x;                  // x es la nueva raíz del subárbol
+}</code></pre>
+<h3>Colecciones de Java</h3>
+<pre><code>TreeMap&lt;Integer, Cliente&gt; porEdad = new TreeMap&lt;&gt;();   // Rojo-Negro
+porEdad.put(34, ana);
+porEdad.subMap(25, true, 35, true);   // rango [25,35], O(log n + k)
+porEdad.firstKey(); porEdad.lastKey(); porEdad.descendingMap();
+
+// Duplicados: asociar una lista a cada clave
+Map&lt;Integer, List&lt;Cliente&gt;&gt; multi = new TreeMap&lt;&gt;();
+multi.computeIfAbsent(28, k -&gt; new ArrayList&lt;&gt;()).add(luis);</code></pre>
+<h3>Aplicaciones</h3>
+<ul><li><b class="k">Índices de bases de datos</b> (B+), consultas por rango y orden.</li><li><b class="k">Diccionarios y conjuntos ordenados</b> (<code>TreeMap</code>, <code>TreeSet</code>).</li><li><b class="k">Planificadores de procesos</b> y gestión de memoria (Rojo-Negro en el kernel de Linux).</li><li><b class="k">Árboles de expresión</b>, compiladores y sistemas de archivos.</li></ul>
+</section>
+
+<section id="s7">
+<h2 class="sec-title">7. Ejercicio complementario<span class="sec-num">Parte E · Extensión del ejercicio de clientes</span></h2>
+<p>Este ejercicio extiende la implementación del <code>BinarySearchTree</code> trabajada en el ejercicio de clientes. Debe entregarse el código completo y un documento breve con las respuestas escritas.</p>
+<ol class="steps">
+<li><b class="k">Eliminación.</b> Implemente <code>Node eliminar(int key, Node root)</code> con los tres casos. Pruebe eliminando una hoja, un nodo con un hijo y la raíz con dos hijos del árbol de compras.</li>
+<li><b class="k">Sucesor y predecesor.</b> Implemente <code>sucesor(int key)</code>: el cliente con la menor clave estrictamente mayor. ¿Qué costo tiene y por qué no requiere recorrer todo el árbol?</li>
+<li><b class="k">Validación.</b> Escriba <code>esBST(Node n, long min, long max)</code> y pruebe con un árbol al que haya cambiado manualmente una clave. ¿Por qué comparar solo con el padre es insuficiente?</li>
+<li><b class="k">Conteo y estadísticas.</b> Implemente <code>contar()</code> (nodos), <code>contarHojas()</code> y <code>promedioCompras()</code>. Indique qué recorrido usó y por qué.</li>
+<li><b class="k">Duplicados con lista.</b> Rediseñe <code>arbolEdad</code> para que cada nodo guarde un <code>ArrayList&lt;Cliente&gt;</code>. Compare esta política con enviar iguales a la derecha: pérdida de datos, altura y costo de <code>clientesEnRango</code>.</li>
+<li><b class="k">Rotaciones a mano.</b> Inserte <code>10, 20, 30, 40, 50, 25</code> en un AVL, dibuje el árbol después de cada inserción, indique el factor de balance que dispara cada rotación y su tipo.</li>
+<li><b class="k">Comparación empírica.</b> Inserte 10.000 claves ordenadas y 10.000 aleatorias en su BST y mida la altura y el tiempo de 1.000 búsquedas. Repita con <code>TreeMap</code> y compare con las cotas teóricas.</li>
+<li><b class="k">Reflexión.</b> Para la tienda, ¿usaría BST simple, AVL o <code>TreeMap</code>? Justifique según tamaño de datos, orden de llegada y frecuencia de lecturas vs. escrituras.</li>
+</ol>
+<div class="callout"><b>Criterios sugeridos:</b> correctitud de las operaciones (40 %), justificación del recorrido y de la complejidad (25 %), manejo de casos borde: árbol vacío, claves duplicadas (20 %), análisis empírico y reflexión (15 %).</div>
+</section>
+
+<section id="s8">
+<h2 class="sec-title">8. Autoevaluación para el parcial<span class="sec-num">Haga clic para ver la respuesta</span></h2>
+<p>Intente responder cada pregunta por escrito antes de abrir la solución. Las preguntas están agrupadas por tema.</p>
+
+<h3>Recursión y divide y vencerás</h3>
+<details class="q"><summary><span class="tag ok">Concepto</span>¿Qué elementos debe tener toda función recursiva correcta? ¿Qué ocurre si falta alguno?</summary><div class="ans">Un caso base y un paso recursivo que se acerque a él. Sin caso base, la recursión no termina y se produce <code>StackOverflowError</code>; si el paso no converge, ocurre lo mismo.</div></details>
+<details class="q"><summary><span class="tag warn">Análisis</span>Plantee y resuelva la recurrencia de mergesort. ¿Por qué su costo es O(n log n)?</summary><div class="ans">T(n) = 2T(n/2) + n. Hay log₂ n niveles de división y en cada nivel la mezcla cuesta O(n) en total, luego T(n) = O(n log n).</div></details>
+<details class="q"><summary><span class="tag warn">Análisis</span>Explique por qué la búsqueda binaria es divide y vencerás aunque no tenga paso de combinar.</summary><div class="ans">Divide el problema a la mitad, resuelve solo una de las mitades y la solución de ese subproblema es directamente la solución global, por lo que combinar es trivial. T(n) = T(n/2) + O(1) = O(log n).</div></details>
+
+<h3>Árboles binarios de búsqueda</h3>
+<details class="q"><summary><span class="tag ok">Concepto</span>Enuncie la propiedad BST. ¿Por qué comparar un nodo solo con su padre no basta para validar un BST?</summary><div class="ans">Todas las claves del subárbol izquierdo son menores y todas las del derecho mayores que la clave del nodo. La restricción aplica a todo el subárbol, no solo a los hijos directos: un nodo puede respetar a su padre y violar a un ancestro. Se valida pasando un intervalo (min, max) en la recursión.</div></details>
+<details class="q"><summary><span class="tag ok">Recorridos</span>¿Qué recorrido entrega las claves ordenadas? ¿Cuál usaría para los 3 mayores sin recorrer todo el árbol?</summary><div class="ans">In-orden entrega orden ascendente. Para los mayores, in-orden inverso (der → raíz → izq) con un contador que detenga la recursión al reunir n elementos.</div></details>
+<details class="q"><summary><span class="tag ok">Recorridos</span>Dado el pre-orden 40, 20, 10, 30, 60, 50, 70 de un BST, dibuje el árbol y escriba su post-orden.</summary><div class="ans">Raíz 40; menores (20, 10, 30) a la izquierda; mayores (60, 50, 70) a la derecha. Post-orden: 10, 30, 20, 50, 70, 60, 40.</div></details>
+<details class="q"><summary><span class="tag warn">Diseño</span>Describa los tres casos de eliminación en un BST. ¿Por qué se usa el sucesor in-orden?</summary><div class="ans">Hoja: se quita. Un hijo: el hijo lo reemplaza. Dos hijos: se sustituye su clave por la del sucesor (mínimo del subárbol derecho), que tiene a lo sumo un hijo, y se elimina ese nodo. El sucesor conserva la propiedad BST porque es mayor que todo el subárbol izquierdo y menor o igual que el resto del derecho.</div></details>
+<details class="q"><summary><span class="tag warn">Complejidad</span>¿Cuál es la complejidad de buscar en un BST con n nodos en el mejor, promedio y peor caso? ¿De qué depende?</summary><div class="ans">Mejor: O(1) (la clave está en la raíz). Promedio con inserciones aleatorias: O(log n). Peor: O(n), con árbol degenerado. Depende de la altura h, que depende del orden de inserción.</div></details>
+<details class="q"><summary><span class="tag danger">Aplicación</span>Si <code>insertRecursive</code> ignora claves iguales, ¿qué sucede al indexar clientes por edad? Proponga dos soluciones y compárelas.</summary><div class="ans">Se pierden los clientes con edad repetida. Soluciones: (1) enviar iguales a la derecha: simple, pero la búsqueda halla solo uno y el árbol puede crecer en altura; (2) guardar una lista de clientes por nodo: no pierde datos, la búsqueda recupera todos y la altura depende de las claves distintas, a costa de un nodo más complejo.</div></details>
+<details class="q"><summary><span class="tag danger">Aplicación</span>Escriba el pseudocódigo de <code>clientesEnRango(min, max)</code> con poda e indique su costo.</summary><div class="ans">Si el nodo es nulo, retornar. Si min &lt; clave, recorrer izquierda. Si min ≤ clave ≤ max, agregar. Si max &gt; clave, recorrer derecha. Costo: O(h + k), con k resultados.</div></details>
+
+<h3>Implementación en Java</h3>
+<details class="q"><summary><span class="tag warn">Código</span>Un <code>setLeft</code> está escrito como <code>this.left = left</code> con parámetro llamado <code>newLeft</code>. ¿Qué ocurre y por qué?</summary><div class="ans">Asigna el atributo a sí mismo; el parámetro nunca se usa, así que el hijo no se enlaza y el árbol nunca crece.</div></details>
+<details class="q"><summary><span class="tag warn">Código</span>¿Por qué <code>insertNode</code> debe hacer <code>root = insertRecursive(...)</code>?</summary><div class="ans">En un árbol vacío, el método recursivo devuelve el nuevo nodo como raíz. Si no se asigna, <code>root</code> queda en <code>null</code>. En los demás casos devuelve la misma raíz, por lo que la asignación es inocua.</div></details>
+<details class="q"><summary><span class="tag warn">Código</span>Escriba <code>altura</code> recursivamente. ¿Qué recorrido utiliza implícitamente?</summary><div class="ans"><code>if (n == null) return -1; return 1 + Math.max(altura(izq), altura(der));</code> Es un post-orden: necesita las alturas de los hijos antes de calcular la del nodo.</div></details>
+
+<h3>Árboles autobalanceados</h3>
+<details class="q"><summary><span class="tag ok">Concepto</span>¿Qué es el factor de balance de un AVL y qué valores admite?</summary><div class="ans">Altura del subárbol izquierdo menos la del derecho. Debe valer -1, 0 o 1 en todos los nodos; si llega a ±2 se rota.</div></details>
+<details class="q"><summary><span class="tag warn">Análisis</span>Un nodo tiene FB = 2 y su hijo izquierdo FB = -1. ¿Qué rotación se aplica?</summary><div class="ans">Caso izquierda–derecha: rotación a la izquierda sobre el hijo izquierdo y luego rotación a la derecha sobre el nodo.</div></details>
+<details class="q"><summary><span class="tag warn">Análisis</span>Inserte 30, 20, 10 en un AVL vacío. ¿Qué ocurre y cuál es el árbol final?</summary><div class="ans">Al insertar 10, el nodo 30 queda con FB = 2 (caso izquierda–izquierda). Rotación simple a la derecha: 20 es la raíz con hijos 10 y 30.</div></details>
+<details class="q"><summary><span class="tag warn">Comparación</span>¿Cuándo preferiría AVL y cuándo rojo-negro?</summary><div class="ans">AVL, con muchas lecturas y pocas modificaciones (balance más estricto, búsquedas más rápidas). Rojo-negro, con inserciones y eliminaciones frecuentes (menos rotaciones). Ambos garantizan O(log n).</div></details>
+<details class="q"><summary><span class="tag danger">Aplicación</span>¿Qué estructura de Java usaría para clientes ordenados por edad con consultas de rango? ¿Cómo manejaría edades repetidas?</summary><div class="ans"><code>TreeMap</code> (rojo-negro) con <code>subMap</code> para el rango. Para repetidos, <code>Map&lt;Integer, List&lt;Cliente&gt;&gt;</code>, pues un <code>TreeMap</code> no admite claves duplicadas.</div></details>
+<details class="q"><summary><span class="tag danger">Aplicación</span>¿Por qué las bases de datos usan árboles B+ en lugar de AVL?</summary><div class="ans">Cada nodo B+ contiene muchas claves y ocupa un bloque de disco, lo que reduce la altura y el número de accesos a disco; sus hojas enlazadas permiten recorridos por rango eficientes.</div></details>
+</section>
+
+<section>
+<h2 class="sec-title">Glosario rápido<span class="sec-num">Cierre</span></h2>
+<dl class="glossary">
+<dt>Altura</dt><dd>Número de aristas del camino más largo desde la raíz hasta una hoja.</dd>
+<dt>Árbol degenerado</dt><dd>BST en el que cada nodo tiene un solo hijo; se comporta como una lista enlazada.</dd>
+<dt>Factor de balance</dt><dd>Diferencia entre las alturas de los subárboles izquierdo y derecho de un nodo.</dd>
+<dt>Rotación</dt><dd>Reorganización local de nodos que reduce la altura y preserva la propiedad BST.</dd>
+<dt>Sucesor in-orden</dt><dd>Nodo con la menor clave mayor que la de un nodo dado.</dd>
+</dl>
+</section>
+
+<footer><span>Estructuras de Datos · Semestre 2026B · Universidad Santiago de Cali</span><span>Material de apoyo docente · Unidad 2</span></footer>
+</div>
+</body>
+</html>
